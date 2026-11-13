@@ -453,3 +453,134 @@ p {
   margin: 4px 0;
   padding-left: 28px;
 }
+
+/* アニメ（動きの見本）。縦画面で人物の全身と足元が入る大きさにする */
+.anim {
+  margin: 4px 0;
+}
+
+.anim-canvas {
+  display: block;
+  margin: 0 auto;
+  height: min(38vh, 360px);
+  aspect-ratio: 0.705;
+  max-width: 100%;
+  border-radius: 12px;
+  background: #f6f2e9;
+}
+
+.anim-caption {
+  text-align: center;
+  font-size: max(20px, 1.2rem);
+  font-weight: 700;
+  margin: 4px 0 0;
+  min-height: 1.6em;
+}
+
+.player .count {
+  margin: 4px 0;
+}
+
+.player .cue {
+  margin: 4px 0;
+}
+
+.countdown-lead {
+  text-align: center;
+  margin: 4px 0;
+}
+
+.countdown-count {
+  display: block;
+}
+
+/* 中止と一時停止は、画面の下にいつも見えるようにする（S-7） */
+.player-controls {
+  position: sticky;
+  bottom: 0;
+  background: var(--bg);
+  margin-top: 12px;
+  padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
+}
+
+.player.screen {
+  padding-bottom: 0;
+}
+
+/* プレビュー画面（開発用） */
+.preview label {
+  display: block;
+  margin: 12px 0;
+  font-weight: 600;
+}
+
+.preview .preview-stage .anim-canvas {
+  height: min(62vh, 560px);
+}
+
+.preview-transport {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.preview-transport .btn {
+  flex: 1;
+  min-height: 48px;
+  font-size: 18px;
+}
+
+.preview-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  align-items: center;
+}
+
+.preview input[type='range'] {
+  display: block;
+  width: 100%;
+  min-height: 36px;
+}
+
+.preview-slider {
+  margin: 8px 0 !important;
+}
+
+.preview-keyframes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.preview-kf {
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.3;
+  padding: 6px 8px;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+}
+
+.preview-kf.is-selected {
+  border-color: var(--primary);
+  background: var(--selected-bg);
+}
+
+.preview-json {
+  width: 100%;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 13px;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+@media (min-width: 900px) {
+  .preview {
+    max-width: 720px;
+  }
+}

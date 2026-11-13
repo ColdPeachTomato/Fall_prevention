@@ -3,9 +3,11 @@
 // 「中止」は常に表示する（S-7）。
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AnimationCanvas } from '../animation/AnimationCanvas';
 import { PlaceholderFigure } from '../animation/PlaceholderFigure';
+import { getAnimation } from '../animation/registry';
 import { Button } from '../app/Button';
-import { SECONDS_PER_LAP, SECONDS_PER_REP, buildSessionSteps, stepSeconds, type Side, type Step } from '../app/sessionPlan';
+import { buildSessionSteps, stepSeconds, type Side, type Step } from '../app/sessionPlan';
 import { useWakeLock } from '../app/useWakeLock';
 import { getExercise } from '../data/exercises';
 import type { Menu, SessionKind, StopReason } from '../data/types';
@@ -20,6 +22,7 @@ interface Props {
 }
 
 const SIDE_LABEL: Record<Side, string> = { right: '右側', left: '左側' };
+const TEXT_UPDATE_MS = 100; // 数字の表示を更新する間隔
 
 function variantOf(exId: string, level: number) {
   const ex = getExercise(exId);
@@ -40,6 +43,8 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
   const [paused, setPaused] = useState(false);
   const [stopping, setStopping] = useState(false);
   const completedRef = useRef<string[]>([]);
+  // アニメと数字の表示が同じ時計を使う
+  const elapsedRef = useRef(0);
 
   useWakeLock(true);
 
@@ -55,22 +60,27 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
       onFinish(completedRef.current);
       return;
     }
+    elapsedRef.current = 0;
     setIndex(index + 1);
     setElapsedMs(0);
   }, [index, steps, onFinish]);
 
-  // 時間で進む手順のタイマー
+  // 時間で進む手順の時計
   useEffect(() => {
     if (duration === null || paused || stopping) return;
+    let raf = 0;
     let last = performance.now();
-    const id = window.setInterval(() => {
+    const tick = () => {
+      raf = requestAnimationFrame(tick);
       const now = performance.now();
       // 画面が隠れていた間に一気に進まないよう、1回に進める時間に上限を設ける
-      const dt = Math.min(now - last, 1000);
+      elapsedRef.current += Math.min(now - last, 1000);
       last = now;
-      setElapsedMs((e) => e + dt);
-    }, 200);
-    return () => window.clearInterval(id);
+      const e = elapsedRef.current;
+      setElapsedMs((prev) => (e >= duration * 1000 || Math.floor(e / TEXT_UPDATE_MS) !== Math.floor(prev / TEXT_UPDATE_MS) ? e : prev));
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, [index, duration, paused, stopping]);
 
   useEffect(() => {
@@ -80,6 +90,7 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
   if (!step) return null;
 
   const { ex, variant } = variantOf(step.exId, step.kind === 'rest' || step.kind === 'countdown' ? levelOf.get(step.exId) ?? 1 : step.level);
+  const anim = getAnimation(variant.animationId);
   const itemNumber = (kind === 'standard' ? menu.standard : menu.short).findIndex((i) => i.ex === step.exId) + 1;
   const remaining = duration === null ? 0 : Math.max(0, Math.ceil(duration - elapsedMs / 1000));
 
@@ -165,11 +176,16 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
         {header}
         <h1>{ex.name}</h1>
         {step.side && <p className="side">{SIDE_LABEL[step.side]}</p>}
-        <p className="lead">まもなく始めます</p>
-        <p className="count" aria-live="polite">
-          {remaining}
+        {/* 始める前に、最初の姿勢を見せる */}
+        {anim && <AnimationCanvas key={anim.id} anim={anim} getTime={() => 0} label={`${ex.name}の最初の姿勢`} showCaption={false} />}
+        <p className="lead countdown-lead">
+          まもなく始めます
+          <span className="count countdown-count" aria-live="polite">
+            {remaining}
+          </span>
         </p>
         {paused && <p className="paused">一時停止中</p>}
+        <p>{variant.howTo}</p>
         {controls}
         {stopOverlay}
       </main>
@@ -177,31 +193,36 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
   }
 
   // 運動中
-  const elapsedSec = elapsedMs / 1000;
   let countText: string;
-  if (step.unit === 'reps') {
-    countText = `${Math.min(step.amount, Math.floor(elapsedSec / SECONDS_PER_REP) + 1)} / ${step.amount} 回`;
-  } else if (step.unit === 'laps') {
-    countText = `${Math.min(step.amount, Math.floor(elapsedSec / SECONDS_PER_LAP) + 1)} / ${step.amount} 往復`;
-  } else {
+  if (step.unit === 'seconds') {
     countText = `あと ${remaining} 秒`;
+  } else {
+    // 1往復（アニメの1往復）の終わりで、次の回に進む
+    const current = Math.min(step.amount, Math.floor(elapsedMs / 1000 / step.unitSeconds) + 1);
+    countText = `${current} / ${step.amount} ${step.unit === 'reps' ? '回' : '往復'}`;
   }
 
   return (
     <main className="screen player">
       {header}
       <h1>{ex.name}</h1>
-      <p className="muted">
-        {step.side && <span className="side">{SIDE_LABEL[step.side]}　</span>}
-        {step.sets > 1 && `${step.set} / ${step.sets} セット`}
-      </p>
-      <PlaceholderFigure posture={variant.posture} />
+      {(step.side || step.sets > 1) && (
+        <p className="muted">
+          {step.side && <span className="side">{SIDE_LABEL[step.side]}　</span>}
+          {step.sets > 1 && `${step.set} / ${step.sets} セット`}
+        </p>
+      )}
+      {anim ? (
+        <AnimationCanvas key={`${anim.id}-${index}`} anim={anim} getTime={() => elapsedRef.current / 1000} label={`${ex.name}の動きの見本`} />
+      ) : (
+        <PlaceholderFigure posture={variant.posture} />
+      )}
       <p className="count" aria-live="polite">
         {countText}
       </p>
       {paused && <p className="paused">一時停止中</p>}
       <p className="cue">{ex.cues[0]}</p>
-      <p>{variant.howTo}</p>
+      {!anim && <p>{variant.howTo}</p>}
       {step.support && <p className="muted">つかまり方：{SUPPORT_LABEL[step.support]}</p>}
       {controls}
       {stopOverlay}

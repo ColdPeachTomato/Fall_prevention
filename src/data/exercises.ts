@@ -68,8 +68,8 @@ export const EXERCISES: Exercise[] = [
     bilateral: false,
     cues: ['足を少し引き、前かがみになって立つ', 'ゆっくり座る', '膝が内側に入らないようにする'],
     variants: [
-      { level: 1, howTo: '手を使ってよいので、椅子から立ち上がり、ゆっくり座ります。', posture: 'standing', usesSupport: false, view: 'side', animationId: null },
-      { level: 2, howTo: '手を使わずに、椅子から立ち上がり、ゆっくり座ります。', posture: 'standing', usesSupport: false, view: 'side', animationId: null },
+      { level: 1, howTo: '手を使ってよいので、椅子から立ち上がり、ゆっくり座ります。', posture: 'standing', usesSupport: false, view: 'side', animationId: 'S1-side-L1' },
+      { level: 2, howTo: '手を使わずに、椅子から立ち上がり、ゆっくり座ります。', posture: 'standing', usesSupport: false, view: 'side', animationId: 'S1-side-L2' },
       { level: 3, howTo: '椅子に軽く触れるところまで腰を下ろし、座らずに立ち上がります。', posture: 'standing', usesSupport: false, view: 'side', animationId: null },
     ],
   },

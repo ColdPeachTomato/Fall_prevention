@@ -1,11 +1,12 @@
 // メニューから、1回のセッションで行う手順の列を作る。
 // レベル・回数・秒数・セット数はメニューの値だけを使う（S-8）。メニューにない種目は入れない（S-9）。
 
+import { getAnimation } from '../animation/registry';
 import { getExercise } from '../data/exercises';
 import type { Level, Menu, SessionKind, SupportStage, Unit } from '../data/types';
 import { effectiveSupport } from '../menu/support';
 
-// アニメができるまでの仮の時間（フェーズ2以降はアニメの1往復の時間に合わせる）
+// アニメがない種目の仮の時間。アニメがある種目は、アニメの1往復の時間を1回の時間にする
 export const SECONDS_PER_REP = 5; // 上げ下げ 各2.5秒
 export const SECONDS_PER_LAP = 20;
 export const REST_SECONDS = 30;
@@ -32,14 +33,16 @@ export type Step =
       sets: number;
       side: Side | null;
       seconds: number;
+      unitSeconds: number; // 1回・1往復・1秒あたりの時間。カウントの表示に使う
       lastOfItem: boolean; // この種目の最後の手順か（終えたら「終えた運動」に入れる）
     }
   | { kind: 'rest'; exId: string; seconds: number; reason: 'set' | 'next' }; // exId は次に行う種目
 
-export function exerciseSeconds(unit: Exclude<Unit, 'minutes'>, amount: number): number {
-  if (unit === 'reps') return amount * SECONDS_PER_REP;
-  if (unit === 'laps') return amount * SECONDS_PER_LAP;
-  return amount;
+// 1回（1往復、1秒）あたりの時間。回数で行う種目は、アニメの1往復の終わりを回数のカウントに合わせる
+export function unitSeconds(unit: Exclude<Unit, 'minutes'>, animationId: string | null): number {
+  if (unit === 'reps') return getAnimation(animationId)?.cycleSeconds ?? SECONDS_PER_REP;
+  if (unit === 'laps') return SECONDS_PER_LAP;
+  return 1;
 }
 
 export function buildSessionSteps(menu: Menu, kind: SessionKind): Step[] {
@@ -52,6 +55,7 @@ export function buildSessionSteps(menu: Menu, kind: SessionKind): Step[] {
     const unit = ex.unit;
     const support = effectiveSupport(menu.support, ex, variant);
     const sides: (Side | null)[] = ex.bilateral ? ['right', 'left'] : [null];
+    const perUnit = unitSeconds(unit, variant.animationId);
 
     if (itemIndex > 0) steps.push({ kind: 'rest', exId: ex.id, seconds: REST_SECONDS, reason: 'next' });
     if (variant.posture === 'standing') {
@@ -71,7 +75,8 @@ export function buildSessionSteps(menu: Menu, kind: SessionKind): Step[] {
           set,
           sets: item.sets,
           side,
-          seconds: exerciseSeconds(unit, item.amount),
+          seconds: item.amount * perUnit,
+          unitSeconds: perUnit,
           lastOfItem: set === item.sets && sideIndex === sides.length - 1,
         });
       });

@@ -1,0 +1,250 @@
+{
+  "id": "S1-side-L1",
+  "exercise": "S1",
+  "level": 1,
+  "view": "side",
+  "cycleSeconds": 7.2,
+  "root": {
+    "x": 0
+  },
+  "props": [
+    {
+      "type": "chair",
+      "x": -0.31,
+      "seatHeight": 0.242,
+      "seatDepth": 0.26,
+      "backHeight": 0.52
+    }
+  ],
+  "highlight": [
+    "thigh",
+    "shank"
+  ],
+  "keyframes": [
+    {
+      "t": 0,
+      "pose": {
+        "ankle": 19.8,
+        "knee": 103.4,
+        "hip": 83.5,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 4,
+        "elbow": 8
+      },
+      "onSeat": true,
+      "hands": 1,
+      "label": "座る"
+    },
+    {
+      "t": 0.3,
+      "pose": {
+        "ankle": 19.8,
+        "knee": 103.4,
+        "hip": 83.5,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 4,
+        "elbow": 8
+      },
+      "onSeat": true,
+      "hands": 1,
+      "label": "座る（動き始め）"
+    },
+    {
+      "t": 1.6,
+      "pose": {
+        "ankle": 19.8,
+        "knee": 103.4,
+        "hip": 115.5,
+        "spine": 22,
+        "neck": -28,
+        "shoulder": 4,
+        "elbow": 8
+      },
+      "onSeat": true,
+      "hands": 1,
+      "label": "前かがみ（お尻が離れる）"
+    },
+    {
+      "t": 2.1,
+      "pose": {
+        "ankle": 19.8,
+        "knee": 83.7,
+        "hip": 95,
+        "spine": 17,
+        "neck": -23,
+        "shoulder": 4,
+        "elbow": 8
+      },
+      "hands": 1,
+      "label": "立ち上がり 1"
+    },
+    {
+      "t": 2.6,
+      "pose": {
+        "ankle": 15.9,
+        "knee": 51.4,
+        "hip": 55.5,
+        "spine": 9,
+        "neck": -14,
+        "shoulder": 4,
+        "elbow": 8
+      },
+      "hands": 0.6,
+      "label": "立ち上がり 2"
+    },
+    {
+      "t": 3.3,
+      "pose": {
+        "ankle": 4,
+        "knee": 4,
+        "hip": 1,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 4,
+        "elbow": 8
+      },
+      "hands": 0,
+      "label": "立つ"
+    },
+    {
+      "t": 3.8,
+      "pose": {
+        "ankle": 4,
+        "knee": 4,
+        "hip": 1,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 4,
+        "elbow": 8
+      },
+      "hands": 0,
+      "label": "立つ（動き始め）"
+    },
+    {
+      "t": 4.5,
+      "pose": {
+        "ankle": 15.9,
+        "knee": 51.4,
+        "hip": 55.5,
+        "spine": 9,
+        "neck": -14,
+        "shoulder": 4,
+        "elbow": 8
+      },
+      "hands": 0.6,
+      "label": "座り 1"
+    },
+    {
+      "t": 5,
+      "pose": {
+        "ankle": 19.8,
+        "knee": 83.7,
+        "hip": 95,
+        "spine": 17,
+        "neck": -23,
+        "shoulder": 4,
+        "elbow": 8
+      },
+      "hands": 1,
+      "label": "座り 2"
+    },
+    {
+      "t": 5.5,
+      "pose": {
+        "ankle": 19.8,
+        "knee": 103.4,
+        "hip": 115.5,
+        "spine": 22,
+        "neck": -28,
+        "shoulder": 4,
+        "elbow": 8
+      },
+      "onSeat": true,
+      "hands": 1,
+      "label": "前かがみ（お尻がつく）"
+    },
+    {
+      "t": 6.8,
+      "pose": {
+        "ankle": 19.8,
+        "knee": 103.4,
+        "hip": 83.5,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 4,
+        "elbow": 8
+      },
+      "onSeat": true,
+      "hands": 1,
+      "label": "座る（止まる）"
+    }
+  ],
+  "captions": [
+    {
+      "from": 0,
+      "to": 0.3,
+      "text": "足を少し引いて座ります"
+    },
+    {
+      "from": 0.3,
+      "to": 3.3,
+      "text": "前かがみになって、立ち上がります"
+    },
+    {
+      "from": 3.3,
+      "to": 3.8,
+      "text": "背筋を伸ばして立ちます"
+    },
+    {
+      "from": 3.8,
+      "to": 7.2,
+      "text": "ゆっくり座ります"
+    }
+  ],
+  "marks": [
+    {
+      "type": "arrow",
+      "from": 0.3,
+      "to": 1.7,
+      "anchor": "head",
+      "dx": -0.02,
+      "dy": 0.105,
+      "angle": 100,
+      "length": 0.14
+    },
+    {
+      "type": "arrow",
+      "from": 1.7,
+      "to": 3.2,
+      "anchor": "head",
+      "dx": 0.02,
+      "dy": 0.1,
+      "angle": 0,
+      "length": 0.11
+    },
+    {
+      "type": "arrow",
+      "from": 3.9,
+      "to": 5.5,
+      "anchor": "hip",
+      "dx": -0.13,
+      "dy": 0.02,
+      "angle": 180,
+      "length": 0.11
+    }
+  ],
+  "contacts": {
+    "near": {
+      "on": "thigh",
+      "along": 0.72,
+      "offset": 0.055
+    },
+    "far": {
+      "on": "thigh",
+      "along": 0.72,
+      "offset": 0.055
+    }
+  }
+}
