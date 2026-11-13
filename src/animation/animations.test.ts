@@ -195,13 +195,20 @@ describe('S1 椅子からの立ち座り（仕様との照合）', () => {
     expect(top.hands).toBeLessThan(0.01);
   });
 
-  it('レベル2は手を使わない（腕を胸の前に組んだまま）', () => {
+  it('レベル2は手を使わない（腕は体の横に下ろしたまま。ふらついたらすぐつかまれる）', () => {
     expect(l2.contacts).toBeUndefined();
     const frames = times(l2.cycleSeconds).map((t) => computeFrame(l2, t));
     for (const f of frames) {
-      expect(f.sk.arm.shoulder).toBeCloseTo(frames[0]!.sk.arm.shoulder, 6);
-      // 手が太ももや座面に触れない（胸の高さにある）
-      expect(f.sk.hand.y).toBeGreaterThan(f.sk.hip.y + 0.1);
+      expect(f.hands).toBe(0);
+      // 腕はほぼ真下に下がり、肘はほぼ伸びている
+      const fromDown = (Math.atan2(f.sk.hand.x - f.sk.shoulder.x, f.sk.shoulder.y - f.sk.hand.y) * 180) / Math.PI;
+      expect(Math.abs(fromDown), `t=${f.t.toFixed(2)}`).toBeLessThan(15);
+      expect(f.sk.arm.elbow, `t=${f.t.toFixed(2)}`).toBeLessThan(20);
+    }
+    // 座っているときと立ったときは、手が体の横（股関節のあたり）にある
+    for (const t of [0, 3.5]) {
+      const f = computeFrame(l2, t);
+      expect(Math.abs(f.sk.hand.x - f.sk.hip.x)).toBeLessThan(0.08);
     }
   });
 

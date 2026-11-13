@@ -29,8 +29,8 @@
         "hip": 83.5,
         "spine": 0,
         "neck": 0,
-        "shoulder": 22,
-        "elbow": 143
+        "shoulder": 4,
+        "elbow": 8
       },
       "onSeat": true,
       "label": "座る"
@@ -43,8 +43,8 @@
         "hip": 83.5,
         "spine": 0,
         "neck": 0,
-        "shoulder": 22,
-        "elbow": 143
+        "shoulder": 4,
+        "elbow": 8
       },
       "onSeat": true,
       "label": "座る（動き始め）"
@@ -57,8 +57,8 @@
         "hip": 115.5,
         "spine": 22,
         "neck": -28,
-        "shoulder": 22,
-        "elbow": 143
+        "shoulder": 52,
+        "elbow": 12
       },
       "onSeat": true,
       "label": "前かがみ（お尻が離れる）"
@@ -71,8 +71,8 @@
         "hip": 95,
         "spine": 17,
         "neck": -23,
-        "shoulder": 22,
-        "elbow": 143
+        "shoulder": 46,
+        "elbow": 12
       },
       "label": "立ち上がり 1"
     },
@@ -84,8 +84,8 @@
         "hip": 55.5,
         "spine": 9,
         "neck": -14,
-        "shoulder": 22,
-        "elbow": 143
+        "shoulder": 28,
+        "elbow": 10
       },
       "label": "立ち上がり 2"
     },
@@ -97,8 +97,8 @@
         "hip": 1,
         "spine": 0,
         "neck": 0,
-        "shoulder": 22,
-        "elbow": 143
+        "shoulder": 4,
+        "elbow": 8
       },
       "label": "立つ"
     },
@@ -110,8 +110,8 @@
         "hip": 1,
         "spine": 0,
         "neck": 0,
-        "shoulder": 22,
-        "elbow": 143
+        "shoulder": 4,
+        "elbow": 8
       },
       "label": "立つ（動き始め）"
     },
@@ -123,8 +123,8 @@
         "hip": 55.5,
         "spine": 9,
         "neck": -14,
-        "shoulder": 22,
-        "elbow": 143
+        "shoulder": 28,
+        "elbow": 10
       },
       "label": "座り 1"
     },
@@ -136,8 +136,8 @@
         "hip": 95,
         "spine": 17,
         "neck": -23,
-        "shoulder": 22,
-        "elbow": 143
+        "shoulder": 46,
+        "elbow": 12
       },
       "label": "座り 2"
     },
@@ -149,8 +149,8 @@
         "hip": 115.5,
         "spine": 22,
         "neck": -28,
-        "shoulder": 22,
-        "elbow": 143
+        "shoulder": 52,
+        "elbow": 12
       },
       "onSeat": true,
       "label": "前かがみ（お尻がつく）"
@@ -163,8 +163,8 @@
         "hip": 83.5,
         "spine": 0,
         "neck": 0,
-        "shoulder": 22,
-        "elbow": 143
+        "shoulder": 4,
+        "elbow": 8
       },
       "onSeat": true,
       "label": "座る（止まる）"
