@@ -15,7 +15,9 @@
 
 ## 現在の状況
 
-- フェーズ1：実装済み。iPhoneでの確認待ち（2026-11-13）
+- フェーズ1：完了（2026-11-13、iPhone のホーム画面からオフラインで動くことを確認済み）
+- フェーズ2：未着手（指示待ち）
+- 公開先：https://coldpeachtomato.github.io/Fall_prevention/ （リポジトリ ColdPeachTomato/Fall_prevention）
 
 ## 決定事項（2026-11-13、要件メモへの反映は未了承）
 
