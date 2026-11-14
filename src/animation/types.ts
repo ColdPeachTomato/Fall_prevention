@@ -10,8 +10,9 @@ export type AnimationView = 'side' | 'front' | 'back';
 export type NearJoint = 'ankle' | 'knee' | 'hip' | 'spine' | 'neck' | 'shoulder' | 'elbow';
 // 奥側（far）の関節。省略すると手前側と同じ角度になる
 export type FarJoint = 'farAnkle' | 'farKnee' | 'farHip' | 'farShoulder' | 'farElbow' | 'farFootPitch';
-// 省略できる値。footPitch は足の傾き（正：かかとを上げる、負：つま先を上げる）。省略すると 0
-export type OptionalJoint = FarJoint | 'footPitch';
+// 省略できる値。footPitch は足の傾き（正：かかとを上げる、負：つま先を上げる）。省略すると 0。
+// travel は歩いた距離（身長 = 1）。歩く種目で、床の目印を流すのに使う。体の位置は変えない
+export type OptionalJoint = FarJoint | 'footPitch' | 'travel';
 export type JointName = NearJoint | OptionalJoint;
 
 export type Pose = Record<NearJoint, number> & Partial<Record<OptionalJoint, number>>;
@@ -27,8 +28,8 @@ export interface Keyframe {
 
 // 体の位置を決める起点
 export type Root =
-  // 立つ・立ち上がる種目：床についた手前側の足首を起点にする（足は動かない）
-  | { mode?: 'foot'; x: number }
+  // 立つ・立ち上がる種目：床についた足首を起点にする（足は滑らない）。side が far なら、奥側の足が起点（手前の足を踏み出す種目）
+  | { mode?: 'foot'; x: number; side?: 'far' }
   // 座って行う種目：座面に乗った股関節を起点にする。pelvis は骨盤の前傾（まっすぐ座ると 0）
   | { mode: 'seat'; x: number; y: number; pelvis: number }
   // 立って片脚ずつ動かす種目：股関節の位置を動かさず、脚は股関節から下へ計算する（足踏み、脚の後ろ上げ など）
@@ -54,7 +55,14 @@ export interface ChairProp {
   seatDepth: number;
   backHeight: number; // 背もたれの上の高さ
 }
-export type Prop = ChairProp;
+// カウンター（体の向こう側に、歩く向きに沿って置く。横から見ると、体の後ろに長く見える）
+export interface SideCounterProp {
+  type: 'counter';
+  x: number; // 左の端
+  length: number;
+  height: number;
+}
+export type Prop = ChairProp | SideCounterProp;
 
 export type SegmentName = 'head' | 'trunk' | 'pelvis' | 'upperArm' | 'forearm' | 'thigh' | 'shank' | 'foot';
 // 目立たせる部位。far を付けると奥側だけ、near を付けると手前側だけ
@@ -112,6 +120,7 @@ interface AnimationBase {
   level: number;
   cycleSeconds: number; // 1往復の時間
   countsPerCycle?: number; // 1往復で数える回数。省略すると 1（左右交互の種目は 2）
+  cyclesPerLap?: number; // 往復で数える種目で、アニメ何周ぶんを1往復とするか。省略すると 1
   checked?: boolean; // 確認済みの印。医師などが見本を確かめたら true にする
   // 姿勢の文（どう構えるか）。動きの字幕の上に、出し続ける。一瞬しか出ない字幕を作らないために分けてある
   posture?: string;
@@ -130,7 +139,10 @@ export interface SideAnimation extends AnimationBase {
   highlight: HighlightName[]; // 動かしている部位（目立つ色で描く）
   contacts?: { near?: ContactTarget; far?: ContactTarget }; // 手の接触
   // つかまる所（支持物）の、手を置く点。支えの段階に合わせて、腕だけがここに付く（下半身のキーフレームは共通）
-  support?: { x: number; y: number };
+  // hand：片手・指先のときに使う手（省略すると手前側）。体の向こう側のカウンターには、奥側の手でつかまる
+  support?: { x: number; y: number; hand?: 'near' | 'far' };
+  // 歩く種目の床の目印。spacing：目印の間隔。perCycle：1往復（アニメの1周）で進む距離（spacing の整数倍）
+  floor?: { spacing: number; perCycle: number };
   keyframes: Keyframe[];
   marks: Mark[];
 }
@@ -159,6 +171,9 @@ export type FrontLimbChannel =
   | 'HandUp'
   | 'KneeOut' // 股関節→膝
   | 'KneeUp'
+  // 脚が手前（正）にあるか、奥（負）にあるか（-1〜1）。位置は変えず、描き方だけに使う：
+  // 手前の足は少し大きく・濃く・下に、奥の足は小さく・薄く・上に描く（足先を前や後ろに出す種目）
+  | 'KneeDepth'
   | 'AnkleOut' // 膝→足首
   | 'AnkleUp'
   | 'ToeOut' // かかと→つま先

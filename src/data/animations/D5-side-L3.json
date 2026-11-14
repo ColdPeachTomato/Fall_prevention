@@ -1,0 +1,1169 @@
+{
+  "id": "D5-side-L3",
+  "exercise": "D5",
+  "level": 3,
+  "view": "side",
+  "checked": false,
+  "cycleSeconds": 12,
+  "root": {
+    "mode": "hip",
+    "x": -0.06,
+    "y": 0.52,
+    "pelvis": 0
+  },
+  "floor": {
+    "spacing": 0.1,
+    "perCycle": 0
+  },
+  "props": [
+    {
+      "type": "counter",
+      "x": -0.42,
+      "length": 0.8,
+      "height": 0.54
+    }
+  ],
+  "support": {
+    "x": 0.04,
+    "y": 0.54,
+    "hand": "far"
+  },
+  "highlight": [
+    "foot"
+  ],
+  "keyframes": [
+    {
+      "t": 0,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 15.8381,
+        "knee": 20.1584,
+        "ankle": 4.3204,
+        "farHip": 3.7361,
+        "farKnee": 19.6935,
+        "farAnkle": 15.9574,
+        "travel": 0
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 0.1875,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 21.2629,
+        "knee": 31.2244,
+        "ankle": 8.9816,
+        "farHip": 5.9853,
+        "farKnee": 21.2371,
+        "farAnkle": 15.2519,
+        "travel": -0.0125
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 0.375,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 26.5532,
+        "knee": 47.237,
+        "ankle": 17.0385,
+        "farHip": 7.9958,
+        "farKnee": 22.2921,
+        "farAnkle": 14.2963,
+        "travel": -0.025
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 0.5625,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 25.7377,
+        "knee": 54.3647,
+        "ankle": 18,
+        "farHip": 9.7982,
+        "farKnee": 22.9232,
+        "farAnkle": 13.125,
+        "travel": -0.0375
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 0.75,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 19.4095,
+        "knee": 50.285,
+        "ankle": 18,
+        "farHip": 11.4072,
+        "farKnee": 23.1635,
+        "farAnkle": 11.7564,
+        "travel": -0.05
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 0.9375,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 11.7403,
+        "knee": 39.9013,
+        "ankle": 14.9014,
+        "farHip": 12.8263,
+        "farKnee": 23.0247,
+        "farAnkle": 10.1983,
+        "travel": -0.0625
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 1.125,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 9.8434,
+        "knee": 35.5935,
+        "ankle": 11.8845,
+        "farHip": 14.0505,
+        "farKnee": 22.5,
+        "farAnkle": 8.4495,
+        "travel": -0.075
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 1.3125,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 6.988,
+        "knee": 28.2479,
+        "ankle": 14.946,
+        "farHip": 15.0642,
+        "farKnee": 21.5628,
+        "farAnkle": 6.4987,
+        "travel": -0.0875
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 1.5,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 3.7361,
+        "knee": 19.6935,
+        "ankle": 15.9574,
+        "farHip": 15.8381,
+        "farKnee": 20.1584,
+        "farAnkle": 4.3204,
+        "travel": -0.1
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 1.6875,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 5.9853,
+        "knee": 21.2371,
+        "ankle": 15.2519,
+        "farHip": 21.2629,
+        "farKnee": 31.2244,
+        "farAnkle": 8.9816,
+        "travel": -0.1125
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 1.875,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 7.9958,
+        "knee": 22.2921,
+        "ankle": 14.2963,
+        "farHip": 26.5532,
+        "farKnee": 47.237,
+        "farAnkle": 17.0385,
+        "travel": -0.125
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 2.0625,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 9.7982,
+        "knee": 22.9232,
+        "ankle": 13.125,
+        "farHip": 25.7377,
+        "farKnee": 54.3647,
+        "farAnkle": 18,
+        "travel": -0.1375
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 2.25,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 11.4072,
+        "knee": 23.1635,
+        "ankle": 11.7564,
+        "farHip": 19.4095,
+        "farKnee": 50.285,
+        "farAnkle": 18,
+        "travel": -0.15
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 2.4375,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 12.8263,
+        "knee": 23.0247,
+        "ankle": 10.1983,
+        "farHip": 11.7403,
+        "farKnee": 39.9013,
+        "farAnkle": 14.9014,
+        "travel": -0.1625
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 2.625,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 14.0505,
+        "knee": 22.5,
+        "ankle": 8.4495,
+        "farHip": 9.8434,
+        "farKnee": 35.5935,
+        "farAnkle": 11.8845,
+        "travel": -0.175
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 2.8125,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 15.0642,
+        "knee": 21.5628,
+        "ankle": 6.4987,
+        "farHip": 6.988,
+        "farKnee": 28.2479,
+        "farAnkle": 14.946,
+        "travel": -0.1875
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 3,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 15.8381,
+        "knee": 20.1584,
+        "ankle": 4.3204,
+        "farHip": 3.7361,
+        "farKnee": 19.6935,
+        "farAnkle": 15.9574,
+        "travel": -0.2
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 3.1875,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 21.2629,
+        "knee": 31.2244,
+        "ankle": 8.9816,
+        "farHip": 5.9853,
+        "farKnee": 21.2371,
+        "farAnkle": 15.2519,
+        "travel": -0.2125
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 3.375,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 26.5532,
+        "knee": 47.237,
+        "ankle": 17.0385,
+        "farHip": 7.9958,
+        "farKnee": 22.2921,
+        "farAnkle": 14.2963,
+        "travel": -0.225
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 3.5625,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 25.7377,
+        "knee": 54.3647,
+        "ankle": 18,
+        "farHip": 9.7982,
+        "farKnee": 22.9232,
+        "farAnkle": 13.125,
+        "travel": -0.2375
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 3.75,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 19.4095,
+        "knee": 50.285,
+        "ankle": 18,
+        "farHip": 11.4072,
+        "farKnee": 23.1635,
+        "farAnkle": 11.7564,
+        "travel": -0.25
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 3.9375,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 11.7403,
+        "knee": 39.9013,
+        "ankle": 14.9014,
+        "farHip": 12.8263,
+        "farKnee": 23.0247,
+        "farAnkle": 10.1983,
+        "travel": -0.2625
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 4.125,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 9.8434,
+        "knee": 35.5935,
+        "ankle": 11.8845,
+        "farHip": 14.0505,
+        "farKnee": 22.5,
+        "farAnkle": 8.4495,
+        "travel": -0.275
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 4.3125,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 6.988,
+        "knee": 28.2479,
+        "ankle": 14.946,
+        "farHip": 15.0642,
+        "farKnee": 21.5628,
+        "farAnkle": 6.4987,
+        "travel": -0.2875
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 4.5,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 3.7361,
+        "knee": 19.6935,
+        "ankle": 15.9574,
+        "farHip": 15.8381,
+        "farKnee": 20.1584,
+        "farAnkle": 4.3204,
+        "travel": -0.3
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 4.6875,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 5.9853,
+        "knee": 21.2371,
+        "ankle": 15.2519,
+        "farHip": 21.2629,
+        "farKnee": 31.2244,
+        "farAnkle": 8.9816,
+        "travel": -0.3125
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 4.875,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 7.9958,
+        "knee": 22.2921,
+        "ankle": 14.2963,
+        "farHip": 26.5532,
+        "farKnee": 47.237,
+        "farAnkle": 17.0385,
+        "travel": -0.325
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 5.0625,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 9.7982,
+        "knee": 22.9232,
+        "ankle": 13.125,
+        "farHip": 25.7377,
+        "farKnee": 54.3647,
+        "farAnkle": 18,
+        "travel": -0.3375
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 5.25,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 11.4072,
+        "knee": 23.1635,
+        "ankle": 11.7564,
+        "farHip": 19.4095,
+        "farKnee": 50.285,
+        "farAnkle": 18,
+        "travel": -0.35
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 5.4375,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 12.8263,
+        "knee": 23.0247,
+        "ankle": 10.1983,
+        "farHip": 11.7403,
+        "farKnee": 39.9013,
+        "farAnkle": 14.9014,
+        "travel": -0.3625
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 5.625,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 14.0505,
+        "knee": 22.5,
+        "ankle": 8.4495,
+        "farHip": 9.8434,
+        "farKnee": 35.5935,
+        "farAnkle": 11.8845,
+        "travel": -0.375
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 5.8125,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 15.0642,
+        "knee": 21.5628,
+        "ankle": 6.4987,
+        "farHip": 6.988,
+        "farKnee": 28.2479,
+        "farAnkle": 14.946,
+        "travel": -0.3875
+      },
+      "label": "後ろへ歩く"
+    },
+    {
+      "t": 6,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 15.8381,
+        "knee": 20.1584,
+        "ankle": 4.3204,
+        "farHip": 3.7361,
+        "farKnee": 19.6935,
+        "farAnkle": 15.9574,
+        "travel": -0.4
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 6.1875,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 15.0642,
+        "knee": 21.5628,
+        "ankle": 6.4987,
+        "farHip": 6.988,
+        "farKnee": 28.2479,
+        "farAnkle": 14.946,
+        "travel": -0.3875
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 6.375,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 14.0505,
+        "knee": 22.5,
+        "ankle": 8.4495,
+        "farHip": 9.8434,
+        "farKnee": 35.5935,
+        "farAnkle": 11.8845,
+        "travel": -0.375
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 6.5625,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 12.8263,
+        "knee": 23.0247,
+        "ankle": 10.1983,
+        "farHip": 11.7403,
+        "farKnee": 39.9013,
+        "farAnkle": 14.9014,
+        "travel": -0.3625
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 6.75,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 11.4072,
+        "knee": 23.1635,
+        "ankle": 11.7564,
+        "farHip": 19.4095,
+        "farKnee": 50.285,
+        "farAnkle": 18,
+        "travel": -0.35
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 6.9375,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 9.7982,
+        "knee": 22.9232,
+        "ankle": 13.125,
+        "farHip": 25.7377,
+        "farKnee": 54.3647,
+        "farAnkle": 18,
+        "travel": -0.3375
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 7.125,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 7.9958,
+        "knee": 22.2921,
+        "ankle": 14.2963,
+        "farHip": 26.5532,
+        "farKnee": 47.237,
+        "farAnkle": 17.0385,
+        "travel": -0.325
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 7.3125,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 5.9853,
+        "knee": 21.2371,
+        "ankle": 15.2519,
+        "farHip": 21.2629,
+        "farKnee": 31.2244,
+        "farAnkle": 8.9816,
+        "travel": -0.3125
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 7.5,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 3.7361,
+        "knee": 19.6935,
+        "ankle": 15.9574,
+        "farHip": 15.8381,
+        "farKnee": 20.1584,
+        "farAnkle": 4.3204,
+        "travel": -0.3
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 7.6875,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 6.988,
+        "knee": 28.2479,
+        "ankle": 14.946,
+        "farHip": 15.0642,
+        "farKnee": 21.5628,
+        "farAnkle": 6.4987,
+        "travel": -0.2875
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 7.875,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 9.8434,
+        "knee": 35.5935,
+        "ankle": 11.8845,
+        "farHip": 14.0505,
+        "farKnee": 22.5,
+        "farAnkle": 8.4495,
+        "travel": -0.275
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 8.0625,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 11.7403,
+        "knee": 39.9013,
+        "ankle": 14.9014,
+        "farHip": 12.8263,
+        "farKnee": 23.0247,
+        "farAnkle": 10.1983,
+        "travel": -0.2625
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 8.25,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 19.4095,
+        "knee": 50.285,
+        "ankle": 18,
+        "farHip": 11.4072,
+        "farKnee": 23.1635,
+        "farAnkle": 11.7564,
+        "travel": -0.25
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 8.4375,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 25.7377,
+        "knee": 54.3647,
+        "ankle": 18,
+        "farHip": 9.7982,
+        "farKnee": 22.9232,
+        "farAnkle": 13.125,
+        "travel": -0.2375
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 8.625,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 26.5532,
+        "knee": 47.237,
+        "ankle": 17.0385,
+        "farHip": 7.9958,
+        "farKnee": 22.2921,
+        "farAnkle": 14.2963,
+        "travel": -0.225
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 8.8125,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 21.2629,
+        "knee": 31.2244,
+        "ankle": 8.9816,
+        "farHip": 5.9853,
+        "farKnee": 21.2371,
+        "farAnkle": 15.2519,
+        "travel": -0.2125
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 9,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 15.8381,
+        "knee": 20.1584,
+        "ankle": 4.3204,
+        "farHip": 3.7361,
+        "farKnee": 19.6935,
+        "farAnkle": 15.9574,
+        "travel": -0.2
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 9.1875,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 15.0642,
+        "knee": 21.5628,
+        "ankle": 6.4987,
+        "farHip": 6.988,
+        "farKnee": 28.2479,
+        "farAnkle": 14.946,
+        "travel": -0.1875
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 9.375,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 14.0505,
+        "knee": 22.5,
+        "ankle": 8.4495,
+        "farHip": 9.8434,
+        "farKnee": 35.5935,
+        "farAnkle": 11.8845,
+        "travel": -0.175
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 9.5625,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 12.8263,
+        "knee": 23.0247,
+        "ankle": 10.1983,
+        "farHip": 11.7403,
+        "farKnee": 39.9013,
+        "farAnkle": 14.9014,
+        "travel": -0.1625
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 9.75,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 11.4072,
+        "knee": 23.1635,
+        "ankle": 11.7564,
+        "farHip": 19.4095,
+        "farKnee": 50.285,
+        "farAnkle": 18,
+        "travel": -0.15
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 9.9375,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 9.7982,
+        "knee": 22.9232,
+        "ankle": 13.125,
+        "farHip": 25.7377,
+        "farKnee": 54.3647,
+        "farAnkle": 18,
+        "travel": -0.1375
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 10.125,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 7.9958,
+        "knee": 22.2921,
+        "ankle": 14.2963,
+        "farHip": 26.5532,
+        "farKnee": 47.237,
+        "farAnkle": 17.0385,
+        "travel": -0.125
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 10.3125,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 5.9853,
+        "knee": 21.2371,
+        "ankle": 15.2519,
+        "farHip": 21.2629,
+        "farKnee": 31.2244,
+        "farAnkle": 8.9816,
+        "travel": -0.1125
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 10.5,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 3.7361,
+        "knee": 19.6935,
+        "ankle": 15.9574,
+        "farHip": 15.8381,
+        "farKnee": 20.1584,
+        "farAnkle": 4.3204,
+        "travel": -0.1
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 10.6875,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 6.988,
+        "knee": 28.2479,
+        "ankle": 14.946,
+        "farHip": 15.0642,
+        "farKnee": 21.5628,
+        "farAnkle": 6.4987,
+        "travel": -0.0875
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 10.875,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 9.8434,
+        "knee": 35.5935,
+        "ankle": 11.8845,
+        "farHip": 14.0505,
+        "farKnee": 22.5,
+        "farAnkle": 8.4495,
+        "travel": -0.075
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 11.0625,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 11.7403,
+        "knee": 39.9013,
+        "ankle": 14.9014,
+        "farHip": 12.8263,
+        "farKnee": 23.0247,
+        "farAnkle": 10.1983,
+        "travel": -0.0625
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 11.25,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 19.4095,
+        "knee": 50.285,
+        "ankle": 18,
+        "farHip": 11.4072,
+        "farKnee": 23.1635,
+        "farAnkle": 11.7564,
+        "travel": -0.05
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 11.4375,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 25.7377,
+        "knee": 54.3647,
+        "ankle": 18,
+        "farHip": 9.7982,
+        "farKnee": 22.9232,
+        "farAnkle": 13.125,
+        "travel": -0.0375
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 11.625,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 26.5532,
+        "knee": 47.237,
+        "ankle": 17.0385,
+        "farHip": 7.9958,
+        "farKnee": 22.2921,
+        "farAnkle": 14.2963,
+        "travel": -0.025
+      },
+      "label": "前へ歩いて戻る"
+    },
+    {
+      "t": 11.8125,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 21.2629,
+        "knee": 31.2244,
+        "ankle": 8.9816,
+        "farHip": 5.9853,
+        "farKnee": 21.2371,
+        "farAnkle": 15.2519,
+        "travel": -0.0125
+      },
+      "label": "前へ歩いて戻る"
+    }
+  ],
+  "posture": "始める前に、後ろに物がないか確かめます",
+  "captions": [
+    {
+      "from": 0,
+      "to": 6,
+      "text": "小さな歩幅で、後ろへ歩きます"
+    },
+    {
+      "from": 6,
+      "to": 12,
+      "text": "前を向いたまま、前へ歩いて戻ります"
+    }
+  ],
+  "marks": [
+    {
+      "type": "line",
+      "from": 0,
+      "to": 12,
+      "anchor": "hip",
+      "dx": 0,
+      "dy": 0.3,
+      "angle": 0,
+      "length": 0.72
+    },
+    {
+      "type": "arrow",
+      "from": 0.3,
+      "to": 5.7,
+      "anchor": "head",
+      "dx": -0.09,
+      "dy": 0.02,
+      "angle": -90,
+      "length": 0.09
+    },
+    {
+      "type": "arrow",
+      "from": 6.3,
+      "to": 11.7,
+      "anchor": "head",
+      "dx": 0.09,
+      "dy": 0.02,
+      "angle": 90,
+      "length": 0.09
+    }
+  ]
+}

@@ -74,7 +74,7 @@ export const EXERCISES: Exercise[] = [
     variants: [
       { level: 1, howTo: '手を使ってよいので、椅子から立ち上がり、ゆっくり座ります。', posture: 'standing', usesSupport: false, view: 'side', animationId: 'S1-side-L1' },
       { level: 2, howTo: '腕を体の横に下ろし、手を使わずに立ち上がり、ゆっくり座ります。', posture: 'standing', usesSupport: false, view: 'side', animationId: 'S1-side-L2' },
-      { level: 3, howTo: '椅子に軽く触れるところまで腰を下ろし、座らずに立ち上がります。', posture: 'standing', usesSupport: false, view: 'side', animationId: null },
+      { level: 3, howTo: '椅子に軽く触れるところまで腰を下ろし、座らずに立ち上がります。', posture: 'standing', usesSupport: false, view: 'side', animationId: 'S1-side-L3' },
     ],
   },
   {
@@ -176,7 +176,7 @@ export const EXERCISES: Exercise[] = [
     bilateral: true,
     cues: ['体重は前の足に乗せる', '深くしゃがまない', '痛みがあれば浅くする'],
     variants: [
-      { level: 3, howTo: 'つかまって立ち、片足を前に出して、浅く腰を落とし、戻ります。', posture: 'standing', usesSupport: true, view: 'side', animationId: null },
+      { level: 3, howTo: 'カウンターの横に立ち、片足を前に踏み出して、浅く腰を落とします。前の足で押して、足を戻します。', posture: 'standing', usesSupport: true, maxSupport: 'one', view: 'side', animationId: 'S9-side-L3' },
     ],
   },
 
@@ -214,7 +214,7 @@ export const EXERCISES: Exercise[] = [
     bilateral: true,
     cues: ['前の足のかかとを、後ろの足のつま先につける'],
     variants: [
-      { level: 3, howTo: 'つかまって立ち、両足を前後一直線にして、その姿勢を保ちます。', posture: 'standing', usesSupport: true, view: 'side', animationId: null },
+      { level: 3, howTo: 'つかまって立ち、両足を前後一直線にして、その姿勢を保ちます。', posture: 'standing', usesSupport: true, view: 'side', animationId: 'B3-side-L3' },
     ],
   },
   {
@@ -226,7 +226,7 @@ export const EXERCISES: Exercise[] = [
     bilateral: true,
     cues: ['上体を傾けない', 'つかまる所のすぐ横で行う'],
     variants: [
-      { level: 3, howTo: 'つかまって立ち、片足を少し上げて、その姿勢を保ちます。', posture: 'standing', usesSupport: true, view: 'front', animationId: null },
+      { level: 3, howTo: 'つかまって立ち、片足を少し上げて、その姿勢を保ちます。', posture: 'standing', usesSupport: true, view: 'front', animationId: 'B4-front-L3' },
     ],
   },
 
@@ -240,7 +240,7 @@ export const EXERCISES: Exercise[] = [
     bilateral: true,
     cues: ['体重を立っている足の上に保つ', '小さな動きでよい'],
     variants: [
-      { level: 3, howTo: 'つかまって立ち、片足のつま先で、前・横・後ろの床に軽く触れます。', posture: 'standing', usesSupport: true, view: 'front', animationId: null },
+      { level: 3, howTo: 'つかまって立ち、片足のつま先で、前、横、後ろの順に床に軽く触れます。そのたびに足を戻します。', posture: 'standing', usesSupport: true, view: 'front', animationId: 'D1-front-L3' },
     ],
   },
   {
@@ -253,7 +253,7 @@ export const EXERCISES: Exercise[] = [
     cues: ['常につかまる', '足やかかとが痛むときは中止する'],
     minSupport: 'one',
     variants: [
-      { level: 3, howTo: 'カウンターにつかまりながら、つま先で歩き、戻りはかかとで歩きます。', posture: 'standing', usesSupport: true, view: 'side', animationId: null },
+      { level: 3, howTo: 'カウンターに片手でつかまり、往きはつま先で歩き、戻りはかかとで歩きます。', posture: 'standing', usesSupport: true, maxSupport: 'one', view: 'side', animationId: 'D2-side-L3' },
     ],
   },
   {
@@ -277,7 +277,7 @@ export const EXERCISES: Exercise[] = [
     bilateral: false,
     cues: ['かかとを、もう片方の足のつま先につけて進む', '目線は前に'],
     variants: [
-      { level: 3, howTo: 'カウンターにつかまりながら、かかとをつま先につけて前へ歩き、戻ります。', posture: 'standing', usesSupport: true, view: 'side', animationId: null },
+      { level: 3, howTo: 'カウンターの横に立ち、かかとを反対の足のつま先につけながら、一直線に歩いて戻ります。', posture: 'standing', usesSupport: true, maxSupport: 'one', view: 'side', animationId: 'D4-side-L3' },
     ],
   },
   {
@@ -289,7 +289,7 @@ export const EXERCISES: Exercise[] = [
     bilateral: false,
     cues: ['歩幅は小さく', '始める前に、後ろに物がないか確かめる'],
     variants: [
-      { level: 3, howTo: 'カウンターにつかまりながら、小さな歩幅で後ろへ歩き、戻ります。', posture: 'standing', usesSupport: true, view: 'side', animationId: null },
+      { level: 3, howTo: 'カウンターの横に立ち、小さな歩幅で後ろへ歩き、前を向いたまま前へ歩いて戻ります。', posture: 'standing', usesSupport: true, maxSupport: 'one', view: 'side', animationId: 'D5-side-L3' },
     ],
   },
 

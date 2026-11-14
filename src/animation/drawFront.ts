@@ -238,10 +238,15 @@ function head(ctx: Ctx, sk: FrontSkeleton, fill: string, px: number): void {
   }
 }
 
-function foot(ctx: Ctx, limb: FrontLimb, fill: string, px: number): void {
-  const r = FRONT_SHAPE.shoe;
-  capsule(ctx, { x: limb.heel.x, y: limb.heel.y + r }, { x: limb.toe.x, y: limb.toe.y + r * 0.9 }, r, r * 0.9, fill, px);
+// 足。depth：脚の前後（手前が正）。手前の足は少し大きく・下に、奥の足は小さく・上に描く（床の奥行きの見え方）
+function foot(ctx: Ctx, limb: FrontLimb, fill: string, px: number, depth = 0): void {
+  const r = FRONT_SHAPE.shoe * (1 + 0.18 * depth);
+  const dy = DEPTH_DROP * depth;
+  capsule(ctx, { x: limb.heel.x, y: limb.heel.y + r - dy }, { x: limb.toe.x, y: limb.toe.y + r * 0.9 - dy }, r, r * 0.9, fill, px);
 }
+
+// 手前・奥にある足を、絵の上で上下にずらす量（身長 = 1。depth が 1 のとき）
+export const DEPTH_DROP = 0.028;
 
 // 回す向きを示す弧の矢印
 function arcArrow(ctx: Ctx, a: Vec, m: FrontArcMark, t: number, reverse: boolean, px: number, always: boolean): void {
@@ -340,9 +345,14 @@ export function drawFrontFrame(ctx: Ctx, anim: FrontAnimation, f: FrontFrame, o:
   const legs = () => {
     for (const side of ['r', 'l'] as const) {
       const limb = sk[side];
-      capsule(ctx, limb.knee, limb.ankle, SHAPE.shank[0], SHAPE.shank[1], color('shank', STYLE.bottom, side), px);
-      foot(ctx, limb, color('foot', STYLE.shoe, side), px);
-      capsule(ctx, limb.hip, limb.knee, SHAPE.thigh[0], SHAPE.thigh[1], color('thigh', STYLE.bottom, side), px);
+      // 脚の前後（KneeDepth）：足先を前に出すと手前（濃く・大きく・下）、後ろに出すと奥（薄く・小さく・上）
+      const depth = f.pose[`${side}KneeDepth`];
+      const tint = (base: string, d: number) => (d === 0 ? base : shadeByDepth(base, d));
+      const ankle = { x: limb.ankle.x, y: limb.ankle.y - DEPTH_DROP * depth };
+      const knee = { x: limb.knee.x, y: limb.knee.y - DEPTH_DROP * depth * 0.5 };
+      capsule(ctx, knee, ankle, SHAPE.shank[0], SHAPE.shank[1] * (1 + 0.18 * depth), tint(color('shank', STYLE.bottom, side), depth * 0.8), px);
+      foot(ctx, limb, tint(color('foot', STYLE.shoe, side), depth * 0.8), px, depth);
+      capsule(ctx, limb.hip, knee, SHAPE.thigh[0], SHAPE.thigh[1], tint(color('thigh', STYLE.bottom, side), depth * 0.4), px);
     }
   };
   const band = () => {

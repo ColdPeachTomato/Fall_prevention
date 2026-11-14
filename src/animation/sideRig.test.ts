@@ -172,9 +172,12 @@ describe('重心と支えの範囲', () => {
     expect(footContact(sk.farHeel, sk.farBall, sk.farToe)).toBeNull();
   });
 
-  it('かかとを上げた足は、母趾球からつま先までだけを支えに数える', () => {
+  it('かかとを上げた足は、指の付け根のふくらみ（母趾球の少し後ろ）からつま先までだけを支えに数える', () => {
     const range = footContact({ x: 0, y: 0.05 }, { x: 0.12, y: 0 }, { x: 0.15, y: 0 });
-    expect(range).toEqual({ min: 0.12, max: 0.15 });
+    expect(range?.min).toBeCloseTo(0.108, 9);
+    expect(range?.max).toBe(0.15);
+    // かかとも床についていれば、かかとからつま先まで
+    expect(footContact({ x: 0, y: 0 }, { x: 0.12, y: 0 }, { x: 0.15, y: 0 })).toEqual({ min: 0, max: 0.15 });
   });
 
   it('前かがみになると重心は前へ動く', () => {

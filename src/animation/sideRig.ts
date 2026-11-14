@@ -121,11 +121,19 @@ function legFromHip(hip: Vec, pelvisAngle: number, hipFlex: number, kneeFlex: nu
   const thighDown = pelvisAngle + 180 - hipFlex;
   const knee = along(hip, thighDown, BODY.thigh);
   const shankDown = thighDown + kneeFlex;
+  const ankle = along(knee, shankDown, BODY.shank);
+  const footAngle = shankDown - 90 - ankleFlex;
+  // かかとを上げて母趾球で床を踏んでいるとき（つま先歩き）は、つま先が床に沿って曲がる
+  const u = dir(footAngle);
+  const ballY = ankle.y + u.y * BODY.ballFront - u.x * BODY.ankleHeight;
+  // （床に近づくにつれて、なめらかに曲がる）
+  const nearFloor = Math.max(0, Math.min(1, 1 - ballY / 0.012));
+  const toeBend = footAngle > 90 ? Math.min(45, footAngle - 90) * nearFloor : 0;
   return {
     knee,
-    ankle: along(knee, shankDown, BODY.shank),
-    footAngle: shankDown - 90 - ankleFlex,
-    toeBend: 0,
+    ankle,
+    footAngle,
+    toeBend,
     hip: hipFlex,
     kneeAngle: kneeFlex,
     ankleAngle: ankleFlex,
@@ -221,7 +229,7 @@ export function solveSide(pose: FullPose, rig: RigConfig, hands = 0, stage: Supp
   let hip: Vec;
   let pelvisAngle: number;
   let near: Leg;
-  let far: Leg;
+  let far: Leg | undefined;
 
   if (rig.root.mode === 'seat' || rig.root.mode === 'hip') {
     // 座って行う種目、立って片脚ずつ動かす種目：股関節は動かない
@@ -238,24 +246,40 @@ export function solveSide(pose: FullPose, rig: RigConfig, hands = 0, stage: Supp
   } else {
     // 立つ・立ち上がる種目：手前側の足首から上へ。足は床に付いたまま滑らない。
     // かかと上げ・つま先上げでは、足の傾き（footPitch）で足首の位置が決まる
-    const foot = rig.plants?.near
-      ? plantedFoot(rig.plants.near, pose.footPitch)
-      : { ankle: { x: rig.root.x, y: BODY.ankleHeight }, footAngle: 90, toeBend: 0 };
-    const shankUp = pose.ankle + (foot.footAngle - 90); // ankle は足に対するすねの角度（背屈が正）
+    // 起点にする足は、ふつうは手前側。root.side が far なら奥側（手前の足を踏み出す種目）
+    const stanceFar = rig.root.side === 'far';
+    const j = stanceFar
+      ? { ankle: pose.farAnkle, knee: pose.farKnee, hip: pose.farHip, pitch: pose.farFootPitch, plant: rig.plants?.far }
+      : { ankle: pose.ankle, knee: pose.knee, hip: pose.hip, pitch: pose.footPitch, plant: rig.plants?.near };
+    const foot = j.plant ? plantedFoot(j.plant, j.pitch) : { ankle: { x: rig.root.x, y: BODY.ankleHeight }, footAngle: 90, toeBend: 0 };
+    const shankUp = j.ankle + (foot.footAngle - 90); // ankle は足に対するすねの角度（背屈が正）
     const knee = along(foot.ankle, shankUp, BODY.shank);
-    const thighUp = shankUp - pose.knee;
+    const thighUp = shankUp - j.knee;
     hip = along(knee, thighUp, BODY.thigh);
-    pelvisAngle = thighUp + pose.hip;
-    near = { knee, ankle: foot.ankle, footAngle: foot.footAngle, toeBend: foot.toeBend, hip: pose.hip, kneeAngle: pose.knee, ankleAngle: pose.ankle };
+    pelvisAngle = thighUp + j.hip;
+    const stance: Leg = { knee, ankle: foot.ankle, footAngle: foot.footAngle, toeBend: foot.toeBend, hip: j.hip, kneeAngle: j.knee, ankleAngle: j.ankle };
+    if (stanceFar) {
+      far = stance;
+      near = rig.plants?.near ? legPlanted(hip, pelvisAngle, rig.plants.near, pose.footPitch) : legFromHip(hip, pelvisAngle, pose.hip, pose.knee, pose.ankle);
+      if (rig.plants?.near) {
+        effective.hip = near.hip;
+        effective.knee = near.kneeAngle;
+        effective.ankle = near.ankleAngle;
+      }
+    } else {
+      near = stance;
+    }
   }
 
-  if (rig.plants?.far) {
-    far = legPlanted(hip, pelvisAngle, rig.plants.far, pose.farFootPitch);
-    effective.farHip = far.hip;
-    effective.farKnee = far.kneeAngle;
-    effective.farAnkle = far.ankleAngle;
-  } else {
-    far = legFromHip(hip, pelvisAngle, pose.farHip, pose.farKnee, pose.farAnkle);
+  if (far! === undefined) {
+    if (rig.plants?.far) {
+      far = legPlanted(hip, pelvisAngle, rig.plants.far, pose.farFootPitch);
+      effective.farHip = far.hip;
+      effective.farKnee = far.kneeAngle;
+      effective.farAnkle = far.ankleAngle;
+    } else {
+      far = legFromHip(hip, pelvisAngle, pose.farHip, pose.farKnee, pose.farAnkle);
+    }
   }
 
   // 体の中心
@@ -285,13 +309,19 @@ export function solveSide(pose: FullPose, rig: RigConfig, hands = 0, stage: Supp
   // 支持物につかまる腕：支えの段階に合わせて、手を支持物に付ける。下半身は変えない
   const holding = { near: false, far: false };
   if (rig.support && stage !== null && stage !== 'none') {
-    handTarget = { x: rig.support.x, y: rig.support.y + (stage === 'fingertip' ? FINGERTIP_LIFT : 0) };
-    const ik = solveArm(shoulder, handTarget, trunkAngle);
-    arm.shoulder = ik.shoulder;
-    arm.elbow = ik.elbow;
-    holding.near = true;
-    if (stage === 'both') {
-      farHandTarget = handTarget;
+    const target = { x: rig.support.x, y: rig.support.y + (stage === 'fingertip' ? FINGERTIP_LIFT : 0) };
+    const ik = solveArm(shoulder, target, trunkAngle);
+    // 体の向こう側のカウンターには、奥側の手だけでつかまる（両手ではつかまれない）
+    const useNear = rig.support.hand !== 'far';
+    const useFar = rig.support.hand === 'far' || stage === 'both';
+    if (useNear) {
+      handTarget = target;
+      arm.shoulder = ik.shoulder;
+      arm.elbow = ik.elbow;
+      holding.near = true;
+    }
+    if (useFar) {
+      farHandTarget = target;
       arm.farShoulder = ik.shoulder;
       arm.farElbow = ik.elbow;
       holding.far = true;
@@ -383,7 +413,9 @@ export function footContact(heel: Vec, ball: Vec, toe: Vec): SupportRange | null
   const xs = [heel, ball, toe].filter((p) => Math.abs(p.y) < FLOOR_TOLERANCE).map((p) => p.x);
   if (xs.length === 0) return null;
   if (xs.length === 1) return { min: xs[0]! - HEEL_ROUND, max: xs[0]! + HEEL_ROUND };
-  return { min: Math.min(...xs), max: Math.max(...xs) };
+  // かかとが浮いて母趾球とつま先で踏んでいるとき、指の付け根のふくらみは母趾球の点より少し後ろまである
+  const forefootOnly = Math.abs(heel.y) >= FLOOR_TOLERANCE;
+  return { min: Math.min(...xs) - (forefootOnly ? HEEL_ROUND : 0), max: Math.max(...xs) };
 }
 
 // 体を支えている範囲（前後方向）。床についた足と、座っている間の座面、手でつかまっている支持物を合わせた範囲。
@@ -403,8 +435,9 @@ export function supportRange(sk: Skeleton, onSeat: boolean, props: Prop[], stage
       if (front > back) parts.push({ min: back, max: front });
     }
   }
-  if (sk.holding.near && sk.handTarget && (stage === 'both' || stage === 'one')) {
-    parts.push({ min: sk.handTarget.x, max: sk.handTarget.x });
+  if (stage === 'both' || stage === 'one') {
+    const held = sk.holding.near ? sk.handTarget : sk.holding.far ? sk.farHandTarget : undefined;
+    if (held) parts.push({ min: held.x, max: held.x });
   }
   if (parts.length === 0) return null;
   return { min: Math.min(...parts.map((p) => p.min)), max: Math.max(...parts.map((p) => p.max)) };

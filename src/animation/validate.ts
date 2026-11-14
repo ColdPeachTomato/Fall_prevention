@@ -29,6 +29,9 @@ function validateCommon(a: Input, errors: string[]): void {
     errors.push('countsPerCycle は 1 以上の整数にしてください');
   }
   if (a.checked !== undefined && typeof a.checked !== 'boolean') errors.push('checked が正しくありません');
+  if (a.cyclesPerLap !== undefined && !(isNumber(a.cyclesPerLap) && Number.isInteger(a.cyclesPerLap) && a.cyclesPerLap >= 1)) {
+    errors.push('cyclesPerLap は 1 以上の整数にしてください');
+  }
   if (a.posture !== undefined && (typeof a.posture !== 'string' || a.posture === '')) errors.push('posture（姿勢の文）が正しくありません');
   const inCycle = (from: unknown, to: unknown) => isNumber(from) && isNumber(to) && from >= 0 && to > from && (!isNumber(cycle) || to <= cycle);
   for (const key of ['captions', 'reverseCaptions'] as const) {
@@ -193,7 +196,9 @@ export function validateAnimation(input: unknown): AnimationValidation {
     errors.push('props がありません');
   } else {
     a.props.forEach((p, i) => {
-      if (!isObject(p) || p.type !== 'chair') {
+      if (isObject(p) && p.type === 'counter') {
+        if (![p.x, p.length, p.height].every(isNumber)) errors.push(`props の${i + 1}番目：カウンターの寸法が正しくありません`);
+      } else if (!isObject(p) || p.type !== 'chair') {
         errors.push(`props の${i + 1}番目：知らない種類です`);
       } else if (![p.x, p.seatHeight, p.seatDepth, p.backHeight].every(isNumber)) {
         errors.push(`props の${i + 1}番目：椅子の寸法が正しくありません`);
@@ -205,6 +210,13 @@ export function validateAnimation(input: unknown): AnimationValidation {
     errors.push('highlight（目立たせる部位）が正しくありません');
   }
 
+  if (isObject(a.root) && a.root.side !== undefined && a.root.side !== 'far') errors.push('root.side が正しくありません');
+  if (a.floor !== undefined && !(isObject(a.floor) && isNumber(a.floor.spacing) && a.floor.spacing > 0 && isNumber(a.floor.perCycle))) {
+    errors.push('floor（床の目印）が正しくありません');
+  }
+  if (isObject(a.support) && a.support.hand !== undefined && a.support.hand !== 'near' && a.support.hand !== 'far') {
+    errors.push('support.hand が正しくありません');
+  }
   if (a.support !== undefined && !(isObject(a.support) && isNumber(a.support.x) && isNumber(a.support.y))) {
     errors.push('support（つかまる所の、手を置く点）が正しくありません');
   }
@@ -234,6 +246,7 @@ export function validateAnimation(input: unknown): AnimationValidation {
       if (!isNumber(v)) errors.push(`${where}：${j.name} が数ではありません`);
       else if (v < j.min || v > j.max) errors.push(`${where}：${j.name} = ${v} が可動域（${j.min}〜${j.max}）を超えています`);
     }
+    if (pose.travel !== undefined && !isNumber(pose.travel)) errors.push(`${where}：travel が数ではありません`);
     if (k.hands !== undefined && (!isNumber(k.hands) || k.hands < 0 || k.hands > 1)) errors.push(`${where}：hands は 0〜1 にしてください`);
   });
 

@@ -1,5 +1,6 @@
 // 実際に使う支えの段階を決める。
 // メニューの支えを基本に、種目の下限（minSupport）より少なければ下限まで増やす。
+// カウンターの横を歩く種目など、両手ではつかまれない種目は、つかまれる手の上限（maxSupport）に合わせる。
 
 import type { Exercise, ExerciseVariant, SupportStage } from '../data/types';
 
@@ -18,6 +19,7 @@ export function effectiveSupport(
   if (!variant.usesSupport) return null;
   let s = menuSupport;
   if (exercise.minSupport && rank(s) < rank(exercise.minSupport)) s = exercise.minSupport;
+  if (variant.maxSupport && rank(s) > rank(variant.maxSupport)) s = variant.maxSupport;
   return s;
 }
 

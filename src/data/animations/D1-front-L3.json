@@ -1,0 +1,344 @@
+{
+  "id": "D1-front-L3",
+  "exercise": "D1",
+  "level": 3,
+  "view": "front",
+  "checked": false,
+  "cycleSeconds": 15,
+  "root": {
+    "mode": "stand",
+    "x": 0,
+    "y": 0.5202
+  },
+  "viewBox": {
+    "minX": -0.62,
+    "maxX": 0.36,
+    "minY": -0.075,
+    "maxY": 1.06
+  },
+  "support": {
+    "hand": "l",
+    "side": {
+      "x": -0.3,
+      "y": 0.54
+    },
+    "front": {
+      "x": -0.06,
+      "half": 0.1,
+      "y": 0.54
+    }
+  },
+  "props": [
+    {
+      "type": "chair",
+      "x": -0.44,
+      "width": 0.3,
+      "seatHeight": 0.242,
+      "backHeight": 0.54,
+      "showFor": [
+        "one",
+        "fingertip",
+        "none"
+      ]
+    },
+    {
+      "type": "chair",
+      "x": -0.06,
+      "width": 0.3,
+      "seatHeight": 0.242,
+      "backHeight": 0.54,
+      "showFor": [
+        "both"
+      ],
+      "inFront": true
+    }
+  ],
+  "highlight": [
+    "r:shank",
+    "r:foot"
+  ],
+  "keyframes": [
+    {
+      "t": 0,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "lKneeDepth": 0,
+        "rKneeOut": 0.0713,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0.0713,
+        "rAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "rKneeDepth": 0
+      },
+      "label": "前：足をそろえる"
+    },
+    {
+      "t": 0.3,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "lKneeDepth": 0,
+        "rKneeOut": 0.0713,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0.0713,
+        "rAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "rKneeDepth": 0
+      },
+      "label": "前：動き始め"
+    },
+    {
+      "t": 2.5,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "lKneeDepth": 0,
+        "rKneeOut": 0.0713,
+        "rKneeUp": -0.935,
+        "rAnkleOut": 0.0713,
+        "rAnkleUp": -0.935,
+        "rToeOut": 0,
+        "rToeUp": -0.1455,
+        "rKneeDepth": 1
+      },
+      "label": "前：床に触れる"
+    },
+    {
+      "t": 2.8,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "lKneeDepth": 0,
+        "rKneeOut": 0.0713,
+        "rKneeUp": -0.935,
+        "rAnkleOut": 0.0713,
+        "rAnkleUp": -0.935,
+        "rToeOut": 0,
+        "rToeUp": -0.1455,
+        "rKneeDepth": 1
+      },
+      "label": "前：戻し始め"
+    },
+    {
+      "t": 5,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "lKneeDepth": 0,
+        "rKneeOut": 0.0713,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0.0713,
+        "rAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "rKneeDepth": 0
+      },
+      "label": "横：足をそろえる"
+    },
+    {
+      "t": 5.3,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "lKneeDepth": 0,
+        "rKneeOut": 0.0713,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0.0713,
+        "rAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "rKneeDepth": 0
+      },
+      "label": "横：動き始め"
+    },
+    {
+      "t": 7.5,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "lKneeDepth": 0,
+        "rKneeOut": 0.26,
+        "rKneeUp": -0.955,
+        "rAnkleOut": 0.26,
+        "rAnkleUp": -0.955,
+        "rToeOut": 0.5,
+        "rToeUp": -0.0809,
+        "rKneeDepth": 0
+      },
+      "label": "横：床に触れる"
+    },
+    {
+      "t": 7.8,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "lKneeDepth": 0,
+        "rKneeOut": 0.26,
+        "rKneeUp": -0.955,
+        "rAnkleOut": 0.26,
+        "rAnkleUp": -0.955,
+        "rToeOut": 0.5,
+        "rToeUp": -0.0809,
+        "rKneeDepth": 0
+      },
+      "label": "横：戻し始め"
+    },
+    {
+      "t": 10,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "lKneeDepth": 0,
+        "rKneeOut": 0.0713,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0.0713,
+        "rAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "rKneeDepth": 0
+      },
+      "label": "後ろ：足をそろえる"
+    },
+    {
+      "t": 10.3,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "lKneeDepth": 0,
+        "rKneeOut": 0.0713,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0.0713,
+        "rAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "rKneeDepth": 0
+      },
+      "label": "後ろ：動き始め"
+    },
+    {
+      "t": 12.5,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "lKneeDepth": 0,
+        "rKneeOut": 0.0713,
+        "rKneeUp": -0.935,
+        "rAnkleOut": 0.0713,
+        "rAnkleUp": -0.935,
+        "rToeOut": 0,
+        "rToeUp": -0.1455,
+        "rKneeDepth": -1
+      },
+      "label": "後ろ：床に触れる"
+    },
+    {
+      "t": 12.8,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "lKneeDepth": 0,
+        "rKneeOut": 0.0713,
+        "rKneeUp": -0.935,
+        "rAnkleOut": 0.0713,
+        "rAnkleUp": -0.935,
+        "rToeOut": 0,
+        "rToeUp": -0.1455,
+        "rKneeDepth": -1
+      },
+      "label": "後ろ：戻し始め"
+    }
+  ],
+  "posture": "つかまって立ち、体重を反対の足に乗せます",
+  "captions": [
+    {
+      "from": 0,
+      "to": 5,
+      "text": "足先で、前の床に軽く触れて戻します"
+    },
+    {
+      "from": 5,
+      "to": 10,
+      "text": "足先で、横の床に軽く触れて戻します"
+    },
+    {
+      "from": 10,
+      "to": 15,
+      "text": "足先で、後ろの床に軽く触れて戻します"
+    }
+  ],
+  "marks": [
+    {
+      "type": "line",
+      "from": 0,
+      "to": 15,
+      "anchor": "lumbar",
+      "dx": 0,
+      "dy": 0,
+      "angle": 90,
+      "length": 0.36
+    }
+  ]
+}

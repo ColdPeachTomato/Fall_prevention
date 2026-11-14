@@ -2,7 +2,7 @@
 // 画風（体型、色、線の太さ）はこのファイルの STYLE と SHAPE を変えると調整できる。
 
 import { dir, type Frame, type Skeleton, type Vec } from './sideRig';
-import type { AnchorName, ArrowMark, ChairProp, SegmentName, SideAnimation, SupportStage } from './types';
+import type { AnchorName, ArrowMark, ChairProp, SegmentName, SideAnimation, SideCounterProp, SupportStage } from './types';
 
 // 色。動かしている部位は目立つ色、椅子は落ち着いた色にする
 export const STYLE = {
@@ -22,6 +22,7 @@ export const STYLE = {
   highlightFar: '#f3b190',
   chair: '#b9ad97',
   chairEdge: '#8c7f68',
+  counterBody: '#e3dccb', // カウンターの天板より下（体の向こう側にあるので、薄い色）
   band: '#2f7d5b', // バンド（S8）
   scapula: '#f7d9c4', // 肩甲骨（後ろ向きで目立たせる）
   arrow: '#b4380f',
@@ -149,6 +150,31 @@ function chair(ctx: Ctx, c: ChairProp, px: number): void {
   rect(front - 0.04, 0, 0.022, c.seatHeight - 0.028); // 前脚
   rect(c.x - 0.02, c.backHeight - 0.09, 0.04, 0.09); // 背もたれの上
   rect(c.x - 0.012, c.seatHeight - 0.028, c.seatDepth + 0.012, 0.028); // 座面
+}
+
+// カウンター（体の向こう側に、歩く向きに沿って置いてある）
+function counterAlongside(ctx: Ctx, c: SideCounterProp, px: number): void {
+  const rect = (x: number, y: number, w: number, h: number, fill: string) => {
+    ctx.beginPath();
+    ctx.rect(x, y, w, h);
+    ctx.fillStyle = fill;
+    ctx.fill();
+    ctx.lineWidth = SHAPE.outlinePx * px;
+    ctx.strokeStyle = STYLE.chairEdge;
+    ctx.stroke();
+  };
+  rect(c.x, 0, c.length, c.height - 0.03, STYLE.counterBody);
+  rect(c.x - 0.01, c.height - 0.03, c.length + 0.02, 0.03, STYLE.chair);
+}
+
+// 床の目印。歩いた距離（travel）だけ後ろへ流して、その場の足の運びでも進んでいることが分かるようにする
+function floorMarks(ctx: Ctx, spacing: number, travel: number): void {
+  const offset = ((travel % spacing) + spacing) % spacing;
+  ctx.fillStyle = STYLE.floor;
+  for (let x = Math.floor(VIEW.minX / spacing) * spacing - offset; x < VIEW.maxX; x += spacing) {
+    if (x + 0.014 < VIEW.minX) continue;
+    ctx.fillRect(x, -0.034, 0.014, 0.026);
+  }
 }
 
 function anchorPoint(sk: Skeleton, name: AnchorName): Vec {
@@ -315,8 +341,10 @@ export function drawFrame(ctx: Ctx, anim: SideAnimation, f: Frame, o: DrawOption
   ctx.fillRect(VIEW.minX, -0.008, VIEW.maxX - VIEW.minX, 0.008);
 
   // 支持物（常に描く）
+  if (anim.floor) floorMarks(ctx, anim.floor.spacing, f.pose.travel);
   for (const prop of anim.props) {
     if (prop.type === 'chair') chair(ctx, prop, px);
+    else counterAlongside(ctx, prop, px);
   }
 
   // 奥側の腕と脚

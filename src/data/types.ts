@@ -30,6 +30,9 @@ export interface ExerciseVariant {
   howTo: string; // そのレベルでの行い方（短い文）
   posture: Posture; // 立って行うときは開始前に支持物の確認を出す（S-6）
   usesSupport: boolean; // 支持物につかまるか
+  // つかまれる手の上限。カウンターの横を歩く種目などは、両手ではつかまれないので片手まで。
+  // メニューの支えが両手でも、この種目は片手で行う（2026-11-14 利用者の了承）
+  maxSupport?: SupportStage;
   view: View;
   animationId: string | null; // キーフレームの参照。未作成なら null
 }

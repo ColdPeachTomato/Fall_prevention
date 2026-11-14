@@ -1,0 +1,178 @@
+{
+  "id": "S1-side-L3",
+  "exercise": "S1",
+  "level": 3,
+  "view": "side",
+  "checked": false,
+  "cycleSeconds": 6,
+  "root": {
+    "x": 0
+  },
+  "props": [
+    {
+      "type": "chair",
+      "x": -0.31,
+      "seatHeight": 0.242,
+      "seatDepth": 0.26,
+      "backHeight": 0.52
+    }
+  ],
+  "highlight": [
+    "thigh",
+    "shank"
+  ],
+  "keyframes": [
+    {
+      "t": 0,
+      "pose": {
+        "ankle": 4,
+        "knee": 4,
+        "hip": 1,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 4,
+        "elbow": 8
+      },
+      "label": "椅子の前に立つ"
+    },
+    {
+      "t": 0.3,
+      "pose": {
+        "ankle": 4,
+        "knee": 4,
+        "hip": 1,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 4,
+        "elbow": 8
+      },
+      "label": "動き始め"
+    },
+    {
+      "t": 1.35,
+      "pose": {
+        "ankle": 15.9,
+        "knee": 51.4,
+        "hip": 55.5,
+        "spine": 9,
+        "neck": -14,
+        "shoulder": 28,
+        "elbow": 10
+      },
+      "label": "腰を下ろす 1"
+    },
+    {
+      "t": 2.1,
+      "pose": {
+        "ankle": 19.8,
+        "knee": 83.7,
+        "hip": 95,
+        "spine": 17,
+        "neck": -23,
+        "shoulder": 46,
+        "elbow": 12
+      },
+      "label": "腰を下ろす 2"
+    },
+    {
+      "t": 2.85,
+      "pose": {
+        "ankle": 19.8,
+        "knee": 103.4,
+        "hip": 115.5,
+        "spine": 22,
+        "neck": -28,
+        "shoulder": 52,
+        "elbow": 12
+      },
+      "label": "椅子に軽く触れる"
+    },
+    {
+      "t": 3.15,
+      "pose": {
+        "ankle": 19.8,
+        "knee": 103.4,
+        "hip": 115.5,
+        "spine": 22,
+        "neck": -28,
+        "shoulder": 52,
+        "elbow": 12
+      },
+      "label": "立ち上がり始め"
+    },
+    {
+      "t": 3.9,
+      "pose": {
+        "ankle": 19.8,
+        "knee": 83.7,
+        "hip": 95,
+        "spine": 17,
+        "neck": -23,
+        "shoulder": 46,
+        "elbow": 12
+      },
+      "label": "立ち上がり 1"
+    },
+    {
+      "t": 4.65,
+      "pose": {
+        "ankle": 15.9,
+        "knee": 51.4,
+        "hip": 55.5,
+        "spine": 9,
+        "neck": -14,
+        "shoulder": 28,
+        "elbow": 10
+      },
+      "label": "立ち上がり 2"
+    },
+    {
+      "t": 5.7,
+      "pose": {
+        "ankle": 4,
+        "knee": 4,
+        "hip": 1,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 4,
+        "elbow": 8
+      },
+      "label": "立つ"
+    }
+  ],
+  "posture": "椅子のすぐ前に立ちます",
+  "captions": [
+    {
+      "from": 0,
+      "to": 3.15,
+      "text": "椅子に軽く触れるまで、ゆっくり腰を下ろします"
+    },
+    {
+      "from": 3.15,
+      "to": 6,
+      "text": "座らずに、そのまま立ち上がります"
+    }
+  ],
+  "marks": [
+    {
+      "type": "arrow",
+      "from": 0.3,
+      "to": 2.8,
+      "anchor": "hip",
+      "dx": -0.13,
+      "dy": 0.02,
+      "angle": 180,
+      "length": 0.11
+    },
+    {
+      "type": "arrow",
+      "from": 3.2,
+      "to": 5.6,
+      "anchor": "head",
+      "dx": 0.02,
+      "dy": 0.1,
+      "angle": 0,
+      "length": 0.11
+    }
+  ]
+}

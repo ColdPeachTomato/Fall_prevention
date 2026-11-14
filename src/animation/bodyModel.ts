@@ -135,6 +135,7 @@ const LIMB_CHANNELS: { key: FrontLimbChannel; label: string; fallback: number; l
   { key: 'HandUp', label: '肘→手（上へ）', fallback: -1 },
   { key: 'KneeOut', label: '股関節→膝（外へ）', fallback: 0 },
   { key: 'KneeUp', label: '股関節→膝（上へ）', fallback: -1 },
+  { key: 'KneeDepth', label: '脚の前後（＋手前、−奥。描き方だけ）', fallback: 0 },
   { key: 'AnkleOut', label: '膝→足首（外へ）', fallback: 0 },
   { key: 'AnkleUp', label: '膝→足首（上へ）', fallback: -1 },
   { key: 'ToeOut', label: 'かかと→つま先（外へ）', fallback: 0 },

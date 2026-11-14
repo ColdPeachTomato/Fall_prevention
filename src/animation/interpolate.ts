@@ -23,11 +23,12 @@ const JOINT_NAMES: JointName[] = [
   'farShoulder',
   'farElbow',
   'farFootPitch',
+  'travel',
 ];
 
 export function fullPose(pose: Pose): FullPose {
-  const full = { ...pose, footPitch: pose.footPitch ?? 0 } as FullPose;
-  for (const far of Object.keys(FAR_DEFAULT) as FarJoint[]) {
+  const full = { ...pose, footPitch: pose.footPitch ?? 0, travel: pose.travel ?? 0 } as FullPose;
+  for (const far of Object.keys(FAR_DEFAULT) as Exclude<FarJoint, never>[]) {
     if (pose[far] === undefined) full[far] = full[FAR_DEFAULT[far]];
   }
   return full;
@@ -60,10 +61,11 @@ export interface CyclicCurve {
   values: number[];
   tangents: number[];
   period: number;
+  drift: number; // 1周ごとに増える量（歩いた距離など）。ふつうは 0
 }
 
 // 輪になった単調3次補間の準備（各キーフレームでの傾きを決める）
-export function buildCurve(times: number[], values: number[], period: number): CyclicCurve {
+export function buildCurve(times: number[], values: number[], period: number, drift = 0): CyclicCurve {
   const n = times.length;
   if (n === 0 || n !== values.length) throw new Error('キーフレームの数が正しくありません');
   const h: number[] = []; // 次のキーフレームまでの時間
@@ -73,7 +75,7 @@ export function buildCurve(times: number[], values: number[], period: number): C
     const len = (next === 0 ? times[0]! + period : times[next]!) - times[i]!;
     if (!(len > 0)) throw new Error('キーフレームの時刻は昇順で、1往復の時間より小さくしてください');
     h.push(len);
-    d.push((values[next]! - values[i]!) / len);
+    d.push(((next === 0 ? values[0]! + drift : values[next]!) - values[i]!) / len);
   }
   const tangents: number[] = [];
   for (let i = 0; i < n; i++) {
@@ -91,7 +93,7 @@ export function buildCurve(times: number[], values: number[], period: number): C
       tangents.push((w1 + w2) / (w1 / d0 + w2 / d1));
     }
   }
-  return { times, values, tangents, period };
+  return { times, values, tangents, period, drift };
 }
 
 // 区間の番号を返す（times[i] <= t < 次の時刻）。t は wrapTime 済み
@@ -117,7 +119,7 @@ export function evalCurve(c: CyclicCurve, time: number): number {
   return (
     (2 * s3 - 3 * s2 + 1) * c.values[i]! +
     (s3 - 2 * s2 + s) * h * c.tangents[i]! +
-    (-2 * s3 + 3 * s2) * c.values[next]! +
+    (-2 * s3 + 3 * s2) * (next === 0 ? c.values[0]! + c.drift : c.values[next]!) +
     (s3 - s2) * h * c.tangents[next]!
   );
 }
@@ -152,7 +154,8 @@ function compile(anim: AnimationData): Compiled {
   const poses: Record<string, number>[] = anim.view === 'side' ? anim.keyframes.map((k) => fullPose(k.pose)) : anim.keyframes.map((k) => fullFrontPose(k.pose));
   const channels: Record<string, CyclicCurve> = {};
   for (const name of names) {
-    channels[name] = buildCurve(times, poses.map((p) => p[name]!), anim.cycleSeconds);
+    const drift = name === 'travel' && anim.view === 'side' ? anim.floor?.perCycle ?? 0 : 0;
+    channels[name] = buildCurve(times, poses.map((p) => p[name]!), anim.cycleSeconds, drift);
   }
   const hands = anim.view === 'side' ? anim.keyframes.map((k) => k.hands ?? 0) : anim.keyframes.map(() => 0);
   const compiled: Compiled = {

@@ -109,6 +109,7 @@ function ExerciseRow({ ex, item, onChange }: { ex: Exercise; item: DraftItem; on
         <input type="checkbox" checked={item.selected} onChange={(e) => onChange({ ...item, selected: e.target.checked })} />
         {ex.id} {ex.name}
         {ex.bilateral && <span className="muted">（片側ずつ）</span>}
+        {ex.variants.some((v) => v.maxSupport === 'one') && <span className="muted">（カウンターの横で行うので、支えが両手の指定でも片手で行います）</span>}
         {ex.directions && (
           <span className="muted">
             （{ex.directions[0]}・{ex.directions[1]}を、それぞれこの回数）

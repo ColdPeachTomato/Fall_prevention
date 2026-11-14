@@ -87,6 +87,27 @@ describe('buildSessionSteps', () => {
     expect(steps.filter((s) => s.kind === 'countdown')).toHaveLength(4);
   });
 
+  it('カウンターの横を歩く種目は、支えが両手の指定でも片手で行う（D4）。1往復は、アニメ4周ぶんの時間', () => {
+    const m: Menu = { ...menu, support: 'both', standard: [{ ex: 'D4', level: 3, amount: 2, sets: 1 }] };
+    const steps = buildSessionSteps(m, 'standard');
+    const ex = steps.find((s) => s.kind === 'exercise');
+    expect(ex && ex.kind === 'exercise' ? ex.support : undefined).toBe('one');
+    expect(ex && ex.kind === 'exercise' ? ex.unitSeconds : undefined).toBe(16); // 1歩2秒で、片道4歩・往復8歩
+    expect(ex && ex.kind === 'exercise' ? ex.seconds : undefined).toBe(32);
+    // 支えが少ない指定は、そのまま使う（増やさない）
+    const none: Menu = { ...m, support: 'none' };
+    const ex2 = buildSessionSteps(none, 'standard').find((s) => s.kind === 'exercise');
+    expect(ex2 && ex2.kind === 'exercise' ? ex2.support : undefined).toBe('none');
+  });
+
+  it('D2 は常につかまる：支えがなしの指定でも、片手でつかまる', () => {
+    for (const support of ['none', 'fingertip', 'one', 'both'] as const) {
+      const m: Menu = { ...menu, support, standard: [{ ex: 'D2', level: 3, amount: 1, sets: 1 }] };
+      const ex = buildSessionSteps(m, 'standard').find((s) => s.kind === 'exercise');
+      expect(ex && ex.kind === 'exercise' ? ex.support : undefined, support).toBe('one');
+    }
+  });
+
   it('回す向きがない種目には、向きを付けない', () => {
     for (const s of buildSessionSteps(menu, 'standard')) {
       if (s.kind === 'exercise' || s.kind === 'countdown') expect(s.direction).toBeNull();

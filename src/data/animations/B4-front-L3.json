@@ -1,0 +1,121 @@
+{
+  "id": "B4-front-L3",
+  "exercise": "B4",
+  "level": 3,
+  "view": "front",
+  "checked": false,
+  "cycleSeconds": 4,
+  "root": {
+    "mode": "stand",
+    "x": 0,
+    "y": 0.5202
+  },
+  "viewBox": {
+    "minX": -0.62,
+    "maxX": 0.36,
+    "minY": -0.075,
+    "maxY": 1.06
+  },
+  "support": {
+    "hand": "l",
+    "side": {
+      "x": -0.3,
+      "y": 0.54
+    },
+    "front": {
+      "x": -0.06,
+      "half": 0.1,
+      "y": 0.54
+    }
+  },
+  "props": [
+    {
+      "type": "chair",
+      "x": -0.44,
+      "width": 0.3,
+      "seatHeight": 0.242,
+      "backHeight": 0.54,
+      "showFor": [
+        "one",
+        "fingertip",
+        "none"
+      ]
+    },
+    {
+      "type": "chair",
+      "x": -0.06,
+      "width": 0.3,
+      "seatHeight": 0.242,
+      "backHeight": 0.54,
+      "showFor": [
+        "both"
+      ],
+      "inFront": true
+    }
+  ],
+  "highlight": [
+    "r:shank",
+    "r:foot"
+  ],
+  "keyframes": [
+    {
+      "t": 0,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "lKneeDepth": 0,
+        "rKneeOut": 0.03,
+        "rKneeUp": -0.9,
+        "rAnkleOut": 0,
+        "rAnkleUp": -0.8,
+        "rToeOut": 0.1,
+        "rToeUp": -0.1
+      },
+      "label": "片足を浮かせて立つ"
+    },
+    {
+      "t": 2,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "lKneeDepth": 0,
+        "rKneeOut": 0.03,
+        "rKneeUp": -0.9,
+        "rAnkleOut": 0,
+        "rAnkleUp": -0.8,
+        "rToeOut": 0.1,
+        "rToeUp": -0.1
+      },
+      "label": "そのまま保つ"
+    }
+  ],
+  "captions": [
+    {
+      "from": 0,
+      "to": 4,
+      "text": "片足を少し浮かせて立ちます。上体は傾けません"
+    }
+  ],
+  "marks": [
+    {
+      "type": "line",
+      "from": 0,
+      "to": 4,
+      "anchor": "lumbar",
+      "dx": 0,
+      "dy": 0,
+      "angle": 90,
+      "length": 0.36
+    }
+  ]
+}

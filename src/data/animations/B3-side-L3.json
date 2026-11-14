@@ -1,0 +1,87 @@
+{
+  "id": "B3-side-L3",
+  "exercise": "B3",
+  "level": 3,
+  "view": "side",
+  "checked": false,
+  "cycleSeconds": 4,
+  "root": {
+    "mode": "hip",
+    "x": -0.184,
+    "y": 0.522,
+    "pelvis": 0
+  },
+  "plants": {
+    "near": {
+      "pivot": "heel",
+      "x": -0.15
+    },
+    "far": {
+      "pivot": "heel",
+      "x": -0.302
+    }
+  },
+  "props": [
+    {
+      "type": "chair",
+      "x": 0.08,
+      "seatHeight": 0.242,
+      "seatDepth": 0.22,
+      "backHeight": 0.54
+    }
+  ],
+  "support": {
+    "x": 0.07,
+    "y": 0.54
+  },
+  "highlight": [
+    "foot"
+  ],
+  "keyframes": [
+    {
+      "t": 0,
+      "pose": {
+        "ankle": 0,
+        "knee": 0,
+        "hip": 0,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8
+      },
+      "label": "足を一直線にして立つ"
+    },
+    {
+      "t": 2,
+      "pose": {
+        "ankle": 0,
+        "knee": 0,
+        "hip": 0,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8
+      },
+      "label": "そのまま保つ"
+    }
+  ],
+  "captions": [
+    {
+      "from": 0,
+      "to": 4,
+      "text": "前の足のかかとを、後ろの足のつま先につけます"
+    }
+  ],
+  "marks": [
+    {
+      "type": "line",
+      "from": 0,
+      "to": 4,
+      "anchor": "hip",
+      "dx": 0,
+      "dy": 0.3,
+      "angle": 0,
+      "length": 0.72
+    }
+  ]
+}

@@ -51,7 +51,11 @@ export function unitSeconds(unit: Exclude<Unit, 'minutes'>, animationId: string 
     const anim = getAnimation(animationId);
     return anim ? anim.cycleSeconds / (anim.countsPerCycle ?? 1) : SECONDS_PER_REP;
   }
-  if (unit === 'laps') return getAnimation(animationId)?.cycleSeconds ?? SECONDS_PER_LAP;
+  if (unit === 'laps') {
+    // 歩く種目は、アニメ何周ぶんかを1往復とする
+    const anim = getAnimation(animationId);
+    return anim ? anim.cycleSeconds * (anim.cyclesPerLap ?? 1) : SECONDS_PER_LAP;
+  }
   return 1;
 }
 

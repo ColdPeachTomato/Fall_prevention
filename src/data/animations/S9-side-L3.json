@@ -1,0 +1,225 @@
+{
+  "id": "S9-side-L3",
+  "exercise": "S9",
+  "level": 3,
+  "view": "side",
+  "checked": false,
+  "cycleSeconds": 6.3,
+  "root": {
+    "x": -0.2,
+    "side": "far"
+  },
+  "plants": {
+    "far": {
+      "pivot": "ball",
+      "x": -0.12
+    }
+  },
+  "props": [
+    {
+      "type": "counter",
+      "x": -0.42,
+      "length": 0.8,
+      "height": 0.54
+    }
+  ],
+  "support": {
+    "x": -0.04,
+    "y": 0.54,
+    "hand": "far"
+  },
+  "highlight": [
+    "near:thigh",
+    "near:shank"
+  ],
+  "keyframes": [
+    {
+      "t": 0,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 0.1159,
+        "knee": 0.2313,
+        "ankle": 0.1154,
+        "farHip": 0.1159,
+        "farKnee": 0.2313,
+        "farAnkle": 0.1154,
+        "farFootPitch": 0
+      },
+      "label": "足をそろえて立つ"
+    },
+    {
+      "t": 0.3,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 0.1159,
+        "knee": 0.2313,
+        "ankle": 0.1154,
+        "farHip": 0.1159,
+        "farKnee": 0.2313,
+        "farAnkle": 0.1154,
+        "farFootPitch": 0
+      },
+      "label": "動き始め"
+    },
+    {
+      "t": 1,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 28.3639,
+        "knee": 45.2346,
+        "ankle": 16.8707,
+        "farHip": 2.973,
+        "farKnee": 14.1553,
+        "farAnkle": 11.1823,
+        "farFootPitch": 0
+      },
+      "label": "片足を前へ出す"
+    },
+    {
+      "t": 1.7,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 22.1526,
+        "knee": 20.0147,
+        "ankle": -0.1379,
+        "farHip": 4.1337,
+        "farKnee": 22.13,
+        "farAnkle": 19.9963,
+        "farFootPitch": 0
+      },
+      "label": "足を着く"
+    },
+    {
+      "t": 2.9,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 30.7372,
+        "knee": 42.1126,
+        "ankle": 15.3754,
+        "farHip": 19.5105,
+        "farKnee": 55.0297,
+        "farAnkle": 14.5193,
+        "farFootPitch": 25
+      },
+      "label": "浅く腰を落とす"
+    },
+    {
+      "t": 3.4,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 30.7372,
+        "knee": 42.1126,
+        "ankle": 15.3754,
+        "farHip": 19.5105,
+        "farKnee": 55.0297,
+        "farAnkle": 14.5193,
+        "farFootPitch": 25
+      },
+      "label": "戻り始め"
+    },
+    {
+      "t": 4.6,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 22.1526,
+        "knee": 20.0147,
+        "ankle": -0.1379,
+        "farHip": 4.1337,
+        "farKnee": 22.13,
+        "farAnkle": 19.9963,
+        "farFootPitch": 0
+      },
+      "label": "腰を上げる"
+    },
+    {
+      "t": 5.3,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 28.3639,
+        "knee": 45.2346,
+        "ankle": 16.8707,
+        "farHip": 2.973,
+        "farKnee": 14.1553,
+        "farAnkle": 11.1823,
+        "farFootPitch": 0
+      },
+      "label": "足を戻す"
+    },
+    {
+      "t": 6,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 0.1159,
+        "knee": 0.2313,
+        "ankle": 0.1154,
+        "farHip": 0.1159,
+        "farKnee": 0.2313,
+        "farAnkle": 0.1154,
+        "farFootPitch": 0
+      },
+      "label": "足をそろえる"
+    }
+  ],
+  "posture": "カウンターの横に、足をそろえて立ちます",
+  "captions": [
+    {
+      "from": 0,
+      "to": 3.4,
+      "text": "片足を前に踏み出し、浅く腰を落とします"
+    },
+    {
+      "from": 3.4,
+      "to": 6.3,
+      "text": "前の足で押して、足を戻します"
+    }
+  ],
+  "marks": [
+    {
+      "type": "line",
+      "from": 0,
+      "to": 6.3,
+      "anchor": "hip",
+      "dx": 0,
+      "dy": 0.3,
+      "angle": 0,
+      "length": 0.72
+    },
+    {
+      "type": "arrow",
+      "from": 1.7,
+      "to": 2.8,
+      "anchor": "hip",
+      "dx": -0.1,
+      "dy": 0.04,
+      "angle": 180,
+      "length": 0.08
+    }
+  ]
+}
