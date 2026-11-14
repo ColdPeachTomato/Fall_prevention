@@ -309,8 +309,30 @@ function foot(ctx: Ctx, limb: FrontLimb, base: string, px: number, depth: number
 // つま先が、かかとよりどれだけ手前にあるか（濃さに使う値）
 const TOE_NEAR = 0.6;
 
-// 手前・奥にある足を、絵の上で上下にずらす量（身長 = 1。depth が 1 のとき）
-export const DEPTH_DROP = 0.028;
+// 手前・奥にある足を、絵の上で上下にずらす量（身長 = 1。depth が 1 のとき）。少し上から見た図にするため
+export const DEPTH_DROP = 0.036;
+// 床を面として描くときの、奥の端（壁との境）の高さ
+const FLOOR_BACK = 0.085;
+
+// 床を面として描く（少し上から見た図）。手前の床は下、奥の床は上。足先で触れる所には、床に置いた丸い印を描く。
+// 床を1本の線で描くと、前へ出した足は床にめり込み、後ろへ出した足は浮いて見えるため（2026-11-14 利用者の指摘）
+function floorArea(ctx: Ctx, anim: FrontAnimation, spots: { x: number; depth: number }[], px: number): void {
+  const { minX, maxX, minY } = anim.viewBox;
+  ctx.fillStyle = STYLE.floorArea;
+  ctx.fillRect(minX, minY, maxX - minX, FLOOR_BACK - minY);
+  ctx.fillStyle = STYLE.floor;
+  ctx.fillRect(minX, FLOOR_BACK, maxX - minX, 0.005);
+  for (const s of spots) {
+    const scale = 1 + 0.18 * s.depth;
+    ctx.beginPath();
+    ctx.ellipse(s.x, -DEPTH_DROP * s.depth, 0.042 * scale, 0.013 * scale, 0, 0, Math.PI * 2);
+    ctx.fillStyle = STYLE.floorSpot;
+    ctx.fill();
+    ctx.lineWidth = SHAPE.outlinePx * px;
+    ctx.strokeStyle = STYLE.floor;
+    ctx.stroke();
+  }
+}
 
 // 回す向きを示す弧の矢印
 function arcArrow(ctx: Ctx, a: Vec, m: FrontArcMark, t: number, reverse: boolean, px: number, always: boolean): void {
@@ -380,9 +402,13 @@ export function drawFrontFrame(ctx: Ctx, anim: FrontAnimation, f: FrontFrame, o:
   const hl = new Set<string>(anim.highlight);
   const color = (seg: SegmentName, base: string, side?: BodySide): string => (hl.has(seg) || (side !== undefined && hl.has(`${side}:${seg}`)) ? STYLE.highlight : base);
 
-  // 床
-  ctx.fillStyle = STYLE.floor;
-  ctx.fillRect(anim.viewBox.minX, -0.008, anim.viewBox.maxX - anim.viewBox.minX, 0.008);
+  // 床：ふつうは1本の線。足を前や後ろへ出す種目では、面として描く
+  if (anim.floorSpots) {
+    floorArea(ctx, anim, anim.floorSpots, px);
+  } else {
+    ctx.fillStyle = STYLE.floor;
+    ctx.fillRect(anim.viewBox.minX, -0.008, anim.viewBox.maxX - anim.viewBox.minX, 0.008);
+  }
 
   // 支持物は、支えの段階に合うものだけを描く（つかまらない種目は none として扱う）
   const stage = o.support ?? 'none';

@@ -851,10 +851,31 @@ describe('レベル3の種目（正面。仕様との照合）', () => {
     const rest = frames[0]!;
     const third = anim.cycleSeconds / 3;
     const touch = (k: number) => computeFrontFrame(anim, k * third + 2.65, 'none');
+    const hover = (k: number) => computeFrontFrame(anim, k * third + 1.7, 'none');
     const [front, side, back] = [touch(0), touch(1), touch(2)];
     // 触れるとき、つま先は床にある
     for (const f of [front, side, back]) expect(Math.abs(f.sk.r.toe.y)).toBeLessThan(0.002);
-    // 前は手前（濃く・大きく）、後ろは奥（薄く・小さく）、横は体の外へ
+    // 足を床から浮かせて出し、出しきった所で足先を床へ下ろして触れる（触れたことが分かるように）
+    for (const k of [0, 1, 2]) {
+      const [h, t] = [hover(k), touch(k)];
+      expect(h.sk.r.toe.y, `浮かせる ${k}`).toBeGreaterThan(0.035);
+      expect(h.sk.r.heel.y, `浮かせる ${k}`).toBeGreaterThan(0.035);
+      expect(Math.abs(h.sk.r.toe.x - t.sk.r.toe.x), `真下へ下ろす ${k}`).toBeLessThan(0.003);
+      expect(Math.abs(h.pose.rKneeDepth - t.pose.rKneeDepth)).toBeLessThan(1e-6);
+      // 触れている間（0.5 秒）は、足先を動かさない
+      const end = computeFrontFrame(anim, k * third + 2.9, 'none');
+      expect(dist(end.sk.r.toe, computeFrontFrame(anim, k * third + 2.4, 'none').sk.r.toe)).toBeLessThan(1e-6);
+      // 下ろす間、下向きの矢印が出る
+      expect(anim.marks.some((m) => m.type === 'arrow' && m.angle === 180 && Math.abs(m.from - (k * third + 1.7)) < 1e-6)).toBe(true);
+    }
+    // 床は面として描き、触れる所に印がある：印は、触れたときの足先の真下で、前後は脚の前後と同じ
+    expect(anim.floorSpots).toHaveLength(3);
+    [front, side, back].forEach((f, k) => {
+      const spot = anim.floorSpots![k]!;
+      expect(Math.abs(spot.x - f.sk.r.toe.x), `印 ${k}`).toBeLessThan(0.003);
+      expect(spot.depth).toBeCloseTo(f.pose.rKneeDepth, 6);
+    });
+    // 前は手前（少し濃く・大きく・下）、後ろは奥（小さく・上）、横は体の外へ
     expect(front.pose.rKneeDepth).toBeCloseTo(1, 6);
     expect(back.pose.rKneeDepth).toBeCloseTo(-1, 6);
     expect(side.pose.rKneeDepth).toBeCloseTo(0, 6);

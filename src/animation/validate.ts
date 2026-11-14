@@ -105,6 +105,10 @@ function validateFront(a: Input): AnimationValidation {
   if (!isObject(box) || ![box.minX, box.maxX, box.minY, box.maxY].every(isNumber) || !(Number(box.maxX) > Number(box.minX)) || !(Number(box.maxY) > Number(box.minY))) {
     errors.push('viewBox（表示する範囲）が正しくありません');
   }
+  if (a.floorSpots !== undefined) {
+    const ok = Array.isArray(a.floorSpots) && a.floorSpots.every((s) => isObject(s) && isNumber(s.x) && isNumber(s.depth) && Math.abs(Number(s.depth)) <= 1);
+    if (!ok) errors.push('floorSpots（足先で触れる所の印）が正しくありません');
+  }
   if (!Array.isArray(a.props)) {
     errors.push('props がありません');
   } else {

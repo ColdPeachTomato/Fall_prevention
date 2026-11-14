@@ -367,33 +367,53 @@ const box = { minX: -0.62, maxX: 0.36, minY: -0.075, maxY: 1.06 };
   });
 }
 
-// D1 足先タッチ：片足のつま先で、前・横・後ろの順に床に軽く触れ、そのたびに足を戻す。3か所で1回
+// D1 足先タッチ：片足のつま先で、前・横・後ろの順に床に軽く触れ、そのたびに足を戻す。3か所で1回。
+// 足を床から少し浮かせて出し、出しきった所で足先を床へ下ろして触れる（触れたことが分かるように。2026-11-14 利用者の指摘）。
+// 床は面として描き、触れる所に印を置く（floorSpots）
 {
   const rest = { ...stanceLeft, ...leg('r', legOut(FOOT, WEIGHT_SHIFT, 1)), rToeOut: 0.1, rToeUp: 0, rKneeDepth: 0 };
-  // つま先が床に触れるよう、かかとの高さから、つま先の下げ具合を決める
-  const tap = (out, up, toeOut, depth) => {
+  const HOVER = 0.04; // 足を出す間の、足先の床からの高さ（身長160cmで約6cm）
+  // 脚の向き（out, up）から、かかとの高さが決まる。足先の高さ toeY になるよう、つま先の下げ具合を決める
+  const reach = (out, up, toeOut, depth, toeY) => {
     const heelY = STAND_Y + LEG * up - 0.039;
-    return { ...stanceLeft, ...leg('r', out, up), rToeOut: toeOut, rToeUp: round(-heelY / 0.152), rKneeDepth: depth };
+    return { ...stanceLeft, ...leg('r', out, up), rToeOut: toeOut, rToeUp: round((toeY - heelY) / 0.152), rKneeDepth: depth };
   };
   const near = legOut(FOOT, WEIGHT_SHIFT, 1);
+  // up：触れるとき。upHover：浮かせているとき（膝を少し曲げて、足を持ち上げる）
   const taps = [
-    { name: '前', pose: tap(near, -0.935, 0, 1) },
-    { name: '横', pose: tap(0.26, -0.955, 0.5, 0) },
-    { name: '後ろ', pose: tap(near, -0.935, 0, -1) },
+    { name: '前', out: near, up: -0.935, upHover: -0.885, toeOut: 0, depth: 1 },
+    { name: '横', out: 0.26, up: -0.955, upHover: -0.89, toeOut: 0.5, depth: 0 },
+    { name: '後ろ', out: near, up: -0.935, upHover: -0.885, toeOut: 0, depth: -1 },
   ];
   const ONE = 5;
   const keys = [];
   const captions = [];
   const marks = [{ type: 'line', from: 0, to: round(ONE * 3), anchor: 'lumbar', dx: 0, dy: 0, angle: 90, length: 0.36 }];
+  const floorSpots = [];
   taps.forEach((tp, i) => {
     const b = i * ONE;
-    keys.push(fkf(b, rest, `${tp.name}：足をそろえる`), fkf(b + 0.3, rest, `${tp.name}：動き始め`), fkf(b + 2.5, tp.pose, `${tp.name}：床に触れる`), fkf(b + 2.8, tp.pose, `${tp.name}：戻し始め`));
+    const hover = reach(tp.out, tp.upHover, tp.toeOut, tp.depth, HOVER);
+    const touch = reach(tp.out, tp.up, tp.toeOut, tp.depth, 0);
+    keys.push(
+      fkf(b, rest, `${tp.name}：足をそろえる`),
+      fkf(b + 0.3, rest, `${tp.name}：動き始め`),
+      fkf(b + 1.7, hover, `${tp.name}：足を浮かせて出す`),
+      fkf(b + 2.4, touch, `${tp.name}：足先を下ろして床に触れる`),
+      fkf(b + 2.9, touch, `${tp.name}：足先を上げ始める`),
+      fkf(b + 3.5, hover, `${tp.name}：足先を上げる（戻し始め）`),
+    );
     captions.push({ from: round(b), to: round(b + ONE), text: `足先で、${tp.name}の床に軽く触れて戻します` });
+    // 足先を下ろす間、下向きの矢印を足の横に出す
+    marks.push({ type: 'arrow', from: round(b + 1.7), to: round(b + 2.4), anchor: 'r.ankle', dx: 0.075, dy: 0.1, angle: 180, length: 0.07 });
+    // 触れる所の印：足先の真下（足首から、つま先の向きへ 0.11）
+    const ankleX = WEIGHT_SHIFT + HIP_HALF + tp.out * LEG;
+    floorSpots.push({ x: round(ankleX + tp.toeOut * 0.11), depth: tp.depth });
   });
   save.push({
     ...frontCommon('D1-front-L3', 'D1', box, { cycleSeconds: round(ONE * 3) }),
     support: supportPoints,
     props: supportProps,
+    floorSpots,
     highlight: ['r:shank', 'r:foot'],
     keyframes: keys,
     posture: 'つかまる所のそばに立ち、体重を反対の足に乗せます',

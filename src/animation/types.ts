@@ -288,6 +288,10 @@ export interface FrontAnimation extends AnimationBase {
   highlight: FrontHighlightName[];
   // 表示する範囲（身長 = 1）。種目ごとに、全身と足元、支持物が入るように決める
   viewBox: { minX: number; maxX: number; minY: number; maxY: number };
+  // 足先で床に触れる所の印（足を前や後ろへ出す種目）。これがあるときは、床を「面」として描く：
+  // 少し上から見た図にして、手前の床を下に、奥の床を上に描く。足が床に触れているのか、浮いているのかが分かるようにするため。
+  // x：横の位置。depth：前後（手前が正。KneeDepth と同じ尺度）
+  floorSpots?: { x: number; depth: number }[];
   keyframes: FrontKeyframe[];
   marks: FrontMark[];
 }

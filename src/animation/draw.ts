@@ -8,6 +8,8 @@ import type { AnchorName, ArrowMark, ChairProp, SegmentName, SideAnimation, Side
 export const STYLE = {
   background: '#f6f2e9',
   floor: '#8a8170',
+  floorArea: '#e6dfcf', // 床を面として描くときの色（正面で、足を前後に出す種目）
+  floorSpot: '#fffdf8', // 足先で触れる所の印
   outline: 'rgba(40, 30, 20, 0.45)',
   top: '#3f6f8f', // 上半身
   topFar: '#8eaabd',
