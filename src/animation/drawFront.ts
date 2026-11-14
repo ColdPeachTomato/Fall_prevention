@@ -22,6 +22,27 @@ const FRONT_SHAPE = {
   scapulaTall: 0.046,
 } as const;
 
+// 色を、手前（depth > 0）なら濃く、奥（depth < 0）なら薄くする。depth は -1〜1
+export function shadeByDepth(hex: string, depth: number): string {
+  const d = Math.max(-1, Math.min(1, depth));
+  const rgb = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  const shaded = rgb.map((c) => (d >= 0 ? c * (1 - 0.42 * d) : c + (255 - c) * 0.55 * -d));
+  return `rgb(${shaded.map((c) => Math.round(c)).join(', ')})`;
+}
+
+// 手前にある腕が、手をどれだけ隠すか（0：隠さない、1：すっかり腕の後ろ）。肘が前に来るにつれて、なめらかに増える
+export function handCover(depth: number): number {
+  const x = Math.max(0, Math.min(1, depth / 0.6));
+  return x * x * (3 - 2 * x);
+}
+
+// 胸を回すと、頭も少し同じ向きを向く（胸の半分の角度）。そのときの、顔の中心の横へのずれ（画面の右が正）。
+// 鼻と前髪は顔と同じ側へ、後ろ髪の裾は反対の側へ動く
+export function faceShift(view: 'front' | 'back', turn: number): number {
+  const toward = sideSign(view, 'r') * Math.sin((turn * 0.5 * Math.PI) / 180) * FRONT_SHAPE.headWide;
+  return view === 'front' ? toward : -toward; // 後ろ向きでは、見えているのは後頭部なので反対へ動く
+}
+
 function outline(ctx: Ctx, fill: string, px: number): void {
   ctx.fillStyle = fill;
   ctx.fill();
@@ -142,18 +163,22 @@ function head(ctx: Ctx, sk: FrontSkeleton, fill: string, px: number): void {
     ctx.strokeStyle = STYLE.outline;
     ctx.stroke();
   };
+  // 頭の回転に合わせた、横へのずれ。前髪と鼻は shift だけ、後ろ髪の裾は反対へ少し動く
+  const shift = faceShift(sk.view, sk.turn);
+  const nape = sk.view === 'front' ? -shift * 0.7 : shift;
 
   if (sk.view === 'front') {
     // 後ろ髪の裾：頭と首の後ろにあるので先に描き、耳の下から少しだけのぞかせる
     for (const s of [-1, 1]) {
       ctx.beginPath();
-      ctx.moveTo(...hp(s * 0.03, -0.02));
-      ctx.lineTo(...hp(s * 0.053, -0.02));
-      ctx.lineTo(...hp(s * 0.05, -0.058));
-      ctx.lineTo(...hp(s * 0.044, -0.047));
-      ctx.lineTo(...hp(s * 0.038, -0.062));
-      ctx.lineTo(...hp(s * 0.032, -0.05));
-      ctx.lineTo(...hp(s * 0.026, -0.062));
+      // 頭が回ると、向いた側の裾は頭の後ろに隠れ、反対の側の裾が多くのぞく
+      ctx.moveTo(...hp(s * 0.03 + nape, -0.02));
+      ctx.lineTo(...hp(s * 0.053 + nape, -0.02));
+      ctx.lineTo(...hp(s * 0.05 + nape, -0.058));
+      ctx.lineTo(...hp(s * 0.044 + nape, -0.047));
+      ctx.lineTo(...hp(s * 0.038 + nape, -0.062));
+      ctx.lineTo(...hp(s * 0.032 + nape, -0.05));
+      ctx.lineTo(...hp(s * 0.026 + nape, -0.062));
       ctx.closePath();
       ctx.fillStyle = STYLE.hair;
       ctx.fill();
@@ -178,15 +203,16 @@ function head(ctx: Ctx, sk: FrontSkeleton, fill: string, px: number): void {
       ctx.lineTo(...hp(0.08, 0.1));
       ctx.lineTo(...hp(0.08, -0.03));
       for (let k = 0; k <= teeth * 2; k++) {
-        const across = side - (side * 2 * k) / (teeth * 2);
+        const across = side - (side * 2 * k) / (teeth * 2) + nape;
         ctx.lineTo(...hp(across, k % 2 === 1 ? -0.052 : -0.034)); // 奇数番目が毛先
       }
       ctx.lineTo(...hp(-0.08, -0.03));
     } else {
       ctx.moveTo(...hp(-0.08, 0.1));
       ctx.lineTo(...hp(0.08, 0.1));
-      ctx.lineTo(...hp(0.08, 0.004));
-      ctx.quadraticCurveTo(...hp(0, 0.058), ...hp(-0.08, 0.004));
+      // 前髪の生え際は、顔と同じ側へ動く
+      ctx.lineTo(...hp(0.08 + shift, 0.004));
+      ctx.quadraticCurveTo(...hp(shift, 0.058), ...hp(-0.08 + shift, 0.004));
     }
     ctx.closePath();
   };
@@ -208,7 +234,6 @@ function head(ctx: Ctx, sk: FrontSkeleton, fill: string, px: number): void {
 
   if (sk.view === 'front') {
     // 顔の細部は描かない。向きが分かるよう鼻だけ付ける（胸を回すと、顔も少し同じ向きを向く）
-    const shift = sideSign(sk.view, 'r') * Math.sin((sk.turn * 0.5 * Math.PI) / 180) * FRONT_SHAPE.headWide;
     circle(ctx, { x: sk.head.x + shift - sk.up.x * 0.01, y: sk.head.y - sk.up.y * 0.01 }, FRONT_SHAPE.nose, STYLE.skin, px);
   }
 }
@@ -338,12 +363,34 @@ export function drawFrontFrame(ctx: Ctx, anim: FrontAnimation, f: FrontFrame, o:
   const arms = () => {
     // 胸を回したとき、前に出ている側の肩の腕を後に描く（手前に来る）
     const order: BodySide[] = sk.turn > 0 ? ['r', 'l'] : ['l', 'r'];
+    // 肘の前後（ElbowDepth）で、腕の濃さと、手との重なりを変える：
+    // 手前に来るほど肘の側を濃くし、手を腕の後ろに隠す。奥へ行くほど薄くする
+    const shaded = (from: Vec, to: Vec, base: string, depthFrom: number, depthTo: number): string | CanvasGradient => {
+      if (depthFrom === 0 && depthTo === 0) return base;
+      if (Math.hypot(to.x - from.x, to.y - from.y) < 0.004) return shadeByDepth(base, depthTo);
+      const g = ctx.createLinearGradient(from.x, from.y, to.x, to.y);
+      g.addColorStop(0, shadeByDepth(base, depthFrom));
+      g.addColorStop(1, shadeByDepth(base, depthTo));
+      return g;
+    };
     for (const side of order) {
       const limb = sk[side];
-      capsule(ctx, limb.shoulder, limb.elbow, SHAPE.upperArm[0], SHAPE.upperArm[1], color('upperArm', STYLE.top, side), px);
-      capsule(ctx, limb.elbow, limb.wrist, SHAPE.forearm[0], SHAPE.forearm[1], color('forearm', STYLE.top, side), px);
+      const depth = f.pose[`${side}ElbowDepth`];
+      const cover = handCover(depth);
+      const upper = color('upperArm', STYLE.top, side);
+      const fore = color('forearm', STYLE.top, side);
+      if (cover > 0) circle(ctx, limb.hand, SHAPE.hand, STYLE.skin, px); // 腕の後ろになる手
+      // 肩の側は元の色、肘の側ほど前後の濃淡が強い
+      capsule(ctx, limb.shoulder, limb.elbow, SHAPE.upperArm[0], SHAPE.upperArm[1], shaded(limb.shoulder, limb.elbow, upper, depth * 0.25, depth), px);
+      capsule(ctx, limb.elbow, limb.wrist, SHAPE.forearm[0], SHAPE.forearm[1], shaded(limb.elbow, limb.wrist, fore, depth, depth * 0.25), px);
+      if (cover < 1) {
+        // 腕の手前に見える手。肘が前に来るにつれて、腕に隠れていく
+        ctx.save();
+        ctx.globalAlpha *= 1 - cover;
+        circle(ctx, limb.hand, SHAPE.hand, STYLE.skin, px);
+        ctx.restore();
+      }
     }
-    for (const side of order) circle(ctx, sk[side].hand, SHAPE.hand, STYLE.skin, px);
   };
   const body = () => {
     pelvis(ctx, sk, color('pelvis', STYLE.bottom), px);

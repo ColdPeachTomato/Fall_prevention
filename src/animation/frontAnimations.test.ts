@@ -4,6 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { getExercise } from '../data/exercises';
 import { BODY, FRONT_CHANNELS, FRONT_VECTORS } from './bodyModel';
+import { faceShift, handCover, shadeByDepth } from './drawFront';
 import { computeFrontFrame, frontFootContact, type FrontFrame } from './frontRig';
 import { ANIMATIONS, getAnimation } from './registry';
 import type { Vec } from './sideRig';
@@ -455,6 +456,39 @@ describe('W2 腕回し（動きの仕様との照合）', () => {
     expect(top.sk.r.shoulder.y).toBeGreaterThan(bottom.sk.r.shoulder.y + 0.04);
   });
 
+  it('肘が前に来ると腕を濃く描いて手を隠し、後ろへ行くと薄く描く（回す向きが分かるように）', () => {
+    const q = anim.cycleSeconds / 4;
+    const depth = (t: number) => computeFrontFrame(anim, t).pose.rElbowDepth;
+    expect(depth(q)).toBeGreaterThan(0.9); // 前
+    expect(depth(3 * q)).toBeLessThan(-0.7); // 後ろ
+    expect(Math.abs(depth(0))).toBeLessThan(0.05); // 下
+    expect(Math.abs(depth(2 * q))).toBeLessThan(0.05); // 上
+    for (const f of frames) expect(f.pose.lElbowDepth).toBeCloseTo(f.pose.rElbowDepth, 9); // 左右同じ
+    // 手は、肘が前に来るにつれてなめらかに隠れ、前を過ぎると現れる
+    expect(handCover(depth(q))).toBe(1);
+    expect(handCover(depth(0))).toBeLessThan(0.05);
+    expect(handCover(depth(3 * q))).toBe(0);
+    const covers = frames.filter((f) => f.t >= 0 && f.t <= q).map((f) => handCover(f.pose.rElbowDepth));
+    for (let i = 1; i < covers.length; i++) {
+      expect(covers[i]!).toBeGreaterThanOrEqual(covers[i - 1]! - 1e-9);
+      expect(covers[i]! - covers[i - 1]!).toBeLessThan(0.08); // 急に切り替わらない
+    }
+    // 濃さ：手前は元の色より暗く、奥は明るい
+    const sum = (rgb: string) => rgb.match(/\d+/g)!.map(Number).reduce((a, b) => a + b, 0);
+    expect(sum(shadeByDepth('#e8743b', 1))).toBeLessThan(sum(shadeByDepth('#e8743b', 0)));
+    expect(sum(shadeByDepth('#e8743b', -1))).toBeGreaterThan(sum(shadeByDepth('#e8743b', 0)));
+  });
+
+  it('ほかの種目では、腕の濃さや重なりを変えない', () => {
+    for (const other of FRONT) {
+      if (other.exercise === 'W2') continue;
+      for (const k of other.keyframes) {
+        expect(k.pose.rElbowDepth ?? 0, other.id).toBe(0);
+        expect(k.pose.lElbowDepth ?? 0, other.id).toBe(0);
+      }
+    }
+  });
+
   it('大きな円を描く（肘が、肩より上にも外にも大きく動く）', () => {
     const path = frames.map((f) => f.sk.r.elbow);
     expect(Math.max(...path.map((p) => p.y)) - Math.min(...path.map((p) => p.y))).toBeGreaterThan(0.3);
@@ -506,6 +540,21 @@ describe('W3 腕を上げて体をひねる（動きの仕様との照合）', (
     expect(right.sk.r.hand.x).toBeCloseTo(-left.sk.r.hand.x, 3);
     const width = (f: FrontFrame) => Math.abs(f.sk.r.shoulder.x - f.sk.l.shoulder.x);
     expect(width(right)).toBeLessThan(width(frames[0]!) * 0.8);
+  });
+
+  it('頭も少し同じ向きを向き、鼻・前髪は向いた側へ、後ろ髪の裾は反対の側へ動く', () => {
+    const right = frames.reduce((x, y) => (y.pose.turn > x.pose.turn ? y : x));
+    const left = frames.reduce((x, y) => (y.pose.turn < x.pose.turn ? y : x));
+    // 正面は鏡のように描くので、右へひねると顔は画面の右へ寄る
+    expect(faceShift('front', right.pose.turn)).toBeGreaterThan(0.015);
+    expect(faceShift('front', left.pose.turn)).toBeCloseTo(-faceShift('front', right.pose.turn), 9);
+    expect(faceShift('front', 0)).toBe(0);
+    // 手の動く向きと同じ
+    expect(Math.sign(faceShift('front', right.pose.turn))).toBe(Math.sign(right.sk.r.hand.x));
+    // 後ろから見ると、後頭部は反対へ動く
+    expect(faceShift('back', right.pose.turn)).toBeLessThan(0);
+    // 頭の幅を超えるほどは動かない（頭の回転は、胸の半分）
+    expect(Math.abs(faceShift('front', right.pose.turn))).toBeLessThan(0.02);
   });
 
   it('骨盤と足は正面のまま動かさない', () => {

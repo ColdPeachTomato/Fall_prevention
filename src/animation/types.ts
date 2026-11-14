@@ -152,6 +152,9 @@ export type FrontLimbChannel =
   | 'ShoulderUp'
   | 'ElbowOut' // 肩→肘
   | 'ElbowUp'
+  // 肘が手前（正）にあるか、奥（負）にあるか（-1〜1）。位置は変えず、重なりの順と色の濃さだけに使う：
+  // 手前にあるほど腕を濃く描き、手を腕の後ろに隠す。奥にあるほど薄く描く（腕回しで、回す向きが分かるように）
+  | 'ElbowDepth'
   | 'HandOut' // 肘→手のひら
   | 'HandUp'
   | 'KneeOut' // 股関節→膝

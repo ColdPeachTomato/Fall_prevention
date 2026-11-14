@@ -43,6 +43,7 @@
         "rShoulderUp": -0.0234,
         "rElbowOut": 0.1707,
         "rElbowUp": -0.9752,
+        "rElbowDepth": 0,
         "rHandOut": -0.1483,
         "rHandUp": 0.8291
       },
@@ -62,6 +63,7 @@
         "rShoulderUp": -0.0168,
         "rElbowOut": 0.0472,
         "rElbowUp": -0.6992,
+        "rElbowDepth": 0.6992,
         "rHandOut": -0.0594,
         "rHandUp": 0.6306
       },
@@ -81,6 +83,7 @@
         "rShoulderUp": 0,
         "rElbowOut": 0.1942,
         "rElbowUp": 0,
+        "rElbowDepth": 0.9708,
         "rHandOut": -0.1652,
         "rHandUp": 0.1276
       },
@@ -100,6 +103,7 @@
         "rShoulderUp": 0.0161,
         "rElbowOut": 0.2803,
         "rElbowUp": 0.6714,
+        "rElbowDepth": 0.6714,
         "rHandOut": -0.2271,
         "rHandUp": -0.3554
       },
@@ -119,6 +123,7 @@
         "rShoulderUp": 0.021,
         "rElbowOut": 0.4602,
         "rElbowUp": 0.8765,
+        "rElbowDepth": 0,
         "rHandOut": -0.3566,
         "rHandUp": -0.503
       },
@@ -138,6 +143,7 @@
         "rShoulderUp": 0.0152,
         "rElbowOut": 0.6763,
         "rElbowUp": 0.6335,
+        "rElbowDepth": -0.6272,
         "rHandOut": -0.512,
         "rHandUp": -0.3282
       },
@@ -157,6 +163,7 @@
         "rShoulderUp": 0,
         "rElbowOut": 0.8312,
         "rElbowUp": 0,
+        "rElbowDepth": -0.9681,
         "rHandOut": -0.6234,
         "rHandUp": 0.1276
       },
@@ -176,6 +183,7 @@
         "rShoulderUp": -0.0176,
         "rElbowOut": 0.5269,
         "rElbowUp": -0.7344,
+        "rElbowDepth": -0.727,
         "rHandOut": -0.4046,
         "rHandUp": 0.6559
       },

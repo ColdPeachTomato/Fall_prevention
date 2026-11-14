@@ -128,6 +128,8 @@ for (let i = 0; i < 8; i++) {
     rShoulderUp: round(SHOULDER_MOVE.up * e[1]),
     rElbowOut: round(e[0]),
     rElbowUp: round(e[1]),
+    // 肘の前後：前に来たとき 1、後ろへ行ったとき -1 に近づく（重なりの順と、腕の濃さに使う）
+    rElbowDepth: round(Math.max(-1, Math.min(1, e[2] > 0 ? e[2] : e[2] * 1.8))),
     rHandOut: round(hand[0]),
     rHandUp: round(hand[1]),
   };

@@ -66,7 +66,7 @@ export type Ctx = CanvasRenderingContext2D;
 export type ViewBox = { minX: number; maxX: number; minY: number; maxY: number };
 
 // 太さの変わる丸い棒（手足）
-export function capsule(ctx: Ctx, a: Vec, b: Vec, ra: number, rb: number, fill: string, px: number): void {
+export function capsule(ctx: Ctx, a: Vec, b: Vec, ra: number, rb: number, fill: string | CanvasGradient, px: number): void {
   const dx = b.x - a.x;
   const dy = b.y - a.y;
   const len = Math.hypot(dx, dy);
