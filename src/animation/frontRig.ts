@@ -151,7 +151,13 @@ export function solveFront(pose: FrontFullPose, rig: FrontRigConfig, stage: Supp
 
   // 胸を回すと、肩の幅が狭く見える
   const half = BODY_FRONT.shoulderHalf * Math.cos(pose.turn * RAD);
-  const shoulderOf = (side: BodySide) => along(chest, across, sideSign(rig.view, side) * half);
+  // 肩の位置は、肩甲骨の動きで少しずれる（腕回しなど）
+  const shoulderOf = (side: BodySide): Vec => {
+    const sign = sideSign(rig.view, side);
+    const out = sign * (half + pose[`${side}ShoulderOut`]);
+    const rise = pose[`${side}ShoulderUp`];
+    return { x: chest.x + across.x * out + up.x * rise, y: chest.y + across.y * out + up.y * rise };
+  };
   const hipOf = (side: BodySide): Vec => ({ x: pelvis.x + sideSign(rig.view, side) * BODY_FRONT.hipHalf, y: pelvis.y });
 
   const sk: FrontSkeleton = {

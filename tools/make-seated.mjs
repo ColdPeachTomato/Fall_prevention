@@ -1,6 +1,7 @@
 // 座って行う横向きの4種目（S2・S3・S4・S5 のレベル1）のキーフレームを作る
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { tidyCaptions } from './captions.mjs';
 
 const outDir = process.argv[2];
 const HIP = { x: -0.2, y: 0.298 };
@@ -57,8 +58,8 @@ const s3 = {
   keyframes: [
     kf(0, { ...base, footPitch: 0 }, '足を床につける'),
     kf(0.3, { ...base, footPitch: 0 }, '動き始め'),
-    kf(2.3, { ...base, footPitch: -18 }, 'つま先を上げる'),
-    kf(2.8, { ...base, footPitch: -18 }, '下ろし始め'),
+    kf(2.3, { ...base, footPitch: -16 }, 'つま先を上げる'),
+    kf(2.8, { ...base, footPitch: -16 }, '下ろし始め'),
     kf(4.8, { ...base, footPitch: 0 }, '下ろす'),
   ],
   captions: [
@@ -130,6 +131,6 @@ const s5 = {
 };
 
 for (const a of [s2, s3, s4, s5]) {
-  writeFileSync(join(outDir, `${a.id}.json`), JSON.stringify(a, null, 2) + '\n');
+  writeFileSync(join(outDir, `${a.id}.json`), JSON.stringify(tidyCaptions(a), null, 2) + '\n');
   console.log(a.id);
 }

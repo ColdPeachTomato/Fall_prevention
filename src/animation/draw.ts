@@ -350,7 +350,7 @@ export function drawFrame(ctx: Ctx, anim: SideAnimation, f: Frame, o: DrawOption
   headPath();
   ctx.fillStyle = color('head', STYLE.skin, false);
   ctx.fill();
-  // 頭髪：頭の上から後ろを、うなじまで覆う（額と顔は出す）
+  // 頭髪：頭の上から後ろを覆う（額と顔、首は出す）
   const hp = (f: number, u: number): [number, number] => [sk.head.x + forward.x * f + up.x * u, sk.head.y + forward.y * f + up.y * u];
   ctx.save();
   headPath();
@@ -360,8 +360,15 @@ export function drawFrame(ctx: Ctx, anim: SideAnimation, f: Frame, o: DrawOption
   ctx.lineTo(...hp(0.1, 0.036));
   ctx.lineTo(...hp(0.03, 0.03));
   ctx.quadraticCurveTo(...hp(0.0, 0.02), ...hp(-0.006, -0.012));
-  ctx.lineTo(...hp(-0.014, -0.05));
-  ctx.lineTo(...hp(-0.1, -0.05));
+  // 後ろ髪の裾：うなじの上で、少しギザギザにする（正面・後ろ向きとそろえる。首は見える）
+  ctx.lineTo(...hp(-0.01, -0.034));
+  ctx.lineTo(...hp(-0.016, -0.052));
+  ctx.lineTo(...hp(-0.023, -0.034));
+  ctx.lineTo(...hp(-0.03, -0.052));
+  ctx.lineTo(...hp(-0.037, -0.034));
+  ctx.lineTo(...hp(-0.044, -0.05));
+  ctx.lineTo(...hp(-0.052, -0.03));
+  ctx.lineTo(...hp(-0.1, -0.03));
   ctx.lineTo(...hp(-0.1, 0.1));
   ctx.closePath();
   ctx.fillStyle = STYLE.hair;

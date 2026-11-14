@@ -5,6 +5,7 @@
 // 下半身のキーフレームは支えの段階によらず共通で、腕だけが段階に合わせて支持物に付く。
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { tidyCaptions } from './captions.mjs';
 
 const outDir = process.argv[2];
 const RAD = Math.PI / 180;
@@ -304,6 +305,7 @@ const stanceLeft = { shift: WEIGHT_SHIFT, ...leg('l', legOut(-FOOT, WEIGHT_SHIFT
     props: supportProps(WEIGHT_SHIFT),
     highlight: ['r:foot'],
     keyframes: keys,
+    posture: 'つかまって立ち、体重を反対の足に乗せます',
     captions: [{ from: 0, to: CYCLE, text: 'かかとを床につけたまま、つま先で外へ円を描きます' }],
     reverseCaptions: [{ from: 0, to: CYCLE, text: 'かかとを床につけたまま、つま先で内へ円を描きます' }],
     marks: [{ type: 'arc', from: 0, to: CYCLE, anchor: 'r.heel', dx: 0, dy: 0.045, radius: 0.085, start: -75, sweep: 150 }],
@@ -410,6 +412,6 @@ const stanceLeft = { shift: WEIGHT_SHIFT, ...leg('l', legOut(-FOOT, WEIGHT_SHIFT
 }
 
 for (const anim of save) {
-  writeFileSync(join(outDir, `${anim.id}.json`), JSON.stringify(anim, null, 2) + '\n');
+  writeFileSync(join(outDir, `${anim.id}.json`), JSON.stringify(tidyCaptions(anim), null, 2) + '\n');
   console.log(anim.id, anim.view, anim.keyframes.length, 'keyframes', anim.cycleSeconds, 's');
 }

@@ -125,7 +125,9 @@ export interface ChannelDef {
   fallback: number; // 省略したときの値（左側は、省略すると右側と同じ値になる）
 }
 
-const LIMB_CHANNELS: { key: FrontLimbChannel; label: string; fallback: number }[] = [
+const LIMB_CHANNELS: { key: FrontLimbChannel; label: string; fallback: number; limit?: number }[] = [
+  { key: 'ShoulderOut', label: '肩の位置（外へ）', fallback: 0, limit: 0.05 },
+  { key: 'ShoulderUp', label: '肩の位置（上へ）', fallback: 0, limit: 0.05 },
   { key: 'ElbowOut', label: '肩→肘（外へ）', fallback: 0 },
   { key: 'ElbowUp', label: '肩→肘（上へ）', fallback: -1 },
   { key: 'HandOut', label: '肘→手（外へ）', fallback: 0 },
@@ -147,16 +149,16 @@ export const FRONT_BODY_CHANNELS: ChannelDef[] = [
 export const FRONT_RIGHT_CHANNELS: ChannelDef[] = LIMB_CHANNELS.map((c) => ({
   name: `r${c.key}` as FrontChannel,
   label: `右 ${c.label}`,
-  min: -1,
-  max: 1,
+  min: -(c.limit ?? 1),
+  max: c.limit ?? 1,
   unit: '',
   fallback: c.fallback,
 }));
 export const FRONT_LEFT_CHANNELS: ChannelDef[] = LIMB_CHANNELS.map((c) => ({
   name: `l${c.key}` as FrontChannel,
   label: `左 ${c.label}`,
-  min: -1,
-  max: 1,
+  min: -(c.limit ?? 1),
+  max: c.limit ?? 1,
   unit: '',
   fallback: c.fallback,
 }));

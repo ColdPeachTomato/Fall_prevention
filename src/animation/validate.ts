@@ -29,6 +29,7 @@ function validateCommon(a: Input, errors: string[]): void {
     errors.push('countsPerCycle は 1 以上の整数にしてください');
   }
   if (a.checked !== undefined && typeof a.checked !== 'boolean') errors.push('checked が正しくありません');
+  if (a.posture !== undefined && (typeof a.posture !== 'string' || a.posture === '')) errors.push('posture（姿勢の文）が正しくありません');
   const inCycle = (from: unknown, to: unknown) => isNumber(from) && isNumber(to) && from >= 0 && to > from && (!isNumber(cycle) || to <= cycle);
   for (const key of ['captions', 'reverseCaptions'] as const) {
     const list = a[key];

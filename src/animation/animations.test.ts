@@ -134,6 +134,17 @@ describe('アニメの登録', () => {
     }
   });
 
+  it('どの字幕も2秒以上出る（一瞬で消える字幕を作らない）。最初の姿勢は「姿勢の文」で出し続ける', () => {
+    for (const anim of ANIMATIONS) {
+      for (const c of [...anim.captions, ...(anim.reverseCaptions ?? [])]) {
+        expect(c.to - c.from, `${anim.id}「${c.text}」`).toBeGreaterThanOrEqual(2);
+      }
+      if (anim.posture !== undefined) expect([...anim.posture].length, `${anim.id}「${anim.posture}」`).toBeLessThanOrEqual(26);
+      // 動きのある種目には、姿勢の文がある（姿勢を保つ種目と横歩きは、字幕が姿勢の説明を兼ねる）
+      if (!['B1', 'B2', 'D3'].includes(anim.exercise)) expect(anim.posture, anim.id).toBeDefined();
+    }
+  });
+
   it('確認済みの印は、人が確かめるまで付けない', () => {
     // 印を付けるのは、医師などが見本を確かめた後。ここに id を足してから JSON の checked を true にする
     const confirmed: string[] = [];

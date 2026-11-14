@@ -475,6 +475,18 @@ p {
   margin: 2px 0 0;
 }
 
+/* 姿勢の文（どう構えるか）。運動の間ずっと出しておく。2行分を先に確保する */
+.anim-posture {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: max(18px, 1.1rem);
+  line-height: 1.4;
+  margin: 4px 0 0;
+  min-height: 2.8em;
+}
+
 /* 字幕。1行のときも2行のときも同じ高さにして、下の表示が動かないようにする（2行分を先に確保する） */
 .anim-caption {
   display: flex;

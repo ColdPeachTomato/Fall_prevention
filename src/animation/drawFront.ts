@@ -125,62 +125,87 @@ function scapulae(ctx: Ctx, sk: FrontSkeleton, fill: string, px: number): void {
   }
 }
 
+// 頭と首、頭髪。頭髪で、こちら向きか向こう向きかを見分けられるようにする。
+//   正面　：額のあたりまで。耳の下（首の横）に、後ろ髪の裾が少しだけのぞく
+//   後ろ向き：後頭部を覆い、裾はうなじの上でギザギザにする（首が見える）
+// 髪の裾のギザギザは、横向き（draw.ts）とそろえてある
 function head(ctx: Ctx, sk: FrontSkeleton, fill: string, px: number): void {
-  capsule(ctx, sk.neckBase, sk.head, SHAPE.neck[0], SHAPE.neck[1], STYLE.skin, px);
   const tilt = Math.atan2(sk.up.x, sk.up.y);
+  // 頭の中心からの点（a：横、u：上）
+  const hp = (a: number, u: number): [number, number] => [sk.head.x + sk.across.x * a + sk.up.x * u, sk.head.y + sk.across.y * a + sk.up.y * u];
   const headPath = () => {
     ctx.beginPath();
     ctx.ellipse(sk.head.x, sk.head.y, FRONT_SHAPE.headWide, FRONT_SHAPE.headTall, tilt, 0, Math.PI * 2);
   };
+  const strokeOutline = () => {
+    ctx.lineWidth = SHAPE.outlinePx * px;
+    ctx.strokeStyle = STYLE.outline;
+    ctx.stroke();
+  };
+
+  if (sk.view === 'front') {
+    // 後ろ髪の裾：頭と首の後ろにあるので先に描き、耳の下から少しだけのぞかせる
+    for (const s of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(...hp(s * 0.03, -0.02));
+      ctx.lineTo(...hp(s * 0.053, -0.02));
+      ctx.lineTo(...hp(s * 0.05, -0.058));
+      ctx.lineTo(...hp(s * 0.044, -0.047));
+      ctx.lineTo(...hp(s * 0.038, -0.062));
+      ctx.lineTo(...hp(s * 0.032, -0.05));
+      ctx.lineTo(...hp(s * 0.026, -0.062));
+      ctx.closePath();
+      ctx.fillStyle = STYLE.hair;
+      ctx.fill();
+      ctx.lineJoin = 'miter';
+      strokeOutline();
+      ctx.lineJoin = 'round';
+    }
+  }
+
+  capsule(ctx, sk.neckBase, sk.head, SHAPE.neck[0], SHAPE.neck[1], STYLE.skin, px);
   headPath();
   outline(ctx, fill, px);
-  // 頭髪で、こちら向きか向こう向きかを見分けられるようにする。
-  // 正面：額のあたりまで。後ろ向き：頭全体を覆い、裾は首のあたりでギザギザにする
-  const hp = (a: number, u: number): [number, number] => [sk.head.x + sk.across.x * a + sk.up.x * u, sk.head.y + sk.across.y * a + sk.up.y * u];
+
+  // 頭髪（頭の形の中だけに塗る）
+  const hairPath = () => {
+    ctx.beginPath();
+    if (sk.view === 'back') {
+      // 後頭部：上から、うなじの上のギザギザの裾まで
+      const teeth = 6;
+      const side = 0.06;
+      ctx.moveTo(...hp(-0.08, 0.1));
+      ctx.lineTo(...hp(0.08, 0.1));
+      ctx.lineTo(...hp(0.08, -0.03));
+      for (let k = 0; k <= teeth * 2; k++) {
+        const across = side - (side * 2 * k) / (teeth * 2);
+        ctx.lineTo(...hp(across, k % 2 === 1 ? -0.052 : -0.034)); // 奇数番目が毛先
+      }
+      ctx.lineTo(...hp(-0.08, -0.03));
+    } else {
+      ctx.moveTo(...hp(-0.08, 0.1));
+      ctx.lineTo(...hp(0.08, 0.1));
+      ctx.lineTo(...hp(0.08, 0.004));
+      ctx.quadraticCurveTo(...hp(0, 0.058), ...hp(-0.08, 0.004));
+    }
+    ctx.closePath();
+  };
   ctx.save();
   headPath();
   ctx.clip();
-  ctx.beginPath();
-  if (sk.view === 'back') {
-    ctx.rect(sk.head.x - 0.1, sk.head.y - 0.1, 0.2, 0.2);
-  } else {
-    ctx.moveTo(...hp(-0.08, 0.1));
-    ctx.lineTo(...hp(0.08, 0.1));
-    ctx.lineTo(...hp(0.08, 0.004));
-    ctx.quadraticCurveTo(...hp(0, 0.058), ...hp(-0.08, 0.004));
-    ctx.closePath();
-  }
+  hairPath();
   ctx.fillStyle = STYLE.hair;
   ctx.fill();
-  ctx.restore();
-  headPath();
-  ctx.lineWidth = SHAPE.outlinePx * px;
-  ctx.strokeStyle = STYLE.outline;
-  ctx.stroke();
   if (sk.view === 'back') {
-    // 後ろ向き：髪の裾を首のあたりまで下ろし、ギザギザにして、後頭部だと分かるようにする
-    const side = 0.047; // 裾の幅（半分）
-    const teeth = 5; // ギザギザの山の数
-    const hem: [number, number][] = [];
-    for (let i = 0; i <= teeth * 2; i++) {
-      const across = side - (side * 2 * i) / (teeth * 2);
-      hem.push(hp(across, i % 2 === 1 ? -0.097 : -0.076)); // 奇数番目が毛先
-    }
-    const hemPath = () => {
-      ctx.beginPath();
-      ctx.moveTo(...hp(side, -0.03));
-      for (const p of hem) ctx.lineTo(...p);
-      ctx.lineTo(...hp(-side, -0.03));
-    };
-    hemPath();
-    ctx.closePath();
-    ctx.fillStyle = STYLE.hair;
-    ctx.fill();
-    hemPath();
+    // 裾のギザギザに線を入れて、形をはっきりさせる
     ctx.lineJoin = 'miter';
-    ctx.stroke();
-    ctx.lineJoin = 'round';
+    strokeOutline();
   }
+  ctx.restore();
+  ctx.lineJoin = 'round';
+  headPath();
+  strokeOutline();
+
   if (sk.view === 'front') {
     // 顔の細部は描かない。向きが分かるよう鼻だけ付ける（胸を回すと、顔も少し同じ向きを向く）
     const shift = sideSign(sk.view, 'r') * Math.sin((sk.turn * 0.5 * Math.PI) / 180) * FRONT_SHAPE.headWide;

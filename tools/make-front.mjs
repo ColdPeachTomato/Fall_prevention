@@ -4,6 +4,7 @@
 // 書き出す JSON は 2D の値だけを持つ。
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { tidyCaptions } from './captions.mjs';
 
 const outDir = process.argv[2];
 const RAD = Math.PI / 180;
@@ -87,6 +88,7 @@ const w1 = {
   props: [CHAIR],
   highlight: ['r:foot'],
   keyframes: w1Keys,
+  posture: '椅子に座り、片足を少し前に出します',
   captions: [{ from: 0, to: W1_CYCLE, text: 'かかとを床につけたまま、つま先で外へ円を描きます' }],
   reverseCaptions: [{ from: 0, to: W1_CYCLE, text: 'かかとを床につけたまま、つま先で内へ円を描きます' }],
   marks: [{ type: 'arc', from: 0, to: W1_CYCLE, anchor: 'r.heel', dx: 0, dy: 0.045, radius: 0.085, start: -75, sweep: 150 }],
@@ -107,15 +109,28 @@ function elbowDirection(theta) {
   return norm([out, s, forward]).map((v) => v * 0.99);
 }
 const SHOULDER_TOP = [-0.005, 0.025]; // 指先を置く所（肩の関節の中心から）
+// 肘を回すと、肩（肩甲骨）も一緒に動く：肘が上なら肩が上がり、下なら下がる。後ろで外へ開くと、肩も少し外へ
+const SHOULDER_MOVE = { out: 0.014, up: 0.024 };
+// 肩に置いた手は、指先を支点にして、肘のある側へ寄る（肘と同じ向きに、小さく回る）
+const HAND_SWING = 0.045;
 const w2Keys = [];
 for (let i = 0; i < 8; i++) {
   const theta = 270 + 45 * i; // 0：前、90：上、180：後ろ、270：下
   const e = elbowDirection(theta);
   const elbow = [e[0] * L1, e[1] * L1];
-  let hand = [(SHOULDER_TOP[0] - elbow[0]) / L2, (SHOULDER_TOP[1] - elbow[1]) / L2];
+  const palm = [SHOULDER_TOP[0] + HAND_SWING * e[0], SHOULDER_TOP[1] + HAND_SWING * e[1]];
+  let hand = [(palm[0] - elbow[0]) / L2, (palm[1] - elbow[1]) / L2];
   const n = Math.hypot(...hand);
   if (n > 0.99) hand = hand.map((c) => (c / n) * 0.99);
-  const pose = { ...LEGS, rElbowOut: round(e[0]), rElbowUp: round(e[1]), rHandOut: round(hand[0]), rHandUp: round(hand[1]) };
+  const pose = {
+    ...LEGS,
+    rShoulderOut: round(SHOULDER_MOVE.out * (e[0] - 0.45)),
+    rShoulderUp: round(SHOULDER_MOVE.up * e[1]),
+    rElbowOut: round(e[0]),
+    rElbowUp: round(e[1]),
+    rHandOut: round(hand[0]),
+    rHandUp: round(hand[1]),
+  };
   w2Keys.push(kf((W2_CYCLE * i) / 8, pose, W2_NAMES[i]));
 }
 const w2 = {
@@ -123,6 +138,7 @@ const w2 = {
   props: [CHAIR],
   highlight: ['upperArm', 'forearm'],
   keyframes: w2Keys,
+  posture: '椅子に座り、指先を肩に置きます',
   captions: [{ from: 0, to: W2_CYCLE, text: '肘を、前から上、後ろへ回します' }],
   reverseCaptions: [{ from: 0, to: W2_CYCLE, text: '肘を、後ろから上、前へ回します' }],
   marks: [
@@ -220,7 +236,7 @@ const s8 = {
 };
 
 for (const anim of [w1, w2, w3, s8]) {
-  writeFileSync(join(outDir, `${anim.id}.json`), JSON.stringify(anim, null, 2) + '\n');
+  writeFileSync(join(outDir, `${anim.id}.json`), JSON.stringify(tidyCaptions(anim), null, 2) + '\n');
   console.log(anim.id, anim.keyframes.length, 'keyframes');
 }
 console.log('arms on seat', ARMS_ON_SEAT);

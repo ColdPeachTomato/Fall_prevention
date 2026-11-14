@@ -113,7 +113,9 @@ interface AnimationBase {
   cycleSeconds: number; // 1往復の時間
   countsPerCycle?: number; // 1往復で数える回数。省略すると 1（左右交互の種目は 2）
   checked?: boolean; // 確認済みの印。医師などが見本を確かめたら true にする
-  captions: Caption[]; // 字幕の区間
+  // 姿勢の文（どう構えるか）。動きの字幕の上に、出し続ける。一瞬しか出ない字幕を作らないために分けてある
+  posture?: string;
+  captions: Caption[]; // 字幕の区間。どの字幕も2秒以上出す
   // 逆向きに再生するとき（内回し・前回しなど）の字幕。これがあるアニメだけ、逆向きに再生できる。
   // 時刻は再生の時刻（逆向きに再生し始めてからの秒）
   reverseCaptions?: Caption[];
@@ -146,6 +148,8 @@ export type SupportStage = 'both' | 'one' | 'fingertip' | 'none';
 // 2つを合わせた長さが 1 より短い分は、手前か奥に向いて短く見えていることを表す。
 // 例：下ろした腕は Out 0, Up -1。こちらに向けて伸ばした腕は Out 0, Up 0（点に見える）。
 export type FrontLimbChannel =
+  | 'ShoulderOut' // 肩の位置のずれ（身長 = 1。肩甲骨の動きで、肩が上下・内外に動く）
+  | 'ShoulderUp'
   | 'ElbowOut' // 肩→肘
   | 'ElbowUp'
   | 'HandOut' // 肘→手のひら

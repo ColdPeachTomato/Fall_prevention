@@ -69,6 +69,8 @@ export function AnimationCanvas({ anim, getTime, label, showCaption = true, show
   return (
     <div className="anim">
       <canvas ref={canvasRef} className="anim-canvas" role="img" aria-label={label} style={{ aspectRatio }} />
+      {/* 姿勢の文は出し続け、その下に動きの字幕を出す（一瞬で消える字幕を作らない） */}
+      {showCaption && anim.posture && <p className="anim-posture">{anim.posture}</p>}
       {showCaption && <p className="anim-caption">{caption || ' '}</p>}
     </div>
   );

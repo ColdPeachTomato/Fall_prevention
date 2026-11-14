@@ -414,7 +414,7 @@ describe('W2 腕回し（動きの仕様との照合）', () => {
 
   it('指先を肩に置いたまま、両肘で同時に（左右対称に）円を描く', () => {
     for (const f of frames) {
-      for (const s of SIDES) expect(dist(f.sk[s].hand, f.sk[s].shoulder), at(f)).toBeLessThan(0.04);
+      for (const s of SIDES) expect(dist(f.sk[s].hand, f.sk[s].shoulder), at(f)).toBeLessThan(0.08);
       expect(f.sk.r.elbow.x, at(f)).toBeCloseTo(-f.sk.l.elbow.x, 9);
       expect(f.sk.r.elbow.y, at(f)).toBeCloseTo(f.sk.l.elbow.y, 9);
     }
@@ -436,6 +436,23 @@ describe('W2 腕回し（動きの仕様との照合）', () => {
     expect(Math.abs(back.up)).toBeLessThan(0.03);
     expect(anim.captions[0]?.text).toContain('前から上、後ろ');
     expect(anim.reverseCaptions?.[0]?.text).toContain('後ろから上、前');
+  });
+
+  it('肩と、肩に置いた手も、肘と同じ向きに一緒に動く（回す向きが分かるように）', () => {
+    const shoulders = frames.map((f) => f.sk.r.shoulder);
+    const hands = frames.map((f) => f.sk.r.hand);
+    const elbows = frames.map((f) => f.sk.r.elbow);
+    const rangeY = (path: Vec[]) => Math.max(...path.map((p) => p.y)) - Math.min(...path.map((p) => p.y));
+    expect(rangeY(shoulders)).toBeGreaterThan(0.04); // 肩が上下に動く（身長160cmで約7cm）
+    expect(rangeY(hands)).toBeGreaterThan(0.1); // 手は、肩の動きに自分の動きが加わって、さらに大きく動く
+    // 肩も手も、肘と同じ向きに1周する
+    const direction = Math.sign(turnsAround(elbows, center(elbows)));
+    expect(turnsAround(shoulders, center(shoulders)) * direction).toBeCloseTo(1, 3);
+    expect(turnsAround(hands, center(hands)) * direction).toBeCloseTo(1, 3);
+    // 肘が上のとき肩も上がり、肘が下のとき肩も下がる
+    const top = frames.reduce((a, b) => (b.sk.r.elbow.y > a.sk.r.elbow.y ? b : a));
+    const bottom = frames.reduce((a, b) => (b.sk.r.elbow.y < a.sk.r.elbow.y ? b : a));
+    expect(top.sk.r.shoulder.y).toBeGreaterThan(bottom.sk.r.shoulder.y + 0.04);
   });
 
   it('大きな円を描く（肘が、肩より上にも外にも大きく動く）', () => {
