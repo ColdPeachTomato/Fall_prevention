@@ -309,7 +309,7 @@ export function solveSide(pose: FullPose, rig: RigConfig, hands = 0, stage: Supp
   // 支持物につかまる腕：支えの段階に合わせて、手を支持物に付ける。下半身は変えない
   const holding = { near: false, far: false };
   if (rig.support && stage !== null && stage !== 'none') {
-    const target = { x: rig.support.x, y: rig.support.y + (stage === 'fingertip' ? FINGERTIP_LIFT : 0) };
+    const target = { x: rig.support.x + (rig.support.follow ? hip.x : 0), y: rig.support.y + (stage === 'fingertip' ? FINGERTIP_LIFT : 0) };
     const ik = solveArm(shoulder, target, trunkAngle);
     // 体の向こう側のカウンターには、奥側の手だけでつかまる（両手ではつかまれない）
     const useNear = rig.support.hand !== 'far';

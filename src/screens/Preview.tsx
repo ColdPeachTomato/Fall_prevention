@@ -8,6 +8,7 @@ import { wrapTime } from '../animation/interpolate';
 import { ANIMATIONS } from '../animation/registry';
 import { frameOf } from '../animation/scene';
 import type { AnimationData, SupportStage } from '../animation/types';
+import { getExercise } from '../data/exercises';
 import { validateAnimation } from '../animation/validate';
 
 const FRAME_STEP = 0.1; // コマ送りの幅（秒）
@@ -77,7 +78,16 @@ export default function Preview() {
   const [showJoints, setShowJoints] = useState(false);
   const [mirror, setMirror] = useState(false);
   const [reverse, setReverse] = useState(false);
-  const [stage, setStage] = useState<SupportStage>('none');
+  const [chosenStage, setStage] = useState<SupportStage>('both');
+  // その種目で使える支えの段階（多い順）。種目の下限（S3 立位は両手）と上限（カウンターの横は片手まで）の間だけ。
+  // アプリでは、この範囲の段階でしか見本を出さない
+  const allowedStages = useMemo(() => {
+    const all: SupportStage[] = ['both', 'one', 'fingertip', 'none'];
+    const ex = getExercise(anim.exercise);
+    const max = ex.variants.find((v) => v.animationId === anim.id)?.maxSupport ?? 'both';
+    return all.slice(all.indexOf(max), all.indexOf(ex.minSupport ?? 'none') + 1);
+  }, [anim.exercise, anim.id]);
+  const stage = allowedStages.includes(chosenStage) ? chosenStage : allowedStages[0]!;
   const [copied, setCopied] = useState(false);
   const timeRef = useRef(0);
 
@@ -278,10 +288,11 @@ export default function Preview() {
           <label>
             支えの段階
             <select value={stage} onChange={(e) => setStage(e.target.value as SupportStage)}>
-              <option value="both">両手</option>
-              <option value="one">片手</option>
-              <option value="fingertip">指先</option>
-              <option value="none">なし</option>
+              {allowedStages.map((s) => (
+                <option key={s} value={s}>
+                  {{ both: '両手', one: '片手', fingertip: '指先', none: 'なし' }[s]}
+                </option>
+              ))}
             </select>
           </label>
         )}

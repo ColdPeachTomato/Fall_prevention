@@ -153,9 +153,23 @@ describe('アニメの登録', () => {
     }
   });
 
-  it('確認済みの印は、人が確かめるまで付けない', () => {
+  it('確認済みの印は、人が確かめたアニメにだけ付いている', () => {
     // 印を付けるのは、医師などが見本を確かめた後。ここに id を足してから JSON の checked を true にする
-    const confirmed: string[] = [];
+    // （tools/confirmed.mjs にも同じ id を入れる。生成スクリプトは、そちらを見て checked を付ける）
+    const confirmed: string[] = [
+      // 2026-11-14 確認
+      'S1-side-L1',
+      'S1-side-L2',
+      'S1-side-L3',
+      'S2-side-L1',
+      'S2-side-L2',
+      'S4-side-L1',
+      'S5-side-L1',
+      'S5-side-L2',
+      'S7-side-L2',
+      'S8-back-L1',
+      'S8-back-L2',
+    ];
     for (const anim of ANIMATIONS) expect(anim.checked === true, anim.id).toBe(confirmed.includes(anim.id));
   });
 });
@@ -165,13 +179,15 @@ describe.each(SIDE.map((a) => [a.id, a] as const))('%s', (_id, anim) => {
   const chair = anim.props.find((p): p is ChairProp => p.type === 'chair');
   const seated = anim.root.mode === 'seat';
   const walking = WALKING.includes(anim.id);
+  // 足を踏み出す種目（S9）も、踏み出した足が着くまでは、次に足を着く所へ体を運んでいる途中
+  const stepping = walking || anim.id === 'S9-side-L3';
   // D2 は、つま先歩きとかかと歩きを切り替える間（前後あわせて約1.6秒）、踏む所が母趾球からかかとへ移る。
   // この間は、足の滑りと静的な重心の検査から外す
   const switching = (t: number) => anim.id === 'D2-side-L3' && (t < 0.8 || t > anim.cycleSeconds - 0.8 || Math.abs(t - anim.cycleSeconds / 2) < 0.8);
 
   it('B：重心が常に支える面（足と座面。両手でつかまる種目は支持物も）の上にある', () => {
     for (const f of frames) {
-      if (walking && (!bothFeetDown(f) || switching(f.t))) continue;
+      if (stepping && (!bothFeetDown(f) || switching(f.t))) continue;
       expect(f.stable, `${at(f)} 重心 ${f.com.x.toFixed(3)} 範囲 ${f.support.min.toFixed(3)}〜${f.support.max.toFixed(3)}`).toBe(true);
     }
   });
@@ -347,18 +363,19 @@ describe.each(SIDE.map((a) => [a.id, a] as const))('%s', (_id, anim) => {
     for (const stage of stagesFor(anim)) {
       for (const f of framesOf(anim, stage)) {
         const where = `${stage} ${at(f)}`;
-        if (!walking || (bothFeetDown(f) && !switching(f.t))) expect(f.stable, where).toBe(true);
+        if (!stepping || (bothFeetDown(f) && !switching(f.t))) expect(f.stable, where).toBe(true);
         expect(f.sk.holding.near, where).toBe(stage !== 'none' && !farSide);
         expect(f.sk.holding.far, where).toBe(stage !== 'none' && (farSide || stage === 'both'));
         const lift = stage === 'fingertip' ? 0.022 : 0;
+        const gripX = support.x + (support.follow ? f.sk.hip.x : 0); // 体と一緒に動く支えは、股関節からの距離
         if (f.sk.holding.near) {
-          expect(dist(f.sk.hand, { x: support.x, y: support.y + lift }), where).toBeLessThan(0.005);
+          expect(dist(f.sk.hand, { x: gripX, y: support.y + lift }), where).toBeLessThan(0.005);
           expect(f.sk.arm.elbow, where).toBeGreaterThan(5); // 腕が伸びきらない（無理なく届く）
         } else {
           expect(f.sk.hand.y, where).toBeLessThan(support.y - 0.02); // 手は体の横に下ろしている
         }
         if (f.sk.holding.far) {
-          expect(dist(f.sk.farHand, { x: support.x, y: support.y + (farSide ? lift : 0) }), where).toBeLessThan(0.005);
+          expect(dist(f.sk.farHand, { x: gripX, y: support.y + (farSide ? lift : 0) }), where).toBeLessThan(0.005);
           expect(f.sk.arm.farElbow, where).toBeGreaterThan(5);
         } else {
           expect(f.sk.farHand.y, where).toBeLessThan(support.y - 0.02);
@@ -690,19 +707,34 @@ describe('レベル3の種目（横向き。仕様との照合）', () => {
     expect(low.pose.hip).toBeCloseTo(computeFrame(l2, 1.6).pose.hip, 6);
   });
 
-  it('S9 ランジ：1回ごとに片足を前へ踏み出し、浅く腰を落として、足を戻す。後ろの足は、母趾球を床に付けたまま', () => {
+  it('S9 ランジ：片足を大きく前へ踏み出し、上体をまっすぐに保って、両膝を曲げて浅く腰を落とし、足を戻す', () => {
     const anim = sideAnim('S9-side-L3');
     const frames = framesOf(anim, 'none');
     const start = frames[0]!;
     const deep = frames.reduce((a, b) => (b.sk.hip.y < a.sk.hip.y ? b : a));
     expect(Math.abs(start.sk.ankle.x - start.sk.farAnkle.x)).toBeLessThan(0.001); // 足をそろえて始める
-    expect(deep.sk.ankle.x - start.sk.ankle.x).toBeCloseTo(0.16, 2); // 踏み出す幅（身長160cmで約26cm）
-    expect(start.sk.hip.y - deep.sk.hip.y).toBeGreaterThan(0.02);
-    expect(start.sk.hip.y - deep.sk.hip.y).toBeLessThan(0.06); // 深くしゃがまない
-    expect(deep.pose.knee).toBeLessThan(60);
-    expect(deep.sk.hip.x).toBeGreaterThan((deep.sk.farBall.x + deep.sk.heel.x) / 2 - 0.02); // 体重は前の足の側へ
-    expect(deep.sk.farHeel.y).toBeGreaterThan(0.03); // 後ろの足はかかとが上がる
-    for (const f of frames) expect(f.sk.farBall.y, at(f)).toBeCloseTo(0, 6);
+    expect(deep.sk.ankle.x - start.sk.ankle.x).toBeCloseTo(0.38, 2); // 踏み出す幅（身長160cmで約61cm）
+    // いちばん下の形
+    expect(Math.abs(deep.sk.knee.x - deep.sk.ankle.x)).toBeLessThan(0.01); // 前の膝が足首の真上（つま先より前に出ない）
+    expect(deep.pose.knee).toBeGreaterThan(35);
+    expect(deep.pose.knee).toBeLessThan(55); // 浅め（深いランジは90度）
+    expect(start.sk.hip.y - deep.sk.hip.y).toBeGreaterThan(0.05);
+    expect(start.sk.hip.y - deep.sk.hip.y).toBeLessThan(0.09); // 深くしゃがまない
+    expect(deep.sk.hip.x).toBeGreaterThan(deep.sk.farBall.x); // 腰は両足の間
+    expect(deep.sk.hip.x).toBeLessThan(deep.sk.heel.x);
+    expect(deep.sk.farHeel.y).toBeGreaterThan(0.05); // 後ろの足はかかとが上がる
+    expect(deep.pose.farKnee).toBeGreaterThan(50); // 後ろの膝も曲がる
+    expect(Math.abs(deep.sk.farKnee.x - deep.sk.hip.x)).toBeLessThan(0.06); // 後ろの膝は、腰のほぼ下へ下りる
+    for (const f of frames) {
+      expect(f.sk.farBall.y, at(f)).toBeCloseTo(0, 6); // 後ろの足は、母趾球を床に付けたまま
+      expect(Math.abs(f.sk.shoulder.x - f.sk.hip.x), at(f)).toBeLessThan(0.03); // 上体はまっすぐ
+      // 踏み出した足が浮いている間、重心は「後ろの足」と「次に足を着く所」の間にある
+      expect(f.com.x, at(f)).toBeGreaterThan(start.sk.farHeel.x);
+      expect(f.com.x, at(f)).toBeLessThan(deep.sk.toe.x);
+    }
+    // かかとから着く
+    const landing = frames.find((f) => f.t > 1 && Math.abs(f.sk.heel.y) < 0.002 && f.sk.ankle.x > start.sk.ankle.x + 0.3)!;
+    expect(landing.sk.toe.y).toBeGreaterThan(0.005);
     const end = frames[frames.length - 1]!;
     expect(dist(end.sk.ankle, start.sk.ankle)).toBeLessThan(1e-6); // 足を戻す
     expect(frames.filter((f) => f.sk.hip.y < deep.sk.hip.y + 1e-4).length * STEP).toBeGreaterThanOrEqual(0.45); // 少し止める

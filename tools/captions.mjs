@@ -3,6 +3,8 @@
 //  ・途中の短い字幕（止める、など）は、前の字幕と1つの文にまとめて、長く出す
 // どの字幕も MIN_SECONDS 秒以上出るようにする（テストでも確かめる）。
 
+import { CONFIRMED } from './confirmed.mjs';
+
 export const MIN_SECONDS = 2;
 
 // 短い字幕を前の字幕とまとめたときの文。「前の文＋短い文」→ まとめた文
@@ -15,7 +17,8 @@ const MERGED = {
 
 export function tidyCaptions(anim) {
   const captions = anim.captions.map((c) => ({ ...c }));
-  const out = { ...anim };
+  // 確認済みの印は、確かめた一覧（confirmed.mjs）で決める
+  const out = { ...anim, checked: CONFIRMED.includes(anim.id) };
   // 最初の姿勢の字幕 → 姿勢の文
   if (captions.length > 1 && captions[0].from === 0 && captions[0].to - captions[0].from < MIN_SECONDS) {
     out.posture = captions[0].text;

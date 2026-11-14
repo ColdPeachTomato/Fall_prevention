@@ -140,7 +140,8 @@ export interface SideAnimation extends AnimationBase {
   contacts?: { near?: ContactTarget; far?: ContactTarget }; // 手の接触
   // つかまる所（支持物）の、手を置く点。支えの段階に合わせて、腕だけがここに付く（下半身のキーフレームは共通）
   // hand：片手・指先のときに使う手（省略すると手前側）。体の向こう側のカウンターには、奥側の手でつかまる
-  support?: { x: number; y: number; hand?: 'near' | 'far' };
+  // follow：体（股関節）と一緒に動く。x は股関節からの距離になる（踏み出して体が前へ動く種目で、手がカウンターの上をすべる）
+  support?: { x: number; y: number; hand?: 'near' | 'far'; follow?: boolean };
   // 歩く種目の床の目印。spacing：目印の間隔。perCycle：1往復（アニメの1周）で進む距離（spacing の整数倍）
   floor?: { spacing: number; perCycle: number };
   keyframes: Keyframe[];

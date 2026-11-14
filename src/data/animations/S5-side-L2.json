@@ -3,7 +3,7 @@
   "exercise": "S5",
   "level": 2,
   "view": "side",
-  "checked": false,
+  "checked": true,
   "cycleSeconds": 9.6,
   "countsPerCycle": 2,
   "root": {

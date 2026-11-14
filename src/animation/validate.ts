@@ -217,6 +217,7 @@ export function validateAnimation(input: unknown): AnimationValidation {
   if (isObject(a.support) && a.support.hand !== undefined && a.support.hand !== 'near' && a.support.hand !== 'far') {
     errors.push('support.hand が正しくありません');
   }
+  if (isObject(a.support) && a.support.follow !== undefined && typeof a.support.follow !== 'boolean') errors.push('support.follow が正しくありません');
   if (a.support !== undefined && !(isObject(a.support) && isNumber(a.support.x) && isNumber(a.support.y))) {
     errors.push('support（つかまる所の、手を置く点）が正しくありません');
   }

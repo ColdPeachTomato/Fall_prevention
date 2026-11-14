@@ -232,6 +232,7 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
         </p>
         {paused && <p className="paused">一時停止中</p>}
         <p>{variant.howTo}</p>
+        {support && <p className="muted">つかまり方：{SUPPORT_LABEL[support]}</p>}
         {controls}
         {stopOverlay}
       </main>

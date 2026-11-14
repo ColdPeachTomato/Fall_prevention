@@ -271,7 +271,7 @@ const stanceLeft = { shift: WEIGHT_SHIFT, ...leg('l', legOut(-FOOT, WEIGHT_SHIFT
       fkf(5.7, rest, '下ろす'),
     ],
     captions: [
-      { from: 0, to: 0.3, text: 'つかまって、まっすぐ立ちます' },
+      { from: 0, to: 0.3, text: 'つかまる所のそばに、まっすぐ立ちます' },
       { from: 0.3, to: 2.5, text: '片方の脚を、ゆっくり横へ上げます' },
       { from: 2.5, to: 3.5, text: '上げたまま止めます。上体は傾けません' },
       { from: 3.5, to: 6, text: 'ゆっくり下ろします' },
@@ -305,7 +305,7 @@ const stanceLeft = { shift: WEIGHT_SHIFT, ...leg('l', legOut(-FOOT, WEIGHT_SHIFT
     props: supportProps(WEIGHT_SHIFT),
     highlight: ['r:foot'],
     keyframes: keys,
-    posture: 'つかまって立ち、体重を反対の足に乗せます',
+    posture: 'つかまる所のそばに立ち、体重を反対の足に乗せます',
     captions: [{ from: 0, to: CYCLE, text: 'かかとを床につけたまま、つま先で外へ円を描きます' }],
     reverseCaptions: [{ from: 0, to: CYCLE, text: 'かかとを床につけたまま、つま先で内へ円を描きます' }],
     marks: [{ type: 'arc', from: 0, to: CYCLE, anchor: 'r.heel', dx: 0, dy: 0.045, radius: 0.085, start: -75, sweep: 150 }],

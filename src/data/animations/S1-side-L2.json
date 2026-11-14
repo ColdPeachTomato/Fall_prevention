@@ -4,7 +4,7 @@
   "level": 2,
   "view": "side",
   "cycleSeconds": 7.2,
-  "checked": false,
+  "checked": true,
   "root": {
     "x": 0
   },

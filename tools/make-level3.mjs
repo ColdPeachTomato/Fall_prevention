@@ -86,56 +86,64 @@ const COUNTER = { type: 'counter', x: -0.42, length: 0.8, height: 0.54 };
   });
 }
 
-// ── S9 ランジ（浅め）：1回ごとに片足を前へ踏み出し、浅く腰を落として、足を戻す ──
+// ── S9 ランジ（浅め）：1回ごとに片足を大きく前へ踏み出し、両膝を曲げて浅く腰を落とし、前の足で押して戻る ──
+// 形のよりどころ（一般的なランジの指導内容）：
+//  ・歩幅は、前の膝が足首の真上に来る（つま先より前に出ない）長さにする。歩幅が短いと、前の膝が前へ出てしまう
+//  ・上体はまっすぐ。腰は両足の間に、まっすぐ下ろす
+//  ・後ろの足はかかとを上げ、後ろの膝は腰の下へ下ろす
+//  ・戻るときは、前の足（かかと）で床を押す
+// 高齢者向けの浅い形として、前の膝の曲げは約45度（深いランジは90度）にとどめる
 {
-  const R = -0.2; // 後ろに残る足（奥側）の足首
-  const STEP = 0.16; // 踏み出す幅
-  // 腰の位置（R から）、骨盤の前傾、後ろ足のかかとの上げ具合、前足の位置と浮かせる高さ
-  const pose = (hx, hy, phi, backPitch, frontX, frontLift) => {
+  const R = -0.3; // 後ろに残る足（奥側）の足首
+  const STRIDE = 0.38; // 踏み出す幅（身長160cmで約61cm）
+  // 腰の位置（R から）、骨盤の前傾、後ろ足のかかとの上げ具合、前足の位置・傾き・浮かせる高さ
+  const pose = (hx, hy, phi, backPitch, frontX, frontPitch, frontLift) => {
     const H = { x: R + hx, y: hy };
     const back = legAngles(H, ankleOf(R, backPitch), phi, backPitch);
-    const front = legAngles(H, ankleOf(R + frontX, 0, frontLift), phi, 0);
-    return {
-      ...ARMS,
-      hip: front.hip,
-      knee: front.knee,
-      ankle: front.ankle,
-      farHip: back.hip,
-      farKnee: back.knee,
-      farAnkle: back.ankle,
-      farFootPitch: backPitch,
-    };
+    const front = legAngles(H, ankleOf(R + frontX, frontPitch, frontLift), phi, frontPitch);
+    for (const [name, a] of [['後ろ', back], ['前', front]]) {
+      if (a.ankle > 20 || a.ankle < -45 || a.hip < -15 || a.knee > 130) throw new Error(`S9：${name}の脚の角度が可動域を超えています ${JSON.stringify(a)}`);
+    }
+    return { ...ARMS, hip: front.hip, knee: front.knee, ankle: front.ankle, farHip: back.hip, farKnee: back.knee, farAnkle: back.ankle, farFootPitch: backPitch };
   };
-  const stand = pose(0, 0.53, 0, 0, 0, 0);
-  const swing = pose(0.035, 0.525, 0, 0, STEP / 2, 0.035);
-  const landed = pose(0.075, 0.515, 2, 0, STEP, 0);
-  const bottom = pose(0.115, 0.495, 4, 25, STEP, 0);
+  // いちばん下：前のすねは垂直（膝が足首の真上）、前の膝は約45度。腰は両足の間
+  const KNEE = 45;
+  const bottomX = STRIDE - THIGH * Math.sin(KNEE * RAD);
+  const bottomY = ANKLE_H + SHANK + THIGH * Math.cos(KNEE * RAD);
+  const stand = pose(0, 0.53, 0, 0, 0, 0, 0);
+  const swing = pose(0.09, 0.515, 1, 10, STRIDE / 2, 0, 0.05); // 前の足を浮かせて運ぶ。後ろのかかとが上がり始める
+  const landed = pose(0.19, 0.49, 3, 30, STRIDE, -5, 0); // かかとから着く
+  const bottom = pose(bottomX, bottomY, 4, 45, STRIDE, 0, 0);
+  // 着いてから沈む途中：前の足の裏を床に付ける（途中の姿勢を決めて、足が床にめり込まないようにする）
+  const sinking = pose((0.19 + bottomX) / 2, (0.49 + bottomY) / 2 + 0.004, 3.5, 38, STRIDE, 0, 0);
   save.push({
-    ...sideCommon('S9-side-L3', 'S9', { cycleSeconds: 6.3 }),
+    ...sideCommon('S9-side-L3', 'S9', { cycleSeconds: 6.5 }),
     root: { x: R, side: 'far' },
     plants: { far: { pivot: 'ball', x: round(R + BALL_FRONT) } },
     props: [COUNTER],
-    support: { x: round(R + 0.16), y: 0.54, hand: 'far' }, // 体が前へ動いても、手が体より後ろにならない位置
+    support: { x: 0.12, y: 0.54, hand: 'far', follow: true }, // 体と一緒に、手がカウンターの上を前へすべる（体の少し前）
     highlight: ['near:thigh', 'near:shank'],
     keyframes: [
       skf(0, stand, '足をそろえて立つ'),
       skf(0.3, stand, '動き始め'),
-      skf(1, swing, '片足を前へ出す'),
-      skf(1.7, landed, '足を着く'),
-      skf(2.9, bottom, '浅く腰を落とす'),
-      skf(3.4, bottom, '戻り始め'),
-      skf(4.6, landed, '腰を上げる'),
+      skf(1.2, swing, '片足を前へ出す'),
+      skf(2.1, landed, 'かかとから着く'),
+      skf(2.55, sinking, '足の裏を付けて沈む'),
+      skf(3, bottom, '浅く腰を落とす'),
+      skf(3.5, bottom, '戻り始め'),
+      skf(3.95, sinking, '前の足で押して上がる'),
+      skf(4.4, landed, '前の足で押す'),
       skf(5.3, swing, '足を戻す'),
-      skf(6, stand, '足をそろえる'),
+      skf(6.2, stand, '足をそろえる'),
     ],
     posture: 'カウンターの横に、足をそろえて立ちます',
     captions: [
-      { from: 0, to: 3.4, text: '片足を前に踏み出し、浅く腰を落とします' },
-      { from: 3.4, to: 6.3, text: '前の足で押して、足を戻します' },
+      { from: 0, to: 3.5, text: '片足を大きく前に踏み出し、浅く腰を落とします' },
+      { from: 3.5, to: 6.5, text: '前の足で床を押して、足を戻します' },
     ],
     marks: [
-      UPRIGHT_LINE(6.3),
-      { type: 'arrow', from: 1.7, to: 2.8, anchor: 'hip', dx: -0.1, dy: 0.04, angle: 180, length: 0.08 },
+      UPRIGHT_LINE(6.5),
+      { type: 'arrow', from: 2.1, to: 3, anchor: 'hip', dx: -0.1, dy: 0.04, angle: 180, length: 0.08 },
     ],
   });
 }
@@ -388,7 +396,7 @@ const box = { minX: -0.62, maxX: 0.36, minY: -0.075, maxY: 1.06 };
     props: supportProps,
     highlight: ['r:shank', 'r:foot'],
     keyframes: keys,
-    posture: 'つかまって立ち、体重を反対の足に乗せます',
+    posture: 'つかまる所のそばに立ち、体重を反対の足に乗せます',
     captions,
     marks,
   });

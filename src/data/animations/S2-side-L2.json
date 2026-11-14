@@ -3,7 +3,7 @@
   "exercise": "S2",
   "level": 2,
   "view": "side",
-  "checked": false,
+  "checked": true,
   "cycleSeconds": 5.7,
   "root": {
     "x": -0.17

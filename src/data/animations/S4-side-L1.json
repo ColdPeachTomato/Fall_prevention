@@ -3,7 +3,7 @@
   "exercise": "S4",
   "level": 1,
   "view": "side",
-  "checked": false,
+  "checked": true,
   "cycleSeconds": 6,
   "root": {
     "mode": "seat",

@@ -4,15 +4,15 @@
   "level": 3,
   "view": "side",
   "checked": false,
-  "cycleSeconds": 6.3,
+  "cycleSeconds": 6.5,
   "root": {
-    "x": -0.2,
+    "x": -0.3,
     "side": "far"
   },
   "plants": {
     "far": {
       "pivot": "ball",
-      "x": -0.12
+      "x": -0.22
     }
   },
   "props": [
@@ -24,9 +24,10 @@
     }
   ],
   "support": {
-    "x": -0.04,
+    "x": 0.12,
     "y": 0.54,
-    "hand": "far"
+    "hand": "far",
+    "follow": true
   },
   "highlight": [
     "near:thigh",
@@ -68,89 +69,123 @@
       "label": "動き始め"
     },
     {
-      "t": 1,
+      "t": 1.2,
       "pose": {
         "spine": 0,
         "neck": 0,
         "shoulder": 3,
         "elbow": 8,
-        "hip": 28.3639,
-        "knee": 45.2346,
-        "ankle": 16.8707,
-        "farHip": 2.973,
-        "farKnee": 14.1553,
-        "farAnkle": 11.1823,
-        "farFootPitch": 0
+        "hip": 41.2454,
+        "knee": 53.951,
+        "ankle": 13.7056,
+        "farHip": 7.8372,
+        "farKnee": 33.7059,
+        "farAnkle": 16.8687,
+        "farFootPitch": 10
       },
       "label": "片足を前へ出す"
     },
     {
-      "t": 1.7,
+      "t": 2.1,
       "pose": {
         "spine": 0,
         "neck": 0,
         "shoulder": 3,
         "elbow": 8,
-        "hip": 22.1526,
-        "knee": 20.0147,
-        "ankle": -0.1379,
-        "farHip": 4.1337,
-        "farKnee": 22.13,
-        "farAnkle": 19.9963,
-        "farFootPitch": 0
+        "hip": 34.7714,
+        "knee": 18.2683,
+        "ankle": -8.5032,
+        "farHip": 6.8191,
+        "farKnee": 49.5324,
+        "farAnkle": 15.7134,
+        "farFootPitch": 30
       },
-      "label": "足を着く"
+      "label": "かかとから着く"
     },
     {
-      "t": 2.9,
+      "t": 2.55,
       "pose": {
         "spine": 0,
         "neck": 0,
         "shoulder": 3,
         "elbow": 8,
-        "hip": 30.7372,
-        "knee": 42.1126,
-        "ankle": 15.3754,
-        "farHip": 19.5105,
-        "farKnee": 55.0297,
-        "farAnkle": 14.5193,
-        "farFootPitch": 25
+        "hip": 40.576,
+        "knee": 29.1514,
+        "ankle": -7.9247,
+        "farHip": 11.3084,
+        "farKnee": 58.6301,
+        "farAnkle": 12.8217,
+        "farFootPitch": 38
+      },
+      "label": "足の裏を付けて沈む"
+    },
+    {
+      "t": 3,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 49,
+        "knee": 45,
+        "ankle": 0,
+        "farHip": 15.8571,
+        "farKnee": 68.7621,
+        "farAnkle": 11.905,
+        "farFootPitch": 45
       },
       "label": "浅く腰を落とす"
     },
     {
-      "t": 3.4,
+      "t": 3.5,
       "pose": {
         "spine": 0,
         "neck": 0,
         "shoulder": 3,
         "elbow": 8,
-        "hip": 30.7372,
-        "knee": 42.1126,
-        "ankle": 15.3754,
-        "farHip": 19.5105,
-        "farKnee": 55.0297,
-        "farAnkle": 14.5193,
-        "farFootPitch": 25
+        "hip": 49,
+        "knee": 45,
+        "ankle": 0,
+        "farHip": 15.8571,
+        "farKnee": 68.7621,
+        "farAnkle": 11.905,
+        "farFootPitch": 45
       },
       "label": "戻り始め"
     },
     {
-      "t": 4.6,
+      "t": 3.95,
       "pose": {
         "spine": 0,
         "neck": 0,
         "shoulder": 3,
         "elbow": 8,
-        "hip": 22.1526,
-        "knee": 20.0147,
-        "ankle": -0.1379,
-        "farHip": 4.1337,
-        "farKnee": 22.13,
-        "farAnkle": 19.9963,
-        "farFootPitch": 0
+        "hip": 40.576,
+        "knee": 29.1514,
+        "ankle": -7.9247,
+        "farHip": 11.3084,
+        "farKnee": 58.6301,
+        "farAnkle": 12.8217,
+        "farFootPitch": 38
       },
-      "label": "腰を上げる"
+      "label": "前の足で押して上がる"
+    },
+    {
+      "t": 4.4,
+      "pose": {
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "hip": 34.7714,
+        "knee": 18.2683,
+        "ankle": -8.5032,
+        "farHip": 6.8191,
+        "farKnee": 49.5324,
+        "farAnkle": 15.7134,
+        "farFootPitch": 30
+      },
+      "label": "前の足で押す"
     },
     {
       "t": 5.3,
@@ -159,18 +194,18 @@
         "neck": 0,
         "shoulder": 3,
         "elbow": 8,
-        "hip": 28.3639,
-        "knee": 45.2346,
-        "ankle": 16.8707,
-        "farHip": 2.973,
-        "farKnee": 14.1553,
-        "farAnkle": 11.1823,
-        "farFootPitch": 0
+        "hip": 41.2454,
+        "knee": 53.951,
+        "ankle": 13.7056,
+        "farHip": 7.8372,
+        "farKnee": 33.7059,
+        "farAnkle": 16.8687,
+        "farFootPitch": 10
       },
       "label": "足を戻す"
     },
     {
-      "t": 6,
+      "t": 6.2,
       "pose": {
         "spine": 0,
         "neck": 0,
@@ -191,20 +226,20 @@
   "captions": [
     {
       "from": 0,
-      "to": 3.4,
-      "text": "片足を前に踏み出し、浅く腰を落とします"
+      "to": 3.5,
+      "text": "片足を大きく前に踏み出し、浅く腰を落とします"
     },
     {
-      "from": 3.4,
-      "to": 6.3,
-      "text": "前の足で押して、足を戻します"
+      "from": 3.5,
+      "to": 6.5,
+      "text": "前の足で床を押して、足を戻します"
     }
   ],
   "marks": [
     {
       "type": "line",
       "from": 0,
-      "to": 6.3,
+      "to": 6.5,
       "anchor": "hip",
       "dx": 0,
       "dy": 0.3,
@@ -213,8 +248,8 @@
     },
     {
       "type": "arrow",
-      "from": 1.7,
-      "to": 2.8,
+      "from": 2.1,
+      "to": 3,
       "anchor": "hip",
       "dx": -0.1,
       "dy": 0.04,
