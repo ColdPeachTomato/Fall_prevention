@@ -97,6 +97,11 @@ const w1 = {
 // ── W2 腕回し（座って）──────────────────────────────────────
 // 指先を肩に置き、両肘で同時に大きな円を描く。
 // 正の向きの再生：前→上→後ろ→下（後ろ回し）。逆向きの再生が前回し。
+// 0〜1 を、なめらかに立ち上がる 0〜1 にする
+const smooth = (v) => {
+  const x = Math.max(0, Math.min(1, v));
+  return x * x * (3 - 2 * x);
+};
 const W2_CYCLE = 4;
 const W2_NAMES = ['肘を下げる', '下から前へ', '前へ', '前から上へ', '上へ', '上から後ろへ', '後ろへ', '後ろから下へ'];
 function elbowDirection(theta) {
@@ -128,8 +133,10 @@ for (let i = 0; i < 8; i++) {
     rShoulderUp: round(SHOULDER_MOVE.up * e[1]),
     rElbowOut: round(e[0]),
     rElbowUp: round(e[1]),
-    // 肘の前後：前に来たとき 1、後ろへ行ったとき -1 に近づく（腕の濃さと、手との重なりに使う。濃くするのは手前だけ）
+    // 肘の前後：前に来たとき 1、後ろへ行ったとき -1 に近づく（腕の濃さに使う。濃くするのは手前だけ）
     rElbowDepth: round(Math.max(-1, Math.min(1, e[2] > 0 ? e[2] : e[2] * 1.8))),
+    // 肘が前に来ると、腕が拳に少し重なる（直径の3割まで。なめらかに増える）
+    rHandCover: round(0.3 * smooth(e[2] / 0.6)),
     rHandOut: round(hand[0]),
     rHandUp: round(hand[1]),
   };
@@ -215,10 +222,10 @@ const SPREAD = 55; // 引き広げたときの、前からの開き
 function bandPose(alpha, scapula) {
   const out = round(Math.sin(alpha * RAD) * Math.cos(DOWN * RAD));
   const up = round(-Math.sin(DOWN * RAD));
-  // 後ろから見るので、前に伸ばした腕は奥（負）：手がいちばん奥、肘はその4割。肘が手より手前なので、腕が拳に少し重なる。
-  // バンドを緩めて腕が前を向くほど、重なりが増える（拳が消えることはない。色の濃さは変わらない）
-  const forward = Math.cos(alpha * RAD) * Math.cos(DOWN * RAD);
-  return { ...LEGS, scapula, rElbowOut: out, rElbowUp: up, rElbowDepth: round(-forward * 0.4), rHandOut: out, rHandUp: up, rHandDepth: round(-forward) };
+  // 後ろから見ると、拳は腕の向こう側にある。腕を広げているときは拳がすべて見え（0割）、
+  // 拳が内側に寄るほど腕に隠れていき、バンドを緩めきったときは直径の8割が隠れる（2026-11-14 利用者の指示。拳は消えない）
+  const cover = round(0.8 * (1 - Math.sin(alpha * RAD) / Math.sin(SPREAD * RAD)));
+  return { ...LEGS, scapula, rElbowOut: out, rElbowUp: up, rHandOut: out, rHandUp: up, rHandCover: cover };
 }
 const s8 = {
   ...common('S8-back-L1', 'S8', 'back', box(0.47), { cycleSeconds: 8 }),

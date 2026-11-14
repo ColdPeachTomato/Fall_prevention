@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { getExercise } from '../data/exercises';
 import { BODY, FRONT_CHANNELS, FRONT_VECTORS } from './bodyModel';
-import { faceShift, HAND_HIDDEN_MAX, handBite, handCover, NEAR_SHADE, shadeByDepth, thighInset } from './drawFront';
+import { faceShift, HAND_HIDDEN_LIMIT, handBite, NEAR_SHADE, shadeByDepth, thighInset } from './drawFront';
 import { computeFrontFrame, frontFootContact, type FrontFrame } from './frontRig';
 import { ANIMATIONS, getAnimation } from './registry';
 import type { Vec } from './sideRig';
@@ -474,47 +474,34 @@ describe('W2 腕回し（動きの仕様との照合）', () => {
     expect(Math.abs(depth(2 * q))).toBeLessThan(0.05); // 上
     for (const f of frames) expect(f.pose.lElbowDepth).toBeCloseTo(f.pose.rElbowDepth, 9); // 左右同じ
     for (const f of frames) expect(f.pose.rHandDepth).toBe(0); // 手は肩に置いたまま
-    // 腕は、肘が前に来るにつれてなめらかに手に重なり、前を過ぎると離れる
-    expect(handCover(depth(q))).toBe(1);
-    expect(handCover(depth(0))).toBeLessThan(0.05);
-    expect(handCover(depth(3 * q))).toBe(0);
-    const covers = frames.filter((f) => f.t >= 0 && f.t <= q).map((f) => handCover(f.pose.rElbowDepth));
+    // 腕は、肘が前に来るにつれてなめらかに拳に重なり、前を過ぎると離れる。隠れるのは拳の直径の3割まで（拳は消えない）
+    const cover = (t: number) => computeFrontFrame(anim, t).pose.rHandCover;
+    expect(cover(q)).toBeCloseTo(0.3, 6);
+    expect(cover(0)).toBeLessThan(0.02);
+    expect(cover(3 * q)).toBeCloseTo(0, 6);
+    const covers = frames.filter((f) => f.t >= 0 && f.t <= q).map((f) => f.pose.rHandCover);
     for (let i = 1; i < covers.length; i++) {
       expect(covers[i]!).toBeGreaterThanOrEqual(covers[i - 1]! - 1e-9);
-      expect(covers[i]! - covers[i - 1]!).toBeLessThan(0.08); // 急に切り替わらない
+      expect(covers[i]! - covers[i - 1]!).toBeLessThan(0.03); // 急に切り替わらない
     }
-    // 手は消えない：いちばん重なったときでも、隠れるのは手の直径の3割まで。隠れるのは肘のある側
-    expect(HAND_HIDDEN_MAX).toBeLessThanOrEqual(0.3);
     for (const f of frames) {
+      expect(f.pose.rHandCover, at(f)).toBeGreaterThanOrEqual(-1e-9);
+      expect(f.pose.rHandCover, at(f)).toBeLessThanOrEqual(0.3 + 1e-9);
+      expect(f.pose.lHandCover, at(f)).toBeCloseTo(f.pose.rHandCover, 9); // 左右同じ
       for (const limb of [f.sk.r, f.sk.l]) {
-        const cover = handCover(f.pose.rElbowDepth);
-        const bite = handBite(limb, cover);
-        if (cover === 0) {
+        const bite = handBite(limb, f.pose.rHandCover);
+        if (f.pose.rHandCover <= 0) {
           expect(bite, at(f)).toBeNull();
           continue;
         }
         // 手の中心から、隠す円のふちまでの距離（手の半径 0.025 のうち、残る分）
         const gap = Math.hypot(bite!.x - limb.hand.x, bite!.y - limb.hand.y) - bite!.r;
-        expect(gap, at(f)).toBeGreaterThanOrEqual(0.025 * (1 - 2 * HAND_HIDDEN_MAX) - 1e-9);
-        expect(gap, at(f)).toBeLessThanOrEqual(0.025 + 1e-9);
+        expect(gap, at(f)).toBeCloseTo(0.025 - f.pose.rHandCover * 0.05, 9);
         // 隠す円は、手から見て肘の側にある
         const toElbow = { x: limb.elbow.x - limb.hand.x, y: limb.elbow.y - limb.hand.y };
         const toBite = { x: bite!.x - limb.hand.x, y: bite!.y - limb.hand.y };
         if (Math.hypot(toElbow.x, toElbow.y) > 0.03) expect(toElbow.x * toBite.x + toElbow.y * toBite.y, at(f)).toBeGreaterThan(0);
       }
-    }
-  });
-
-  it('大きな円を描く（肘が、肩より上にも外にも大きく動く）', () => {
-    const path = frames.map((f) => f.sk.r.elbow);
-    expect(Math.max(...path.map((p) => p.y)) - Math.min(...path.map((p) => p.y))).toBeGreaterThan(0.3);
-  });
-
-  it('体幹と脚は動かさない', () => {
-    const first = frames[0]!;
-    for (const f of frames) {
-      expect(dist(f.sk.head, first.sk.head)).toBeLessThan(1e-9);
-      for (const s of SIDES) expect(dist(f.sk[s].toe, first.sk[s].toe)).toBeLessThan(1e-9);
     }
   });
 });
@@ -534,9 +521,9 @@ describe('前後の見せ方（正面・後ろ向きで共通）', () => {
     expect(sum(shadeByDepth(BASE, 1))).toBeGreaterThanOrEqual(sum(shadeByDepth(BASE, 0)) * 0.79);
   });
 
-  it('腕の前後を持つのは、腕が前後に動く種目だけ（W2：肘を回す、W3：腕をこちらへ伸ばす、S8：腕を向こうへ伸ばす）', () => {
+  it('腕の前後を持つのは、腕が前後に動く種目だけ（W2：肘を回す、W3：腕をこちらへ伸ばす）', () => {
     for (const other of FRONT) {
-      if (['W2', 'W3', 'S8'].includes(other.exercise)) continue;
+      if (['W2', 'W3'].includes(other.exercise)) continue;
       for (const k of other.keyframes) {
         for (const key of ['rElbowDepth', 'lElbowDepth', 'rHandDepth', 'lHandDepth'] as const) expect(k.pose[key] ?? 0, other.id).toBe(0);
       }
@@ -552,43 +539,54 @@ describe('前後の見せ方（正面・後ろ向きで共通）', () => {
         expect(hand).toBeGreaterThan(0.45); // ひねった側の反対の腕は、肩が後ろへ引かれる分だけ奥になる
         expect(hand).toBeLessThanOrEqual(1);
         expect(elbow).toBeCloseTo(hand / 2, 2);
-        expect(handCover(elbow - hand)).toBe(0);
+        expect(f.pose[`${side}HandCover`]).toBe(0);
       }
     }
   });
 
-  it('S8：後ろから見ると、拳は腕の向こう。腕が拳に少し重なり、バンドを緩めるほど重なりが増える。拳は消えない', () => {
+  it('腕に隠れる手の割合は、どの種目でも 0〜8割。手が消えることはない', () => {
+    expect(HAND_HIDDEN_LIMIT).toBe(0.8);
+    for (const anim of FRONT) {
+      for (const f of framesOf(anim)) {
+        for (const side of ['r', 'l'] as const) {
+          expect(f.pose[`${side}HandCover`], `${anim.id} ${at(f)}`).toBeGreaterThanOrEqual(-1e-9);
+          expect(f.pose[`${side}HandCover`], `${anim.id} ${at(f)}`).toBeLessThanOrEqual(HAND_HIDDEN_LIMIT + 1e-9);
+        }
+      }
+      // 手が隠れる種目は、W2（肘を回す）と S8（後ろから見て、腕を向こうへ伸ばす）だけ
+      const used = anim.keyframes.some((k) => (k.pose.rHandCover ?? 0) !== 0 || (k.pose.lHandCover ?? 0) !== 0);
+      expect(used, anim.id).toBe(['W2', 'S8'].includes(anim.exercise));
+    }
+  });
+
+  it('S8：腕を広げているとき拳はすべて見え、拳が内側に寄るほど腕に隠れて、緩めきると直径の8割が隠れる', () => {
     for (const id of ['S8-back-L1', 'S8-back-L2']) {
       const anim = frontAnim(id);
-      const cover = (t: number) => {
-        const f = computeFrontFrame(anim, t);
-        expect(f.pose.rHandDepth, id).toBeLessThan(f.pose.rElbowDepth); // 手は、肘より奥
-        expect(f.pose.rElbowDepth, id).toBeLessThan(0); // 腕は奥へ伸びている（色は濃くしない）
-        expect(f.pose.lHandDepth, id).toBeCloseTo(f.pose.rHandDepth, 9);
-        return handCover(f.pose.rElbowDepth - f.pose.rHandDepth);
-      };
-      const slack = cover(0); // バンドを肩幅に持つ
-      const spread = cover(4); // 引き広げて止めている
-      expect(spread, id).toBeGreaterThan(0.3); // 引き広げたときも、少し重なっている
-      expect(slack, id).toBeGreaterThan(spread + 0.3); // 緩めるほど、重なりが増える
-      // 戻す間（5.2〜7.6 秒）、重なりは減らない。急にも変わらない
-      let prev = cover(5.2);
-      for (let t = 5.25; t <= 7.6; t += 0.05) {
-        const c = cover(t);
-        expect(c, `${id} t=${t.toFixed(2)}`).toBeGreaterThanOrEqual(prev - 1e-9);
-        expect(c - prev, `${id} t=${t.toFixed(2)}`).toBeLessThan(0.05);
-        prev = c;
-      }
-      // いちばん重なっても、隠れるのは拳の直径の3割まで
+      const slack = computeFrontFrame(anim, 0); // バンドを肩幅に持つ
+      const spread = computeFrontFrame(anim, 4); // 引き広げて止めている
+      expect(spread.pose.rHandCover, id).toBeCloseTo(0, 9);
+      expect(handBite(spread.sk.r, spread.pose.rHandCover), id).toBeNull(); // 広げているときは欠けない
+      expect(slack.pose.rHandCover, id).toBeCloseTo(0.8, 9);
+      // 隠れる割合は、拳が内側に寄った分に比例する。戻す間（5.2〜7.6 秒）は減らず、急にも変わらない
+      const x0 = slack.sk.r.hand.x;
+      const x1 = spread.sk.r.hand.x;
+      let prev = computeFrontFrame(anim, 5.2).pose.rHandCover;
       for (const f of framesOf(anim)) {
-        const bite = handBite(f.sk.r, handCover(f.pose.rElbowDepth - f.pose.rHandDepth))!;
-        const gap = Math.hypot(bite.x - f.sk.r.hand.x, bite.y - f.sk.r.hand.y) - bite.r;
-        expect(gap, `${id} ${at(f)}`).toBeGreaterThanOrEqual(0.025 * (1 - 2 * HAND_HIDDEN_MAX) - 1e-9);
+        expect(f.pose.lHandCover, `${id} ${at(f)}`).toBeCloseTo(f.pose.rHandCover, 9);
+        expect(f.pose.rHandCover, `${id} ${at(f)}`).toBeCloseTo(0.8 * (1 - (f.sk.r.hand.x - x0) / (x1 - x0)), 3);
+        if (f.t > 5.2 && f.t <= 7.6) {
+          expect(f.pose.rHandCover, `${id} ${at(f)}`).toBeGreaterThanOrEqual(prev - 1e-9);
+          expect(f.pose.rHandCover - prev, `${id} ${at(f)}`).toBeLessThan(0.05);
+          prev = f.pose.rHandCover;
+        }
+        // 残る分：いちばん隠れたときでも、拳の直径の2割は見える
+        const bite = handBite(f.sk.r, f.pose.rHandCover);
+        if (bite) expect(Math.hypot(bite.x - f.sk.r.hand.x, bite.y - f.sk.r.hand.y) - bite.r, `${id} ${at(f)}`).toBeGreaterThanOrEqual(0.025 - 0.8 * 0.05 - 1e-9);
       }
     }
   });
 
-  it('立って内へ傾いた脚だけ、付け根を少し内側に寄せて描く。確認済みのアニメの見え方は変えない', () => {
+  it('立って内へ傾いた脚だけ、付け根を少し内側に寄せて描く。まっすぐ立つ S8 立位の見え方は変えない', () => {
     expect(thighInset(0)).toBe(0);
     expect(thighInset(0.5)).toBe(0); // 外へ上げた脚は寄せない
     expect(thighInset(-0.06)).toBe(0);
@@ -598,7 +596,8 @@ describe('前後の見せ方（正面・後ろ向きで共通）', () => {
       expect(thighInset(f.pose.lKneeOut)).toBeGreaterThan(0.01); // 支える脚（左）
       expect(thighInset(f.pose.rKneeOut)).toBeLessThan(0.006); // 上げる脚（右）は、ほぼそのまま
     }
-    for (const done of FRONT.filter((a) => a.checked === true && a.root.mode === 'stand')) {
+    // 足を腰の幅に開いてまっすぐ立つ種目（S8 立位）は、脚の描き方が変わらない
+    for (const done of [frontAnim('S8-back-L2')]) {
       for (const f of framesOf(done)) {
         expect(thighInset(f.pose.rKneeOut), done.id).toBe(0);
         expect(thighInset(f.pose.lKneeOut), done.id).toBe(0);

@@ -34,34 +34,28 @@ export function shadeByDepth(hex: string, depth: number): string {
   return `rgb(${rgb.map((c) => Math.round(c * (1 - NEAR_SHADE * d))).join(', ')})`;
 }
 
-// 手前にある腕が、手にどれだけ重なるか（0：重ならない、1：いちばん重なる）。
-// depth：肘が手よりどれだけ手前にあるか。肘が前に来るにつれて、なめらかに増える
-export function handCover(depth: number): number {
-  const x = Math.max(0, Math.min(1, depth / 0.6));
-  return x * x * (3 - 2 * x);
-}
-
-// 腕がいちばん重なったときに隠れる、手の直径の割合。手が消えることはなく、少し欠けて見えるだけにする
-export const HAND_HIDDEN_MAX = 0.3;
+// 腕に隠れる手の割合（手の直径に対して）は、種目ごとにキーフレームの HandCover で決める。
+// その上限。どの種目でも、手が消えることはない
+export const HAND_HIDDEN_LIMIT = 0.8;
 // 手に重なる腕のふちの丸み（半径）
 const ARM_EDGE = 0.036;
 
-// 手のうち、腕に隠れる部分（円で表す）。隠れるのは肘のある側。cover が 0 なら隠れない
-export function handBite(limb: Pick<FrontLimb, 'hand' | 'elbow' | 'sign'>, cover: number): { x: number; y: number; r: number } | null {
-  if (cover <= 0) return null;
+// 手のうち、腕に隠れる部分（円で表す）。隠れるのは肘のある側。hidden：隠れる割合（手の直径に対して）。0 なら隠れない
+export function handBite(limb: Pick<FrontLimb, 'hand' | 'elbow' | 'sign'>, hidden: number): { x: number; y: number; r: number } | null {
+  if (hidden <= 0) return null;
   // 肘が手のすぐ近くに重なって見えるときは、下・外の側から隠す（向きが急に変わらないよう、少しだけ足しておく）
   const dx = limb.elbow.x - limb.hand.x + limb.sign * 0.008;
   const dy = limb.elbow.y - limb.hand.y - 0.008;
   const n = Math.hypot(dx, dy);
-  const reach = SHAPE.hand + ARM_EDGE - Math.min(1, cover) * HAND_HIDDEN_MAX * 2 * SHAPE.hand;
+  const reach = SHAPE.hand + ARM_EDGE - Math.min(HAND_HIDDEN_LIMIT, hidden) * 2 * SHAPE.hand;
   return { x: limb.hand.x + (dx / n) * reach, y: limb.hand.y + (dy / n) * reach, r: ARM_EDGE };
 }
 
 // 手。腕より手前に描いたうえで、腕が重なる分だけ、手の肘の側を腕の色で覆う（袖口が手に少しかぶさるように見える）。
 // 覆う所は手の円の中だけなので、下に腕が描かれていなくても、欠けた所に穴が開かない。sleeve：腕の、手首の側の色
-function hand(ctx: Ctx, limb: FrontLimb, cover: number, sleeve: string, px: number): void {
+function hand(ctx: Ctx, limb: FrontLimb, hidden: number, sleeve: string, px: number): void {
   circle(ctx, limb.hand, SHAPE.hand, STYLE.skin, px);
-  const bite = handBite(limb, cover);
+  const bite = handBite(limb, hidden);
   if (!bite) return;
   ctx.save();
   ctx.beginPath();
@@ -465,8 +459,8 @@ export function drawFrontFrame(ctx: Ctx, anim: FrontAnimation, f: FrontFrame, o:
   const arms = () => {
     // 胸を回したとき、前に出ている側の肩の腕を後に描く（手前に来る）
     const order: BodySide[] = sk.turn > 0 ? ['r', 'l'] : ['l', 'r'];
-    // 肘と手の前後（ElbowDepth・HandDepth）で、腕の濃さと、手との重なりを変える：
-    // 手前にある所ほど少し濃くする（肩は元の色。奥は元の色のまま）。肘が手より手前に来ると、腕が手に少し重なる
+    // 肘と手の前後（ElbowDepth・HandDepth）で、腕の濃さを変える：手前にある所ほど少し濃くする（肩は元の色。奥は元の色のまま）。
+    // 腕が手に重なる割合は HandCover で決める
     const shaded = (from: Vec, to: Vec, base: string, depthFrom: number, depthTo: number): string | CanvasGradient => {
       if (depthFrom <= 0 && depthTo <= 0) return base;
       if (Math.hypot(to.x - from.x, to.y - from.y) < 0.004) return shadeByDepth(base, depthTo);
@@ -483,8 +477,8 @@ export function drawFrontFrame(ctx: Ctx, anim: FrontAnimation, f: FrontFrame, o:
       const fore = color('forearm', STYLE.top, side);
       capsule(ctx, limb.shoulder, limb.elbow, SHAPE.upperArm[0], SHAPE.upperArm[1], shaded(limb.shoulder, limb.elbow, upper, 0, elbowDepth), px);
       capsule(ctx, limb.elbow, limb.wrist, SHAPE.forearm[0], SHAPE.forearm[1], shaded(limb.elbow, limb.wrist, fore, elbowDepth, handDepth), px);
-      // 手は消さない。肘が手より手前に来たときだけ、肘の側が少し欠けて見える
-      hand(ctx, limb, handCover(elbowDepth - handDepth), shadeByDepth(fore, handDepth), px);
+      // 手は消さない。腕が重なる分だけ、肘の側が欠けて見える
+      hand(ctx, limb, f.pose[`${side}HandCover`], shadeByDepth(fore, handDepth), px);
     }
   };
   const body = () => {

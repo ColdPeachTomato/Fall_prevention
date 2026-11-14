@@ -171,6 +171,7 @@ describe('アニメの登録', () => {
       'S7-side-L2',
       // S8-back-L1・L2 は、拳への腕の重なりを足したので外した（2026-11-14。もう一度確かめてもらう）
       'S9-side-L3',
+      'D1-front-L3',
     ];
     for (const anim of ANIMATIONS) expect(anim.checked === true, anim.id).toBe(confirmed.includes(anim.id));
   });

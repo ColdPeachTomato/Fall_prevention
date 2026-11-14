@@ -3,7 +3,7 @@
   "exercise": "D1",
   "level": 3,
   "view": "front",
-  "checked": false,
+  "checked": true,
   "cycleSeconds": 15,
   "root": {
     "mode": "stand",
