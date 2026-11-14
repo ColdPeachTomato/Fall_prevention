@@ -222,7 +222,7 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
       <main className="screen player">
         {header}
         <h1>{ex.name}</h1>
-        {/* 何のための運動かを、始める前に伝える。運動中は、回数が下へ押し出されないよう出さない */}
+        {/* 何のための運動かを伝える一文。運動中の画面にも同じ場所に出す */}
         <p className="purpose">{ex.purpose}</p>
         {(step.side || direction) && <p className="side">{[step.side && SIDE_LABEL[step.side], direction?.label].filter(Boolean).join('　')}</p>}
         {/* 始める前に、最初の姿勢を見せる */}
@@ -257,6 +257,7 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
     <main className="screen player">
       {header}
       <h1>{ex.name}</h1>
+      <p className="purpose">{ex.purpose}</p>
       {(step.side || direction || step.sets > 1) && (
         <p className="muted">
           {(step.side || direction) && <span className="side">{[step.side && SIDE_LABEL[step.side], direction?.label].filter(Boolean).join('　')}　</span>}

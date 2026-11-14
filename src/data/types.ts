@@ -12,7 +12,7 @@ export type Posture = 'sitting' | 'standing';
 export interface Exercise {
   id: string;
   name: string;
-  // 何のための運動かを伝える一文（やさしい言葉で、17文字以内。スマホの画面で1行に収める。治療や予防の効果をうたわない）。始める前の画面に出す
+  // 何のための運動かを伝える一文（やさしい言葉で、17文字以内。スマホの画面で1行に収める。治療や予防の効果をうたわない）。運動名のすぐ下に出す
   purpose: string;
   category: Category;
   highRisk: boolean; // true の種目はメニューで明示的に選んだときだけ表示
