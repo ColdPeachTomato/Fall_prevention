@@ -15,6 +15,7 @@ export const STYLE = {
   bottomFar: '#8593a0',
   skin: '#e9c6a0',
   skinFar: '#f0dcc4',
+  hair: '#2b2623', // 頭髪。こちら向きは額まで、向こう向きは後頭部から首まで覆い、向きが分かるようにする
   shoe: '#5b4636',
   shoeFar: '#a39486',
   highlight: '#e8743b', // 動かしている部位
@@ -341,10 +342,31 @@ export function drawFrame(ctx: Ctx, anim: SideAnimation, f: Frame, o: DrawOption
     STYLE.skin,
     px,
   );
-  ctx.beginPath();
-  ctx.ellipse(sk.head.x, sk.head.y, SHAPE.headLong, SHAPE.headShort, ((90 - sk.headAngle) * Math.PI) / 180, 0, Math.PI * 2);
+  const headPath = () => {
+    ctx.beginPath();
+    ctx.ellipse(sk.head.x, sk.head.y, SHAPE.headLong, SHAPE.headShort, ((90 - sk.headAngle) * Math.PI) / 180, 0, Math.PI * 2);
+  };
+  headPath();
   ctx.fillStyle = color('head', STYLE.skin, false);
   ctx.fill();
+  // 頭髪：頭の上から後ろを、うなじまで覆う（額と顔は出す）
+  const hp = (f: number, u: number): [number, number] => [sk.head.x + forward.x * f + up.x * u, sk.head.y + forward.y * f + up.y * u];
+  ctx.save();
+  headPath();
+  ctx.clip();
+  ctx.beginPath();
+  ctx.moveTo(...hp(0.1, 0.1));
+  ctx.lineTo(...hp(0.1, 0.036));
+  ctx.lineTo(...hp(0.03, 0.03));
+  ctx.quadraticCurveTo(...hp(0.0, 0.02), ...hp(-0.006, -0.012));
+  ctx.lineTo(...hp(-0.014, -0.05));
+  ctx.lineTo(...hp(-0.1, -0.05));
+  ctx.lineTo(...hp(-0.1, 0.1));
+  ctx.closePath();
+  ctx.fillStyle = STYLE.hair;
+  ctx.fill();
+  ctx.restore();
+  headPath();
   ctx.lineWidth = SHAPE.outlinePx * px;
   ctx.strokeStyle = STYLE.outline;
   ctx.stroke();

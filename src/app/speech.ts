@@ -1,6 +1,8 @@
 // 音声の読み上げ。端末の読み上げ機能（Web Speech API）を使う。
 // 実機で聞いて不十分なら録音音声に差し替えられるよう、呼び出し側は Speaker の形だけを使う。
-// 読み上げの文は speechTexts.ts にまとめてある。
+// 読み上げの文は speechTexts.ts にまとめてある。漢字の読み方は readings.ts で直す。
+
+import { toReading } from './readings';
 
 export interface Speaker {
   say(text: string): void; // 順番待ちに入れて読み上げる
@@ -17,7 +19,8 @@ export const speaker: Speaker = {
   say(text) {
     try {
       if (!('speechSynthesis' in window) || text === '') return;
-      const utterance = new SpeechSynthesisUtterance(text);
+      // 画面の文はそのまま、読み上げだけ自然な読み方に直す（例：肩甲骨 → けんこうこつ）
+      const utterance = new SpeechSynthesisUtterance(toReading(text));
       utterance.lang = 'ja-JP';
       utterance.rate = 0.95; // 少しゆっくり
       const voice = japaneseVoice();

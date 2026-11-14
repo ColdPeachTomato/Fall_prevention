@@ -114,9 +114,35 @@ function scapulae(ctx: Ctx, sk: FrontSkeleton, fill: string, px: number): void {
 function head(ctx: Ctx, sk: FrontSkeleton, fill: string, px: number): void {
   capsule(ctx, sk.neckBase, sk.head, SHAPE.neck[0], SHAPE.neck[1], STYLE.skin, px);
   const tilt = Math.atan2(sk.up.x, sk.up.y);
-  ctx.beginPath();
-  ctx.ellipse(sk.head.x, sk.head.y, FRONT_SHAPE.headWide, FRONT_SHAPE.headTall, tilt, 0, Math.PI * 2);
+  const headPath = () => {
+    ctx.beginPath();
+    ctx.ellipse(sk.head.x, sk.head.y, FRONT_SHAPE.headWide, FRONT_SHAPE.headTall, tilt, 0, Math.PI * 2);
+  };
+  headPath();
   outline(ctx, fill, px);
+  // 頭髪で、こちら向きか向こう向きかを見分けられるようにする。
+  // 正面：額のあたりまで。後ろ向き：後頭部から首のあたりまで、頭全体を覆う
+  const hp = (a: number, u: number): [number, number] => [sk.head.x + sk.across.x * a + sk.up.x * u, sk.head.y + sk.across.y * a + sk.up.y * u];
+  ctx.save();
+  headPath();
+  ctx.clip();
+  ctx.beginPath();
+  if (sk.view === 'back') {
+    ctx.rect(sk.head.x - 0.1, sk.head.y - 0.1, 0.2, 0.2);
+  } else {
+    ctx.moveTo(...hp(-0.08, 0.1));
+    ctx.lineTo(...hp(0.08, 0.1));
+    ctx.lineTo(...hp(0.08, 0.004));
+    ctx.quadraticCurveTo(...hp(0, 0.058), ...hp(-0.08, 0.004));
+    ctx.closePath();
+  }
+  ctx.fillStyle = STYLE.hair;
+  ctx.fill();
+  ctx.restore();
+  headPath();
+  ctx.lineWidth = SHAPE.outlinePx * px;
+  ctx.strokeStyle = STYLE.outline;
+  ctx.stroke();
   if (sk.view === 'front') {
     // 顔の細部は描かない。向きが分かるよう鼻だけ付ける（胸を回すと、顔も少し同じ向きを向く）
     const shift = sideSign(sk.view, 'r') * Math.sin((sk.turn * 0.5 * Math.PI) / 180) * FRONT_SHAPE.headWide;

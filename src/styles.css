@@ -475,12 +475,17 @@ p {
   margin: 2px 0 0;
 }
 
+/* 字幕。1行のときも2行のときも同じ高さにして、下の表示が動かないようにする（2行分を先に確保する） */
 .anim-caption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   font-size: max(20px, 1.2rem);
   font-weight: 700;
+  line-height: 1.4;
   margin: 4px 0 0;
-  min-height: 1.6em;
+  min-height: 2.8em;
 }
 
 .player .count {

@@ -107,6 +107,15 @@ describe('アニメの登録', () => {
     }
   });
 
+  it('字幕は、先に確保した2行に収まる長さ（26文字以内）にする', () => {
+    // 字幕の場所は2行分を先に取ってある（styles.css の .anim-caption）。これより長いと、下の表示が動いてしまう
+    for (const anim of ANIMATIONS) {
+      for (const c of [...anim.captions, ...(anim.reverseCaptions ?? [])]) {
+        expect([...c.text].length, `${anim.id}「${c.text}」`).toBeLessThanOrEqual(26);
+      }
+    }
+  });
+
   it('確認済みの印は、人が確かめるまで付けない', () => {
     // 印を付けるのは、医師などが見本を確かめた後。ここに id を足してから JSON の checked を true にする
     const confirmed: string[] = [];
