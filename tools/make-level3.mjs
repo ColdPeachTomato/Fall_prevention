@@ -251,41 +251,111 @@ function walkPose(tau, T, ds, L, pitchOf, center, travel, hipY = HY) {
   });
 }
 
-// D2 つま先歩き・かかと歩き：往き（4歩）はつま先で、戻り（4歩）はかかとで歩く。アニメの1周が1往復
+// D2 つま先歩き・かかと歩き：往き（4歩）はつま先で歩き、向きを変えて、戻り（4歩）はかかとで歩く。アニメの1周が1往復。
+// 2026-11-14 利用者の指摘で作り直した：
+//   ・戻りは、人物の向きを変えて、来た道を戻る（説明の「戻り」と絵を合わせる）
+//   ・膝は伸ばしぎみにする（つま先で立つ分だけ、股関節を高くする）
+//   ・つかまっていない腕は、ふつうの歩行よりやや小さく振る（出した足と反対の腕が前へ出る）
 {
-  const T = 1.5;
+  const T = 1.5; // 1歩の時間
   const ds = 0.4;
   const L = 0.1;
-  const cycle = 8 * T;
-  const half = cycle / 2;
-  // 往きはつま先歩き（重み 0）、戻りはかかと歩き（重み 1）。切り替えは1秒かけてなめらかに
-  const weightAt = (t) => {
-    if (t < 0.5) return ease(1, 0, t + 0.5);
-    if (t < half - 0.5) return 0;
-    if (t < half + 0.5) return ease(0, 1, t - (half - 0.5));
-    if (t < cycle - 0.5) return 1;
-    return ease(1, 0, t - (cycle - 0.5));
+  const WALK = 4 * T; // 片道4歩
+  const TURN = 2; // 向きを変える時間。その場で1歩踏みながら向きを変える
+  const cycle = 2 * (WALK + TURN);
+  const back = WALK + TURN; // 戻り始め
+  const v = L / T;
+  // 向きを変える進み具合（0〜1）。歩いている間は null
+  const turning = (t) => (t >= WALK && t < back ? (t - WALK) / TURN : t >= back + WALK ? (t - back - WALK) / TURN : null);
+  // 足の運びの進み具合（歩いている間は 1 秒に 1。向きを変える間は、2秒で1歩）
+  const phaseAt = (t) => {
+    if (t <= WALK) return t;
+    if (t < back) return WALK + ((t - WALK) / TURN) * T;
+    if (t <= back + WALK) return WALK + T + (t - back);
+    return 2 * WALK + T + ((t - back - WALK) / TURN) * T;
   };
+  // 人物の向き：往きは 1（右向き）、戻りは -1（左向き）。向きを変える間に、なめらかに裏返す
+  const facingAt = (t) => {
+    const w = turning(t);
+    if (w === null) return t < back ? 1 : -1;
+    return t < back ? Math.cos(Math.PI * w) : -Math.cos(Math.PI * w);
+  };
+  // 歩いた距離：往きは増え、戻りは減って、元の所に戻る（速さ × 向き を足し合わせたもの）
+  const turnTravel = (w) => ((v * (T / TURN) * TURN) / Math.PI) * Math.sin(Math.PI * w);
+  const travelAt = (t) => {
+    const w = turning(t);
+    if (w === null) return t < back ? v * t : v * WALK - v * (t - back);
+    return t < back ? v * WALK + turnTravel(w) : -turnTravel(w);
+  };
+  // つま先歩き（重み 0）とかかと歩き（重み 1）。向きを変える間に、なめらかに切り替える
+  const weightAt = (t) => {
+    const w = turning(t);
+    if (w === null) return t < back ? 0 : 1;
+    return t < back ? ease(0, 1, w) : ease(1, 0, w);
+  };
+  const pitchFor = (w) => (u) => PITCH.toe() * (1 - w) + PITCH.heel(u, T, ds) * w;
+  const centerFor = (w) => -0.07 * (1 - w) + 0.04 * w;
+  // 股関節の高さ：いちばん膝が伸びる瞬間に、膝の曲がりが STRAIGHT 度になる高さを探す（膝を伸ばしぎみに歩く）
+  const STRAIGHT = 8;
+  const hipHeightFor = (w) => {
+    for (let h = 0.58; h > 0.5; h -= 0.0005) {
+      try {
+        let least = 180;
+        for (let i = 0; i < 48; i++) {
+          const p = walkPose((2 * T * i) / 48, T, ds, L, pitchFor(w), centerFor(w), 0, h);
+          least = Math.min(least, p.knee, p.farKnee);
+        }
+        if (least >= STRAIGHT) return h;
+      } catch {
+        // 足首が可動域を超える高さは使わない
+      }
+    }
+    throw new Error('股関節の高さが決まりません');
+  };
+  const hipToe = hipHeightFor(0);
+  const hipHeel = hipHeightFor(1);
+  const ROOT_Y = round(hipHeel);
+  const SWING = 12; // 腕の振り（肩の角度の片側。ふつうの歩行は 20 度前後なので、やや小さめ）
   const keys = [];
-  for (let i = 0; i < 64; i++) {
-    const t = i * (cycle / 64);
+  const STEP = 0.125;
+  for (let i = 0; i < cycle / STEP - 1e-9; i++) {
+    const t = round(i * STEP);
     const w = weightAt(t);
-    const pitchOf = (u) => PITCH.toe() * (1 - w) + PITCH.heel(u, T, ds) * w;
-    const center = -0.07 * (1 - w) + 0.04 * w;
-    keys.push(skf(t, walkPose(t, T, ds, L, pitchOf, center, (L / T) * t, HY_SMALL), t < half ? 'つま先で歩く' : 'かかとで歩く'));
+    const phase = phaseAt(t);
+    const hipY = hipToe * (1 - w) + hipHeel * w;
+    const pose = walkPose(phase, T, ds, L, pitchFor(w), centerFor(w), travelAt(t), hipY);
+    // 腕の振り：手前の足が前に着くとき（phase が 2T の倍数）、手前の腕は後ろ、奥の腕は前
+    const swing = Math.cos((Math.PI * phase) / T);
+    const turn = turning(t);
+    keys.push(
+      skf(
+        t,
+        {
+          ...pose,
+          shoulder: round(3 - SWING * swing),
+          elbow: round(12 - 5 * swing),
+          farShoulder: round(3 + SWING * swing),
+          farElbow: round(12 + 5 * swing),
+          facing: round(facingAt(t)),
+          lift: round(hipY - ROOT_Y),
+        },
+        turn !== null ? '向きを変える' : t < back ? 'つま先で歩く' : 'かかとで歩く',
+      ),
+    );
   }
   save.push({
     ...sideCommon('D2-side-L3', 'D2', { cycleSeconds: cycle }),
-    root: { mode: 'hip', x: HX, y: HY_SMALL, pelvis: 0 },
-    floor: { spacing: L, perCycle: round(8 * L) },
+    root: { mode: 'hip', x: HX, y: ROOT_Y, pelvis: 0 },
+    floor: { spacing: L, perCycle: 0 },
     props: [COUNTER],
     support: WALK_SUPPORT,
     highlight: ['foot'],
     keyframes: keys,
     posture: 'カウンターに片手でつかまって立ちます',
     captions: [
-      { from: 0, to: half, text: 'かかとを上げ、つま先で小さく歩きます' },
-      { from: half, to: cycle, text: '戻りは、つま先を上げ、かかとで歩きます' },
+      { from: 0, to: WALK, text: 'かかとを上げ、つま先で小さく歩きます' },
+      { from: WALK, to: back + WALK, text: '向きを変え、つま先を上げて、かかとで戻ります' },
+      { from: back + WALK, to: cycle, text: '向きを変えて、またつま先で歩きます' },
     ],
     marks: [UPRIGHT_LINE(cycle), { type: 'arrow', from: 0, to: cycle, anchor: 'head', dx: 0.09, dy: 0.02, angle: 90, length: 0.09 }],
   });

@@ -252,6 +252,8 @@ export function validateAnimation(input: unknown): AnimationValidation {
       else if (v < j.min || v > j.max) errors.push(`${where}：${j.name} = ${v} が可動域（${j.min}〜${j.max}）を超えています`);
     }
     if (pose.travel !== undefined && !isNumber(pose.travel)) errors.push(`${where}：travel が数ではありません`);
+    if (pose.facing !== undefined && !(isNumber(pose.facing) && Math.abs(pose.facing) <= 1)) errors.push(`${where}：facing は -1〜1 の数にします`);
+    if (pose.lift !== undefined && !(isNumber(pose.lift) && Math.abs(pose.lift) <= 0.1)) errors.push(`${where}：lift は -0.1〜0.1 の数にします`);
     if (k.hands !== undefined && (!isNumber(k.hands) || k.hands < 0 || k.hands > 1)) errors.push(`${where}：hands は 0〜1 にしてください`);
   });
 

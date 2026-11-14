@@ -3,7 +3,7 @@
   "exercise": "D4",
   "level": 3,
   "view": "side",
-  "checked": false,
+  "checked": true,
   "cycleSeconds": 4,
   "cyclesPerLap": 4,
   "root": {

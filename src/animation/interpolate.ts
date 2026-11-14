@@ -24,10 +24,12 @@ const JOINT_NAMES: JointName[] = [
   'farElbow',
   'farFootPitch',
   'travel',
+  'facing',
+  'lift',
 ];
 
 export function fullPose(pose: Pose): FullPose {
-  const full = { ...pose, footPitch: pose.footPitch ?? 0, travel: pose.travel ?? 0 } as FullPose;
+  const full = { ...pose, footPitch: pose.footPitch ?? 0, travel: pose.travel ?? 0, facing: pose.facing ?? 1, lift: pose.lift ?? 0 } as FullPose;
   for (const far of Object.keys(FAR_DEFAULT) as Exclude<FarJoint, never>[]) {
     if (pose[far] === undefined) full[far] = full[FAR_DEFAULT[far]];
   }

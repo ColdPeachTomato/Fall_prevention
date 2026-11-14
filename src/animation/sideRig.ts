@@ -232,8 +232,8 @@ export function solveSide(pose: FullPose, rig: RigConfig, hands = 0, stage: Supp
   let far: Leg | undefined;
 
   if (rig.root.mode === 'seat' || rig.root.mode === 'hip') {
-    // 座って行う種目、立って片脚ずつ動かす種目：股関節は動かない
-    hip = { x: rig.root.x, y: rig.root.y };
+    // 座って行う種目、立って片脚ずつ動かす種目：股関節は動かない（歩く種目では、lift で高さだけ変えられる）
+    hip = { x: rig.root.x, y: rig.root.y + (rig.root.mode === 'hip' ? pose.lift : 0) };
     pelvisAngle = rig.root.pelvis;
     if (rig.plants?.near) {
       near = legPlanted(hip, pelvisAngle, rig.plants.near, pose.footPitch);

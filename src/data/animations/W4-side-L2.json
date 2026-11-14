@@ -3,7 +3,7 @@
   "exercise": "W4",
   "level": 2,
   "view": "side",
-  "checked": false,
+  "checked": true,
   "cycleSeconds": 15.6,
   "root": {
     "x": -0.33

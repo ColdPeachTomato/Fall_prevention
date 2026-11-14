@@ -3,7 +3,7 @@
   "exercise": "S6",
   "level": 2,
   "view": "front",
-  "checked": false,
+  "checked": true,
   "cycleSeconds": 6,
   "root": {
     "mode": "stand",

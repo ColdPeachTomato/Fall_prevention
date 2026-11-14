@@ -169,7 +169,23 @@ describe('アニメの登録', () => {
       'S5-side-L1',
       'S5-side-L2',
       'S7-side-L2',
-      // S8-back-L1・L2 は、拳への腕の重なりを足したので外した（2026-11-14。もう一度確かめてもらう）
+      // 2026-11-15 確認（S8 は拳の欠け方を直した後に、もう一度確かめてもらった）
+      'S6-front-L2',
+      'S8-back-L1',
+      'S8-back-L2',
+      'W1-front-L1',
+      'W1-front-L2',
+      'W2-front-L1',
+      'W3-front-L1',
+      'W4-side-L2',
+      'B1-front-L2',
+      'B2-side-L2',
+      'B3-side-L3',
+      'B4-front-L3',
+      'D3-front-L2',
+      'D4-side-L3',
+      'D5-side-L3',
+      // D2-side-L3 は、向き・膝・腕の振りを作り直した（2026-11-15）。確認待ち
       'S9-side-L3',
       'D1-front-L3',
     ];
@@ -184,9 +200,9 @@ describe.each(SIDE.map((a) => [a.id, a] as const))('%s', (_id, anim) => {
   const walking = WALKING.includes(anim.id);
   // 足を踏み出す種目（S9）も、踏み出した足が着くまでは、次に足を着く所へ体を運んでいる途中
   const stepping = walking || anim.id === 'S9-side-L3';
-  // D2 は、つま先歩きとかかと歩きを切り替える間（前後あわせて約1.6秒）、踏む所が母趾球からかかとへ移る。
+  // D2 は、向きを変える間（6〜8 秒と 14〜16 秒）、人物を裏返しながら、踏む所が母趾球とかかとの間で移る。
   // この間は、足の滑りと静的な重心の検査から外す
-  const switching = (t: number) => anim.id === 'D2-side-L3' && (t < 0.8 || t > anim.cycleSeconds - 0.8 || Math.abs(t - anim.cycleSeconds / 2) < 0.8);
+  const switching = (t: number) => anim.id === 'D2-side-L3' && ((t > 5.9 && t < 8.1) || t > 13.9 || t < 0.1);
 
   it('B：重心が常に支える面（足と座面。両手でつかまる種目は支持物も）の上にある', () => {
     for (const f of frames) {
@@ -245,7 +261,8 @@ describe.each(SIDE.map((a) => [a.id, a] as const))('%s', (_id, anim) => {
             landed[name] = null;
             continue;
           }
-          const onFloor = point.x + travel; // 床の上での位置
+          // 床の上での位置。人物が左向き（facing = -1）のときは、股関節の真上の線を軸に裏返して描かれる
+          const onFloor = frames[i]!.pose.facing * (point.x - b.hip.x) + travel;
           if (landed[name] === null) landed[name] = onFloor;
           expect(Math.abs(onFloor - landed[name]!), `${name} ${at(frames[i]!)}`).toBeLessThan(0.004);
         }
@@ -769,28 +786,65 @@ describe('レベル3の種目（横向き。仕様との照合）', () => {
     }
   });
 
-  it('D2 つま先歩き・かかと歩き：往きはかかとを上げてつま先で、戻りはつま先を上げてかかとで歩く', () => {
+  it('D2 つま先歩き・かかと歩き：往きはかかとを上げてつま先で歩き、向きを変えて、戻りはつま先を上げてかかとで歩く', () => {
     const anim = sideAnim('D2-side-L3');
     const frames = framesOf(anim);
-    const half = anim.cycleSeconds / 2;
-    const out = frames.filter((f) => f.t > 1 && f.t < half - 1);
-    const back = frames.filter((f) => f.t > half + 1 && f.t < anim.cycleSeconds - 1);
+    expect(anim.cycleSeconds).toBe(16); // 往き 6 秒（4歩）、向きを変える 2 秒、戻り 6 秒（4歩）、向きを変える 2 秒
+    const out = frames.filter((f) => f.t > 0.3 && f.t < 5.7);
+    const back = frames.filter((f) => f.t > 8.3 && f.t < 13.7);
     for (const f of out) {
-      // つま先歩き：どちらの足も、かかとが床から離れている
+      // つま先歩き：どちらの足も、かかとが床から離れている。右向き
       expect(f.sk.heel.y, at(f)).toBeGreaterThan(0.02);
       expect(f.sk.farHeel.y, at(f)).toBeGreaterThan(0.02);
+      expect(f.pose.facing, at(f)).toBe(1);
     }
     for (const f of back) {
-      // かかと歩き：床についている足は、かかとで踏み、つま先が上がっている
+      // かかと歩き：床についている足は、かかとで踏み、つま先が上がっている。左向き（説明の「戻り」と絵が合う）
       for (const [heel, toe] of [
         [f.sk.heel, f.sk.toe],
         [f.sk.farHeel, f.sk.farToe],
       ] as const) {
         if (Math.abs(heel.y) < 0.0005) expect(toe.y, at(f)).toBeGreaterThan(0.004);
       }
+      expect(f.pose.facing, at(f)).toBe(-1);
     }
     expect(Math.max(...back.map((f) => Math.max(f.sk.toe.y, f.sk.farToe.y)))).toBeGreaterThan(0.02);
-    expect(anim.floor?.perCycle).toBeCloseTo(0.8, 6); // 小さな歩幅（0.1）で8歩
+    // 向きは、向きを変える 2 秒の間だけ、なめらかに変わる（急に裏返らない）
+    for (let i = 1; i < frames.length; i++) {
+      const d = Math.abs(frames[i]!.pose.facing - frames[i - 1]!.pose.facing);
+      if (frames[i]!.t < anim.cycleSeconds) expect(d, at(frames[i]!)).toBeLessThan(0.12);
+    }
+    // 歩いた距離：往きは増え（0.1 ずつ4歩）、戻りは減って、元の所に戻る
+    expect(anim.floor?.perCycle).toBe(0);
+    expect(computeFrame(anim, 6).pose.travel).toBeCloseTo(0.4, 3);
+    expect(computeFrame(anim, 8).pose.travel).toBeCloseTo(0.4, 3);
+    expect(computeFrame(anim, 14).pose.travel).toBeCloseTo(0, 3);
+    for (let i = 1; i < frames.length; i++) {
+      const d = frames[i]!.pose.travel - frames[i - 1]!.pose.travel;
+      if (frames[i]!.t > 0.2 && frames[i]!.t < 5.8) expect(d, at(frames[i]!)).toBeGreaterThan(0);
+      if (frames[i]!.t > 8.2 && frames[i]!.t < 13.8) expect(d, at(frames[i]!)).toBeLessThan(0);
+    }
+    // 膝は伸ばしぎみに歩く：床についている脚の膝は、30 度より深く曲げない（作り直す前は 45 度前後）
+    for (const f of [...out, ...back]) {
+      if (Math.abs(f.sk.ball.y) < 0.0005 || Math.abs(f.sk.heel.y) < 0.0005) expect(f.pose.knee, at(f)).toBeLessThan(30);
+      if (Math.abs(f.sk.farBall.y) < 0.0005 || Math.abs(f.sk.farHeel.y) < 0.0005) expect(f.pose.farKnee, at(f)).toBeLessThan(30);
+    }
+    // つま先で歩く間は、かかとの分だけ体が高い
+    expect(out[0]!.sk.hip.y - back[0]!.sk.hip.y).toBeGreaterThan(0.015);
+    // 腕の振り：ふつうの歩行（片側 20 度前後）よりやや小さく、出した足と反対の腕が前へ出る
+    const walking = [...out, ...back];
+    const range = (v: number[]) => Math.max(...v) - Math.min(...v);
+    expect(range(walking.map((f) => f.pose.shoulder))).toBeGreaterThan(20);
+    expect(range(walking.map((f) => f.pose.shoulder))).toBeLessThanOrEqual(24.001);
+    for (const f of walking) {
+      expect(f.pose.shoulder + f.pose.farShoulder, at(f)).toBeCloseTo(6, 3); // 左右の腕は、互い違いに振る
+      // 手前の脚が前（股関節を曲げている）のとき、手前の腕は後ろ
+      if (f.pose.hip - f.pose.farHip > 12) expect(f.pose.shoulder, at(f)).toBeLessThan(f.pose.farShoulder);
+      if (f.pose.farHip - f.pose.hip > 12) expect(f.pose.farShoulder, at(f)).toBeLessThan(f.pose.shoulder);
+    }
+    // つかまらない手前の腕は、絵の上でも振れている（奥の手はカウンターに置いたまま）
+    const hands = out.map((f) => computeFrame(anim, f.t, 'one').sk.hand.x);
+    expect(range(hands)).toBeGreaterThan(0.08);
     expect(stagesFor(anim)).toEqual(['one']); // 常につかまる。カウンターの横なので片手
   });
 

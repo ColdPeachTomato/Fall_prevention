@@ -3,7 +3,7 @@
   "exercise": "W2",
   "level": 1,
   "view": "front",
-  "checked": false,
+  "checked": true,
   "cycleSeconds": 4,
   "root": {
     "mode": "seat",

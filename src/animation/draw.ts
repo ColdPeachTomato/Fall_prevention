@@ -349,6 +349,16 @@ export function drawFrame(ctx: Ctx, anim: SideAnimation, f: Frame, o: DrawOption
     else counterAlongside(ctx, prop, px);
   }
 
+  // 人物の向き（facing）：左向きのときは、股関節の真上の線を軸に、人物だけを左右に裏返して描く。
+  // 向きを変える途中は、横に縮めて描く。床の目印と支持物は裏返さない
+  ctx.save();
+  if (f.pose.facing !== 1) {
+    const width = Math.abs(f.pose.facing) < 0.03 ? (f.pose.facing < 0 ? -0.03 : 0.03) : f.pose.facing;
+    ctx.translate(sk.hip.x, 0);
+    ctx.scale(width, 1);
+    ctx.translate(-sk.hip.x, 0);
+  }
+
   // 奥側の腕と脚
   capsule(ctx, sk.shoulder, sk.farElbow, SHAPE.upperArm[0], SHAPE.upperArm[1], color('upperArm', STYLE.topFar, true), px);
   capsule(ctx, sk.farElbow, sk.farWrist, SHAPE.forearm[0], SHAPE.forearm[1], color('forearm', STYLE.topFar, true), px);
@@ -426,4 +436,5 @@ export function drawFrame(ctx: Ctx, anim: SideAnimation, f: Frame, o: DrawOption
 
   if (o.showJoints) jointsOverlay(ctx, sk, px);
   if (o.showBalance) balanceOverlay(ctx, f, px);
+  ctx.restore();
 }

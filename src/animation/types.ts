@@ -11,8 +11,12 @@ export type NearJoint = 'ankle' | 'knee' | 'hip' | 'spine' | 'neck' | 'shoulder'
 // 奥側（far）の関節。省略すると手前側と同じ角度になる
 export type FarJoint = 'farAnkle' | 'farKnee' | 'farHip' | 'farShoulder' | 'farElbow' | 'farFootPitch';
 // 省略できる値。footPitch は足の傾き（正：かかとを上げる、負：つま先を上げる）。省略すると 0。
-// travel は歩いた距離（身長 = 1）。歩く種目で、床の目印を流すのに使う。体の位置は変えない
-export type OptionalJoint = FarJoint | 'footPitch' | 'travel';
+// travel は歩いた距離（身長 = 1）。歩く種目で、床の目印を流すのに使う。体の位置は変えない。
+// facing は人物の向き（1：画面の右向き、-1：左向き。省略すると 1）。往復して歩く種目で、戻るときに向きを変えるのに使う。
+//   途中の値では、人物を股関節の真上の線を軸に、横に縮めて描く（紙をくるりと裏返すように見える）。
+//   左向きのとき、歩いた距離（travel）は減っていく（来た道を戻る）。
+// lift は股関節の高さのずれ（身長 = 1。省略すると 0。起点が hip のときだけ使う）。つま先で歩く間、体が少し高くなるのを表す
+export type OptionalJoint = FarJoint | 'footPitch' | 'travel' | 'facing' | 'lift';
 export type JointName = NearJoint | OptionalJoint;
 
 export type Pose = Record<NearJoint, number> & Partial<Record<OptionalJoint, number>>;

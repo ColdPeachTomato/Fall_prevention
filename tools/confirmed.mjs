@@ -15,7 +15,23 @@ export const CONFIRMED = [
   'S5-side-L1',
   'S5-side-L2',
   'S7-side-L2',
-  // S8-back-L1・L2 は、拳への腕の重なりを足したので外した（2026-11-14。もう一度確かめてもらう）
+  // 2026-11-15 確認（S8 は拳の欠け方を直した後に、もう一度確かめてもらった）
+  'S6-front-L2',
+  'S8-back-L1',
+  'S8-back-L2',
+  'W1-front-L1',
+  'W1-front-L2',
+  'W2-front-L1',
+  'W3-front-L1',
+  'W4-side-L2',
+  'B1-front-L2',
+  'B2-side-L2',
+  'B3-side-L3',
+  'B4-front-L3',
+  'D3-front-L2',
+  'D4-side-L3',
+  'D5-side-L3',
+  // D2-side-L3 は、向き・膝・腕の振りを作り直した（2026-11-15）。確認待ち
   'S9-side-L3',
   'D1-front-L3',
 ];

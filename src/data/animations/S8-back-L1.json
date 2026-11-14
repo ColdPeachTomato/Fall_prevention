@@ -3,7 +3,7 @@
   "exercise": "S8",
   "level": 1,
   "view": "back",
-  "checked": false,
+  "checked": true,
   "cycleSeconds": 8,
   "root": {
     "mode": "seat",
