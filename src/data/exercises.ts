@@ -17,7 +17,7 @@ export const EXERCISES: Exercise[] = [
     cues: ['片足ずつ、両方向に回す', '立っているのが不安なら座って行う'],
     variants: [
       { level: 1, howTo: '椅子に座り、片足を少し前に出します。かかとを床につけたまま、つま先で円を描きます。', posture: 'sitting', usesSupport: false, view: 'front', animationId: 'W1-front-L1' },
-      { level: 2, howTo: 'つかまって立ち、体重を反対の足に乗せます。片足を少し前に出し、かかとを床につけたまま、つま先で円を描きます。', posture: 'standing', usesSupport: true, view: 'front', animationId: null },
+      { level: 2, howTo: 'つかまって立ち、体重を反対の足に乗せます。片足を少し前に出し、かかとを床につけたまま、つま先で円を描きます。', posture: 'standing', usesSupport: true, view: 'front', animationId: 'W1-front-L2' },
     ],
   },
   {
@@ -58,7 +58,7 @@ export const EXERCISES: Exercise[] = [
     bilateral: true,
     cues: ['後ろ足のかかとを床につける', '反動をつけない'],
     variants: [
-      { level: 2, howTo: 'つかまって立ち、片足を後ろに引いて、ふくらはぎをゆっくり伸ばします。', posture: 'standing', usesSupport: true, view: 'side', animationId: null },
+      { level: 2, howTo: 'つかまって立ち、片足を後ろに引きます。かかとを床につけたまま、前の膝を曲げてふくらはぎを伸ばし、10秒止めて戻します。', posture: 'standing', usesSupport: true, view: 'side', animationId: 'W4-side-L2' },
     ],
   },
 
@@ -87,7 +87,7 @@ export const EXERCISES: Exercise[] = [
     cues: ['親指側に体重を乗せ、足首を外に倒さない'],
     variants: [
       { level: 1, howTo: '椅子に座り、かかとをゆっくり上げて、ゆっくり下ろします。', posture: 'sitting', usesSupport: false, view: 'side', animationId: 'S2-side-L1' },
-      { level: 2, howTo: 'つかまって立ち、かかとをゆっくり上げて、ゆっくり下ろします。', posture: 'standing', usesSupport: true, view: 'side', animationId: null },
+      { level: 2, howTo: 'つかまって立ち、かかとをゆっくり上げて、ゆっくり下ろします。', posture: 'standing', usesSupport: true, view: 'side', animationId: 'S2-side-L2' },
     ],
   },
   {
@@ -101,7 +101,7 @@ export const EXERCISES: Exercise[] = [
     minSupport: 'both',
     variants: [
       { level: 1, howTo: '椅子に座り、つま先をゆっくり上げて、ゆっくり下ろします。', posture: 'sitting', usesSupport: false, view: 'side', animationId: 'S3-side-L1' },
-      { level: 2, howTo: '両手でつかまって立ち、つま先をゆっくり上げて、ゆっくり下ろします。', posture: 'standing', usesSupport: true, view: 'side', animationId: null },
+      { level: 2, howTo: '両手でつかまって立ち、つま先をゆっくり上げて、ゆっくり下ろします。', posture: 'standing', usesSupport: true, view: 'side', animationId: 'S3-side-L2' },
     ],
   },
   {
@@ -126,7 +126,7 @@ export const EXERCISES: Exercise[] = [
     cues: ['上体を倒さず反らさず、肩を腰の真上に保つ'],
     variants: [
       { level: 1, howTo: '椅子に座り、膝を左右交互にゆっくり上げます。', posture: 'sitting', usesSupport: false, view: 'side', animationId: 'S5-side-L1' },
-      { level: 2, howTo: 'つかまって立ち、膝を左右交互にゆっくり上げて足踏みします。', posture: 'standing', usesSupport: true, view: 'side', animationId: null },
+      { level: 2, howTo: 'つかまって立ち、膝を左右交互にゆっくり上げて足踏みします。', posture: 'standing', usesSupport: true, view: 'side', animationId: 'S5-side-L2' },
     ],
   },
   {
@@ -138,7 +138,7 @@ export const EXERCISES: Exercise[] = [
     bilateral: true,
     cues: ['腰を水平に保ち、上体を傾けない'],
     variants: [
-      { level: 2, howTo: 'つかまって立ち、片脚をゆっくり横に上げて、ゆっくり下ろします。', posture: 'standing', usesSupport: true, view: 'front', animationId: null },
+      { level: 2, howTo: 'つかまって立ち、片脚をゆっくり横に上げて、ゆっくり下ろします。', posture: 'standing', usesSupport: true, view: 'front', animationId: 'S6-front-L2' },
     ],
   },
   {
@@ -150,7 +150,7 @@ export const EXERCISES: Exercise[] = [
     bilateral: true,
     cues: ['上体を前に倒さず、腰を反らさない'],
     variants: [
-      { level: 2, howTo: 'つかまって立ち、片脚をゆっくり後ろに上げて、ゆっくり下ろします。', posture: 'standing', usesSupport: true, view: 'side', animationId: null },
+      { level: 2, howTo: 'つかまって立ち、片脚をゆっくり後ろに上げて、ゆっくり下ろします。', posture: 'standing', usesSupport: true, view: 'side', animationId: 'S7-side-L2' },
     ],
   },
   {
@@ -164,7 +164,7 @@ export const EXERCISES: Exercise[] = [
     variants: [
       { level: 1, howTo: '椅子に座り、背筋を伸ばして、バンドを胸の前で肩幅に持ちます。肘を伸ばしたまま左右に引き広げ、肩甲骨を寄せて止め、ゆっくり戻します。', posture: 'sitting', usesSupport: false, view: 'back', animationId: 'S8-back-L1' },
       // 両手でバンドを持つため、つかまらずに行う。立位なので支持物の確認は出す
-      { level: 2, howTo: 'つかまる所のすぐ横に立ち、背筋を伸ばして、肩甲骨をゆっくり寄せます。', posture: 'standing', usesSupport: false, view: 'back', animationId: null },
+      { level: 2, howTo: 'つかまる所のすぐ横に立ち、背筋を伸ばして、肩甲骨をゆっくり寄せます。', posture: 'standing', usesSupport: false, view: 'back', animationId: 'S8-back-L2' },
     ],
   },
   {
@@ -190,7 +190,7 @@ export const EXERCISES: Exercise[] = [
     bilateral: false,
     cues: ['つかまる所のすぐ横で行う', 'ふらついたら、すぐつかまる'],
     variants: [
-      { level: 2, howTo: 'つかまって立ち、両足をそろえて、その姿勢を保ちます。', posture: 'standing', usesSupport: true, view: 'front', animationId: null },
+      { level: 2, howTo: 'つかまって立ち、両足をそろえて、その姿勢を保ちます。', posture: 'standing', usesSupport: true, view: 'front', animationId: 'B1-front-L2' },
     ],
   },
   {
@@ -202,7 +202,7 @@ export const EXERCISES: Exercise[] = [
     bilateral: true,
     cues: ['前の足の親指を、後ろの足の土踏まずの横に置く'],
     variants: [
-      { level: 2, howTo: 'つかまって立ち、片足を半歩前にずらして、その姿勢を保ちます。', posture: 'standing', usesSupport: true, view: 'side', animationId: null },
+      { level: 2, howTo: 'つかまって立ち、前の足の親指を、後ろの足の土踏まずの横に置いて、その姿勢を保ちます。', posture: 'standing', usesSupport: true, view: 'side', animationId: 'B2-side-L2' },
     ],
   },
   {
@@ -265,7 +265,7 @@ export const EXERCISES: Exercise[] = [
     bilateral: false,
     cues: ['カウンターに向かい、小さく横へ', '足を交差させない'],
     variants: [
-      { level: 2, howTo: 'カウンターに向かって立ち、つかまりながら小さく横へ歩き、戻ります。', posture: 'standing', usesSupport: true, view: 'front', animationId: null },
+      { level: 2, howTo: 'カウンターに向かって立ち、足を交差させずに、小さく横へ歩いて戻ります。', posture: 'standing', usesSupport: true, view: 'front', animationId: 'D3-front-L2' },
     ],
   },
   {

@@ -2,18 +2,47 @@
 // 付録「動きの仕様」で検査する。新しいアニメを登録すると、自動で共通の検査の対象になる。
 
 import { describe, expect, it } from 'vitest';
+import { getExercise } from '../data/exercises';
 import { BODY, FRONT_CHANNELS, FRONT_VECTORS } from './bodyModel';
 import { computeFrontFrame, frontFootContact, type FrontFrame } from './frontRig';
 import { ANIMATIONS, getAnimation } from './registry';
 import type { Vec } from './sideRig';
-import type { BodySide, FrontAnimation, FrontChairProp } from './types';
+import type { BodySide, FrontAnimation, FrontChairProp, SupportStage } from './types';
 import { validateAnimation } from './validate';
 
 const STEP = 0.02; // 検査する時刻の間隔（秒）
 const SIDES: BodySide[] = ['r', 'l'];
 
 // 止まらずに回し続ける種目（1周を1回と数える）。動きの区切りや、数える時点で止まることは求めない
-const CIRCLING = ['W1-front-L1', 'W2-front-L1'];
+const CIRCLING = ['W1-front-L1', 'W2-front-L1', 'W1-front-L2'];
+
+// 運動そのものとして動かす足（体を支えていない足）。床をかすめて動き出すので、滑りの検査から外す。
+// 支える足が動かないことは、下の種目別の検査で確かめる
+const EXERCISING_FOOT: Record<string, BodySide[]> = {
+  'S6-front-L2': ['r'], // 横へ上げる側の足
+  'D3-front-L2': ['r', 'l'], // 横歩き：出す足と寄せる足を、交互に小さく浮かせて動かす
+};
+
+// 歩く種目。片足を浮かせている間は、次に足を着く所へ体を運んでいる途中なので、
+// 「重心が支えの範囲の中」は両足が床についているコマで確かめ、浮かせている間は種目別の検査で確かめる
+const STEPPING = ['D3-front-L2'];
+const bothFeetDown = (f: FrontFrame) => frontFootContact(f.sk.r) !== null && frontFootContact(f.sk.l) !== null;
+
+// その種目で使える支えの段階（多い順）。つかまらない種目は null だけ
+const STAGES: SupportStage[] = ['both', 'one', 'fingertip', 'none'];
+function stagesFor(anim: FrontAnimation): (SupportStage | null)[] {
+  if (!anim.support) return [null];
+  const min = getExercise(anim.exercise).minSupport ?? 'none';
+  return STAGES.slice(0, STAGES.indexOf(min) + 1);
+}
+function minStage(anim: FrontAnimation): SupportStage | null {
+  const stages = stagesFor(anim);
+  return stages[stages.length - 1]!;
+}
+const isStatic = (anim: FrontAnimation) => getExercise(anim.exercise).unit === 'seconds';
+// その段階のときに描く支持物
+const shownProps = (anim: FrontAnimation, stage: SupportStage | null) =>
+  anim.props.filter((p) => p.type !== 'band' && (p.showFor === undefined || p.showFor.includes(stage ?? 'none')));
 
 const FRONT = ANIMATIONS.filter((a): a is FrontAnimation => a.view !== 'side');
 
@@ -23,9 +52,9 @@ function frontAnim(id: string): FrontAnimation {
   return anim;
 }
 
-function framesOf(anim: FrontAnimation): FrontFrame[] {
+function framesOf(anim: FrontAnimation, stage: SupportStage | null = minStage(anim)): FrontFrame[] {
   const count = Math.round(anim.cycleSeconds / STEP);
-  return Array.from({ length: count + 1 }, (_, i) => computeFrontFrame(anim, Math.min(anim.cycleSeconds, i * STEP)));
+  return Array.from({ length: count + 1 }, (_, i) => computeFrontFrame(anim, Math.min(anim.cycleSeconds, i * STEP), stage));
 }
 
 const dist = (a: Vec, b: Vec) => Math.hypot(a.x - b.x, a.y - b.y);
@@ -85,8 +114,10 @@ const center = (path: Vec[]): Vec => ({
 });
 
 describe('正面・後ろ向きのアニメの登録', () => {
-  it('レベル1の4種目（W1・W2・W3 は正面、S8 は後ろ向き）がある', () => {
-    expect(FRONT.map((a) => `${a.id}:${a.view}`).sort()).toEqual(['S8-back-L1:back', 'W1-front-L1:front', 'W2-front-L1:front', 'W3-front-L1:front']);
+  it('レベル1の4種目（座位）と、レベル2の5種目（立位）がある', () => {
+    const list = (mode: string) => FRONT.filter((a) => a.root.mode === mode).map((a) => `${a.id}:${a.view}`).sort();
+    expect(list('seat')).toEqual(['S8-back-L1:back', 'W1-front-L1:front', 'W2-front-L1:front', 'W3-front-L1:front']);
+    expect(list('stand')).toEqual(['B1-front-L2:front', 'D3-front-L2:front', 'S6-front-L2:front', 'S8-back-L2:back', 'W1-front-L2:front']);
   });
 
   it('値の範囲や、見かけの長さが実際の長さを超えるデータは、検証で拒否する', () => {
@@ -97,6 +128,7 @@ describe('正面・後ろ向きのアニメの登録', () => {
     expect(validateAnimation(withPose({ rElbowOut: 0.9, rElbowUp: 0.9 })).ok).toBe(false); // 腕が伸びて見える
     expect(validateAnimation(withPose({ rWristOut: 0 })).ok).toBe(false); // 知らない項目
     expect(validateAnimation({ ...base, root: { mode: 'foot', x: 0, y: 0 } }).ok).toBe(false);
+    expect(validateAnimation({ ...base, support: { hand: 'x', front: { x: 0, half: 0.1, y: 0.5 } } }).ok).toBe(false);
     expect(validateAnimation({ ...base, viewBox: undefined }).ok).toBe(false);
   });
 });
@@ -105,36 +137,42 @@ describe.each(FRONT.map((a) => [a.id, a] as const))('%s', (_id, anim) => {
   const frames = framesOf(anim);
   const chair = anim.props.find((p): p is FrontChairProp => p.type === 'chair');
   const circling = CIRCLING.includes(anim.id);
+  const seated = anim.root.mode === 'seat';
 
-  it('B：重心が常に支える面（足と座面）の上にある', () => {
-    for (const f of frames) expect(f.stable, `${at(f)} 重心 ${f.com.x.toFixed(3)} 範囲 ${f.support.min.toFixed(3)}〜${f.support.max.toFixed(3)}`).toBe(true);
+  it('B：重心が常に支える面（足と座面）の上にある（つかまらなくても倒れない）', () => {
+    for (const f of frames) {
+      if (STEPPING.includes(anim.id) && !bothFeetDown(f)) continue;
+      expect(f.stable, `${at(f)} 重心 ${f.com.x.toFixed(3)} 範囲 ${f.support.min.toFixed(3)}〜${f.support.max.toFixed(3)}`).toBe(true);
+    }
   });
 
   it('B：支えている足が滑らず、浮かない', () => {
-    const first = frames[0]!;
+    const exercising = EXERCISING_FOOT[anim.id] ?? [];
     for (const side of SIDES) {
       const plant = anim.plants?.[side];
-      for (const f of frames) {
+      for (let i = 0; i < frames.length; i++) {
+        const f = frames[i]!;
         const limb = f.sk[side];
+        // 足が床にめり込まない
+        expect(limb.heel.y, at(f)).toBeGreaterThan(-0.004);
+        expect(limb.toe.y, at(f)).toBeGreaterThan(-0.004);
         if (plant) {
           // かかとを床に付ける指定がある足：かかとは動かず、つま先だけが動く
           expect(limb.heel.x, at(f)).toBeCloseTo(plant.x, 9);
           expect(limb.heel.y, at(f)).toBeCloseTo(0, 9);
-          expect(limb.toe.y, at(f)).toBeGreaterThan(-0.004);
           // すねの見かけの長さは、実際の長さを超えない（短く見える分は、足を前に出しているため）
           const shank = dist(limb.knee, limb.ankle);
           expect(shank, at(f)).toBeLessThanOrEqual(BODY.shank + 0.001);
           expect(shank, at(f)).toBeGreaterThan(BODY.shank * 0.9);
-        } else {
-          // 支えている足：床に平らについたまま動かない
-          expect(dist(limb.heel, first.sk[side].heel), at(f)).toBeLessThan(1e-9);
-          expect(dist(limb.toe, first.sk[side].toe), at(f)).toBeLessThan(1e-9);
-          expect(Math.abs(limb.heel.y), at(f)).toBeLessThan(0.002);
-          expect(Math.abs(limb.toe.y), at(f)).toBeLessThan(0.002);
-          expect(frontFootContact(limb)).not.toBeNull();
+        } else if (i > 0 && !exercising.includes(side)) {
+          // 床についている足は、ついている間は滑らない
+          const before = frames[i - 1]!.sk[side];
+          if (frontFootContact(before) && frontFootContact(limb)) expect(Math.abs(limb.heel.x - before.heel.x), at(f)).toBeLessThan(0.001);
         }
       }
     }
+    // どのコマでも、少なくとも片方の足が床についている
+    for (const f of frames) expect(frontFootContact(f.sk.r) ?? frontFootContact(f.sk.l), at(f)).not.toBeNull();
   });
 
   it('B：値が範囲を超えず、手足の見かけの長さが実際の長さを超えない', () => {
@@ -150,6 +188,11 @@ describe.each(FRONT.map((a) => [a.id, a] as const))('%s', (_id, anim) => {
   });
 
   it('A：座っている間は、お尻が座面の上にあり、椅子の幅に収まる', () => {
+    if (!seated) {
+      // 立って行う種目：座面を支えに数えない
+      for (const f of frames) expect(f.onSeat, at(f)).toBe(false);
+      return;
+    }
     expect(chair).toBeDefined();
     if (!chair) return;
     for (const f of frames) {
@@ -185,6 +228,11 @@ describe.each(FRONT.map((a) => [a.id, a] as const))('%s', (_id, anim) => {
       return;
     }
     const phases = movingPhases(frames);
+    if (isStatic(anim)) {
+      // 姿勢を保つ種目は動かない（残りの秒数は画面に出す）
+      expect(phases).toHaveLength(0);
+      return;
+    }
     expect(phases.length).toBeGreaterThanOrEqual(2);
     for (const p of phases) {
       expect(p.to - p.from, `${p.from.toFixed(2)}〜${p.to.toFixed(2)}`).toBeGreaterThanOrEqual(1.85);
@@ -211,12 +259,64 @@ describe.each(FRONT.map((a) => [a.id, a] as const))('%s', (_id, anim) => {
     }
   });
 
-  it('C：支持物（椅子）が常に画面内にある', () => {
-    expect(chair).toBeDefined();
-    if (!chair) return;
-    expect(chair.x - chair.width / 2).toBeGreaterThan(anim.viewBox.minX);
-    expect(chair.x + chair.width / 2).toBeLessThan(anim.viewBox.maxX);
-    expect(chair.backHeight).toBeLessThan(anim.viewBox.maxY);
+  it('C：支持物（椅子・カウンター）を、どの支えの段階でも描き、常に画面内にある（S-10）', () => {
+    for (const stage of stagesFor(anim)) {
+      const props = shownProps(anim, stage);
+      expect(props.length, String(stage)).toBeGreaterThan(0);
+      for (const p of props) {
+        if (p.type === 'band') continue;
+        expect(p.x - p.width / 2, String(stage)).toBeGreaterThan(anim.viewBox.minX);
+        expect(p.x + p.width / 2, String(stage)).toBeLessThan(anim.viewBox.maxX);
+        expect(p.type === 'chair' ? p.backHeight : p.height).toBeLessThan(anim.viewBox.maxY);
+      }
+    }
+  });
+
+  it('C：支えの段階（両手・片手・指先・なし）どおりにつかまり、手が支持物に触れている（S-10）', () => {
+    const support = anim.support;
+    if (!support) return;
+    for (const stage of stagesFor(anim)) {
+      for (const f of framesOf(anim, stage)) {
+        const where = `${stage} ${at(f)}`;
+        if (!STEPPING.includes(anim.id) || bothFeetDown(f)) expect(f.stable, where).toBe(true);
+        for (const side of SIDES) {
+          const limb = f.sk[side];
+          const holds = stage === 'both' || ((stage === 'one' || stage === 'fingertip') && side === support.hand);
+          expect(limb.holding, `${where} ${side}`).toBe(holds);
+          if (!holds) continue;
+          expect(limb.handTarget).toBeDefined();
+          expect(dist(limb.hand, limb.handTarget!), where).toBeLessThan(1e-9);
+          // 手を置く点は、支持物の上（指先のときは少し上）
+          const lift = stage === 'fingertip' ? 0.022 : 0;
+          const top = stage !== 'both' && support.side ? support.side.y : support.front.y;
+          expect(limb.hand.y, where).toBeCloseTo(top + lift, 9);
+          // 腕の見かけの長さは、実際の長さを超えない（無理なく届く）
+          expect(dist(limb.shoulder, limb.elbow), where).toBeLessThanOrEqual(BODY.upperArm + 1e-6);
+          expect(dist(limb.elbow, limb.hand), where).toBeLessThanOrEqual(BODY.forearm + BODY.palm + 1e-6);
+          expect(dist(limb.shoulder, limb.hand), where).toBeLessThan(BODY.upperArm + BODY.forearm + BODY.palm - 0.005);
+        }
+      }
+      // 手を置く点の高さに、その段階で描く支持物の上の面がある
+      const tops = shownProps(anim, stage).map((p) => (p.type === 'chair' ? p.backHeight : p.type === 'counter' ? p.height : 0));
+      const y = stage !== 'both' && support.side ? support.side.y : support.front.y;
+      expect(tops, String(stage)).toContain(y);
+    }
+  });
+
+  it('C：下半身の動きは、支えの段階によらず同じ', () => {
+    if (!anim.support) return;
+    const stages = stagesFor(anim);
+    const reference = framesOf(anim, stages[0]!);
+    for (const stage of stages.slice(1)) {
+      framesOf(anim, stage).forEach((f, i) => {
+        expect(dist(f.sk.head, reference[i]!.sk.head)).toBeLessThan(1e-9);
+        for (const side of SIDES) {
+          for (const key of ['hip', 'knee', 'ankle', 'heel', 'toe'] as const) {
+            expect(dist(f.sk[side][key], reference[i]!.sk[side][key]), `${stage} ${side}.${key} ${at(f)}`).toBeLessThan(1e-9);
+          }
+        }
+      });
+    }
   });
 
   it('E：人物の全身と足元が画面からはみ出さない', () => {
@@ -455,5 +555,133 @@ describe('S8 肩甲骨寄せ（動きの仕様との照合）', () => {
     expect(line && line.type === 'line' ? line.angle : null).toBe(90); // 水平の線
     expect(line?.from).toBe(0);
     expect(line?.to).toBe(anim.cycleSeconds);
+  });
+});
+
+describe('立って行う種目（レベル2・正面と後ろ向き。仕様との照合）', () => {
+  const footRange = (f: FrontFrame, side: BodySide) => frontFootContact(f.sk[side])!;
+
+  it('B1 足をそろえて立つ：両足をそろえ、姿勢を保つ（動かない）', () => {
+    const frames = framesOf(frontAnim('B1-front-L2'));
+    const first = frames[0]!;
+    expect(Math.abs(first.sk.r.ankle.x - first.sk.l.ankle.x)).toBeLessThan(0.07); // 足の幅（0.055）ほどの間隔＝両足が並んでつく
+    expect(first.sk.r.ankle.x).toBeCloseTo(-first.sk.l.ankle.x, 6);
+    for (const f of frames) {
+      expect(dist(f.sk.head, first.sk.head)).toBeLessThan(1e-9);
+      for (const s of SIDES) expect(dist(f.sk[s].toe, first.sk[s].toe)).toBeLessThan(1e-9);
+    }
+  });
+
+  it('S6 脚の横上げ：体重を反対の足に乗せ、骨盤を水平に保ち、上体を傾けずに、片方の脚を横へ上げる', () => {
+    const anim = frontAnim('S6-front-L2');
+    const frames = framesOf(anim, 'none');
+    const rest = frames[0]!;
+    const top = frames.reduce((a, b) => (b.sk.r.ankle.y > a.sk.r.ankle.y ? b : a));
+    expect(top.sk.r.ankle.y).toBeGreaterThan(rest.sk.r.ankle.y + 0.04);
+    expect(top.sk.r.ankle.x - rest.sk.r.ankle.x).toBeGreaterThan(0.15); // 横（体の外）へ動く
+    const angle = (Math.atan2(top.sk.r.ankle.x - top.sk.r.hip.x, top.sk.r.hip.y - top.sk.r.ankle.y) * 180) / Math.PI;
+    expect(angle).toBeGreaterThan(20);
+    expect(angle).toBeLessThanOrEqual(45); // 股関節の外転の参考可動域の中
+    for (const f of frames) {
+      expect(f.pose.lean).toBe(0); // 上体を傾けない
+      expect(f.sk.r.hip.y).toBeCloseTo(f.sk.l.hip.y, 9); // 骨盤は水平
+      expect(dist(f.sk.l.heel, rest.sk.l.heel), at(f)).toBeLessThan(1e-9); // 支える足は動かない
+      // 重心は、支える足（左足）の上にある
+      const range = footRange(f, 'l');
+      expect(f.com.x, at(f)).toBeGreaterThanOrEqual(range.min);
+      expect(f.com.x, at(f)).toBeLessThanOrEqual(range.max);
+    }
+    const mark = anim.marks.find((m) => m.type === 'line');
+    expect(mark?.anchor).toBe('lumbar'); // 骨盤を水平に保つ線
+  });
+
+  it('W1 足首回し（立って）：体重を反対の足に乗せ、かかとを床につけたまま、つま先で円を描く', () => {
+    const anim = frontAnim('W1-front-L2');
+    const frames = framesOf(anim, 'none');
+    const first = frames[0]!;
+    const path = frames.map((f) => f.sk.r.toe);
+    expect(Math.abs(turnsAround(path, center(path)))).toBeCloseTo(1, 3);
+    for (const f of frames) {
+      expect(f.sk.r.heel.y).toBeCloseTo(0, 9);
+      expect(dist(f.sk.l.heel, first.sk.l.heel)).toBeLessThan(1e-9);
+      expect(dist(f.sk.head, first.sk.head)).toBeLessThan(1e-9);
+      const range = footRange(f, 'l');
+      expect(f.com.x, at(f)).toBeGreaterThanOrEqual(range.min);
+      expect(f.com.x, at(f)).toBeLessThanOrEqual(range.max);
+    }
+    // 座って行うレベル1と、つま先の動きは同じ
+    const seated = framesOf(frontAnim('W1-front-L1'));
+    frames.forEach((f, i) => {
+      expect(f.pose.rToeOut).toBeCloseTo(seated[i]!.pose.rToeOut, 9);
+      expect(f.pose.rToeUp).toBeCloseTo(seated[i]!.pose.rToeUp, 9);
+    });
+    expect(anim.reverseCaptions).toBeDefined();
+  });
+
+  it('D3 横歩き：右へ3歩、左へ3歩で元の所に戻る。足を交差させず、片足ずつ小さく動かす', () => {
+    const anim = frontAnim('D3-front-L2');
+    const frames = framesOf(anim, 'none');
+    const first = frames[0]!;
+    const far = frames.reduce((a, b) => (b.sk.pelvis.x > a.sk.pelvis.x ? b : a));
+    expect(far.sk.pelvis.x - first.sk.pelvis.x).toBeCloseTo(0.3, 3); // 0.1 ずつ3歩
+    expect(far.t).toBeLessThan(anim.cycleSeconds / 2 + 0.01);
+    let steps = 0;
+    let wasMovingR = false;
+    for (let i = 1; i < frames.length; i++) {
+      const a = frames[i - 1]!;
+      const b = frames[i]!;
+      // 足を交差させない（右足はいつも左足より右。間は足の幅より広い）
+      expect(b.sk.r.ankle.x - b.sk.l.ankle.x, at(b)).toBeGreaterThan(0.1);
+      expect(b.sk.r.ankle.x - b.sk.l.ankle.x, at(b)).toBeLessThan(0.22); // 小さな歩幅
+      // 片足ずつ動かす：片方が動いている間、もう片方は床の上で動かない
+      // （キーフレームの値を小数4桁に丸めているので、止まっている足にもごく小さな誤差が出る）
+      const dR = Math.abs(b.sk.r.heel.x - a.sk.r.heel.x);
+      const dL = Math.abs(b.sk.l.heel.x - a.sk.l.heel.x);
+      const movedR = dR > 3e-4;
+      const movedL = dL > 3e-4;
+      expect(movedR && movedL, at(b)).toBe(false);
+      if (movedR) {
+        expect(dL, at(b)).toBeLessThan(1e-4);
+        expect(Math.abs(b.sk.l.heel.y), at(b)).toBeLessThan(1e-4);
+      }
+      if (movedL) {
+        expect(dR, at(b)).toBeLessThan(1e-4);
+        expect(Math.abs(b.sk.r.heel.y), at(b)).toBeLessThan(1e-4);
+      }
+      if (movedR && !wasMovingR) steps++;
+      wasMovingR = movedR;
+      // 浮かせている間、重心は「支える足」と「次に足を着く所」の間にある
+      if (!bothFeetDown(b)) {
+        expect(b.com.x, at(b)).toBeGreaterThan(b.sk.l.heel.x - 0.03);
+        expect(b.com.x, at(b)).toBeLessThan(b.sk.r.heel.x + 0.03);
+      }
+      expect(Math.abs(b.sk.head.x - b.sk.pelvis.x)).toBeLessThan(1e-9); // 上体を傾けない
+    }
+    expect(steps).toBe(6); // 右足を動かすのは、右へ3回・左へ3回
+    // 体と一緒に、手もカウンターの上を動く
+    const held = framesOf(anim, 'both');
+    for (const f of held) {
+      expect(f.sk.r.hand.x - f.sk.pelvis.x).toBeCloseTo(0.1, 9);
+      expect(f.sk.l.hand.x - f.sk.pelvis.x).toBeCloseTo(-0.1, 9);
+    }
+    expect(anim.props.some((p) => p.type === 'counter' && p.inFront)).toBe(true);
+  });
+
+  it('S8 肩甲骨寄せ（立って）：つかまらずに行い、腕の動きは座って行うレベル1と同じ。つかまる所は横に描く', () => {
+    const anim = frontAnim('S8-back-L2');
+    expect(anim.support).toBeUndefined();
+    expect(shownProps(anim, null).some((p) => p.type === 'chair')).toBe(true);
+    const frames = framesOf(anim);
+    const seated = framesOf(frontAnim('S8-back-L1'));
+    frames.forEach((f, i) => {
+      for (const key of ['rElbowOut', 'rElbowUp', 'rHandOut', 'rHandUp', 'scapula'] as const) expect(f.pose[key]).toBeCloseTo(seated[i]!.pose[key], 9);
+      for (const s of SIDES) {
+        expect(f.sk[s].shoulder.y).toBeCloseTo(frames[0]!.sk[s].shoulder.y, 9); // 肩を上げない
+        expect(Math.abs(f.sk[s].heel.y)).toBeLessThan(0.002); // 両足で立つ
+      }
+    });
+    // 横の椅子に、広げた腕が当たらない（椅子の背は腕より低い）
+    const chair = anim.props.find((p): p is FrontChairProp => p.type === 'chair')!;
+    for (const f of frames) expect(Math.min(f.sk.r.hand.y, f.sk.l.hand.y)).toBeGreaterThan(chair.backHeight + 0.05);
   });
 });

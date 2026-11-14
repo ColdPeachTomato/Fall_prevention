@@ -11,6 +11,17 @@ import s8BackL1 from '../data/animations/S8-back-L1.json';
 import w1FrontL1 from '../data/animations/W1-front-L1.json';
 import w2FrontL1 from '../data/animations/W2-front-L1.json';
 import w3FrontL1 from '../data/animations/W3-front-L1.json';
+import w1FrontL2 from '../data/animations/W1-front-L2.json';
+import w4SideL2 from '../data/animations/W4-side-L2.json';
+import s2SideL2 from '../data/animations/S2-side-L2.json';
+import s3SideL2 from '../data/animations/S3-side-L2.json';
+import s5SideL2 from '../data/animations/S5-side-L2.json';
+import s6FrontL2 from '../data/animations/S6-front-L2.json';
+import s7SideL2 from '../data/animations/S7-side-L2.json';
+import s8BackL2 from '../data/animations/S8-back-L2.json';
+import b1FrontL2 from '../data/animations/B1-front-L2.json';
+import b2SideL2 from '../data/animations/B2-side-L2.json';
+import d3FrontL2 from '../data/animations/D3-front-L2.json';
 import type { AnimationData } from './types';
 import { validateAnimation } from './validate';
 
@@ -31,6 +42,18 @@ export const ANIMATIONS: AnimationData[] = [
   load(w1FrontL1, 'W1-front-L1'),
   load(w2FrontL1, 'W2-front-L1'),
   load(w3FrontL1, 'W3-front-L1'),
+  // レベル2（立って行う種目）
+  load(w1FrontL2, 'W1-front-L2'),
+  load(w4SideL2, 'W4-side-L2'),
+  load(s2SideL2, 'S2-side-L2'),
+  load(s3SideL2, 'S3-side-L2'),
+  load(s5SideL2, 'S5-side-L2'),
+  load(s6FrontL2, 'S6-front-L2'),
+  load(s7SideL2, 'S7-side-L2'),
+  load(s8BackL2, 'S8-back-L2'),
+  load(b1FrontL2, 'B1-front-L2'),
+  load(b2SideL2, 'B2-side-L2'),
+  load(d3FrontL2, 'D3-front-L2'),
 ];
 
 const BY_ID = new Map(ANIMATIONS.map((a) => [a.id, a]));

@@ -1,0 +1,134 @@
+{
+  "id": "W4-side-L2",
+  "exercise": "W4",
+  "level": 2,
+  "view": "side",
+  "checked": false,
+  "cycleSeconds": 15.6,
+  "root": {
+    "x": -0.33
+  },
+  "plants": {
+    "far": {
+      "pivot": "heel",
+      "x": -0.172
+    }
+  },
+  "props": [
+    {
+      "type": "chair",
+      "x": 0.02,
+      "seatHeight": 0.242,
+      "seatDepth": 0.22,
+      "backHeight": 0.54
+    }
+  ],
+  "support": {
+    "x": 0.01,
+    "y": 0.54
+  },
+  "highlight": [
+    "near:shank"
+  ],
+  "keyframes": [
+    {
+      "t": 0,
+      "pose": {
+        "ankle": 12,
+        "knee": 0,
+        "hip": -7,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8
+      },
+      "label": "片足を後ろに引いて立つ"
+    },
+    {
+      "t": 0.3,
+      "pose": {
+        "ankle": 12,
+        "knee": 0,
+        "hip": -7,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8
+      },
+      "label": "動き始め"
+    },
+    {
+      "t": 2.8,
+      "pose": {
+        "ankle": 20,
+        "knee": 0,
+        "hip": -13,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8
+      },
+      "label": "前の膝を曲げて伸ばす"
+    },
+    {
+      "t": 12.8,
+      "pose": {
+        "ankle": 20,
+        "knee": 0,
+        "hip": -13,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8
+      },
+      "label": "止める（戻し始め）"
+    },
+    {
+      "t": 15.3,
+      "pose": {
+        "ankle": 12,
+        "knee": 0,
+        "hip": -7,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8
+      },
+      "label": "戻す"
+    }
+  ],
+  "captions": [
+    {
+      "from": 0,
+      "to": 0.3,
+      "text": "片足を後ろに引き、かかとを床につけます"
+    },
+    {
+      "from": 0.3,
+      "to": 2.8,
+      "text": "前の膝を曲げ、ふくらはぎを伸ばします"
+    },
+    {
+      "from": 2.8,
+      "to": 12.8,
+      "text": "反動をつけず、そのまま10秒止めます"
+    },
+    {
+      "from": 12.8,
+      "to": 15.6,
+      "text": "ゆっくり戻します"
+    }
+  ],
+  "marks": [
+    {
+      "type": "arrow",
+      "from": 0.3,
+      "to": 12.8,
+      "anchor": "heel",
+      "dx": -0.035,
+      "dy": 0.1,
+      "angle": 180,
+      "length": 0.075
+    }
+  ]
+}

@@ -6,7 +6,7 @@ import { getExercise } from '../data/exercises';
 import type { Level, Menu, SessionKind, SupportStage, Unit } from '../data/types';
 import { effectiveSupport } from '../menu/support';
 
-// アニメがない種目の仮の時間。アニメがある種目は、アニメの1往復の時間を1回の時間にする
+// アニメがない種目の仮の時間。アニメがある種目は、アニメの1往復の時間を1回（1往復）の時間にする
 export const SECONDS_PER_REP = 5; // 上げ下げ 各2.5秒
 export const SECONDS_PER_LAP = 20;
 export const REST_SECONDS = 30;
@@ -26,7 +26,7 @@ export type Step =
       level: Level;
       support: SupportStage | null;
     }
-  | { kind: 'countdown'; exId: string; seconds: number; side: Side | null; direction: Direction | null }
+  | { kind: 'countdown'; exId: string; seconds: number; side: Side | null; direction: Direction | null; support: SupportStage | null }
   | {
       kind: 'exercise';
       exId: string;
@@ -51,7 +51,7 @@ export function unitSeconds(unit: Exclude<Unit, 'minutes'>, animationId: string 
     const anim = getAnimation(animationId);
     return anim ? anim.cycleSeconds / (anim.countsPerCycle ?? 1) : SECONDS_PER_REP;
   }
-  if (unit === 'laps') return SECONDS_PER_LAP;
+  if (unit === 'laps') return getAnimation(animationId)?.cycleSeconds ?? SECONDS_PER_LAP;
   return 1;
 }
 
@@ -77,7 +77,7 @@ export function buildSessionSteps(menu: Menu, kind: SessionKind): Step[] {
       if (set > 1) steps.push({ kind: 'rest', exId: ex.id, seconds: REST_SECONDS, reason: 'set' });
       sides.forEach((side, sideIndex) => {
         directions.forEach((direction, directionIndex) => {
-          steps.push({ kind: 'countdown', exId: ex.id, seconds: COUNTDOWN_SECONDS, side, direction });
+          steps.push({ kind: 'countdown', exId: ex.id, seconds: COUNTDOWN_SECONDS, side, direction, support });
           steps.push({
             kind: 'exercise',
             exId: ex.id,

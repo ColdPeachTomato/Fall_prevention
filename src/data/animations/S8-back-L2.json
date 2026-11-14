@@ -1,0 +1,177 @@
+{
+  "id": "S8-back-L2",
+  "exercise": "S8",
+  "level": 2,
+  "view": "back",
+  "checked": false,
+  "cycleSeconds": 8,
+  "root": {
+    "mode": "stand",
+    "x": 0,
+    "y": 0.5202
+  },
+  "viewBox": {
+    "minX": -0.58,
+    "maxX": 0.47,
+    "minY": -0.075,
+    "maxY": 1.06
+  },
+  "props": [
+    {
+      "type": "chair",
+      "x": -0.42,
+      "width": 0.26,
+      "seatHeight": 0.242,
+      "backHeight": 0.54
+    },
+    {
+      "type": "band"
+    }
+  ],
+  "highlight": [
+    "upperArm",
+    "forearm",
+    "scapula"
+  ],
+  "keyframes": [
+    {
+      "t": 0,
+      "pose": {
+        "rKneeOut": -0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": -0.0509,
+        "rAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "scapula": 0,
+        "rElbowOut": 0,
+        "rElbowUp": -0.2079,
+        "rHandOut": 0,
+        "rHandUp": -0.2079
+      },
+      "label": "バンドを肩幅に持つ"
+    },
+    {
+      "t": 0.3,
+      "pose": {
+        "rKneeOut": -0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": -0.0509,
+        "rAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "scapula": 0,
+        "rElbowOut": 0,
+        "rElbowUp": -0.2079,
+        "rHandOut": 0,
+        "rHandUp": -0.2079
+      },
+      "label": "引き始め"
+    },
+    {
+      "t": 2.7,
+      "pose": {
+        "rKneeOut": -0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": -0.0509,
+        "rAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "scapula": 1,
+        "rElbowOut": 0.8013,
+        "rElbowUp": -0.2079,
+        "rHandOut": 0.8013,
+        "rHandUp": -0.2079
+      },
+      "label": "引き広げる"
+    },
+    {
+      "t": 5.2,
+      "pose": {
+        "rKneeOut": -0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": -0.0509,
+        "rAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "scapula": 1,
+        "rElbowOut": 0.8013,
+        "rElbowUp": -0.2079,
+        "rHandOut": 0.8013,
+        "rHandUp": -0.2079
+      },
+      "label": "止める（戻し始め）"
+    },
+    {
+      "t": 7.6,
+      "pose": {
+        "rKneeOut": -0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": -0.0509,
+        "rAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "scapula": 0,
+        "rElbowOut": 0,
+        "rElbowUp": -0.2079,
+        "rHandOut": 0,
+        "rHandUp": -0.2079
+      },
+      "label": "戻す"
+    }
+  ],
+  "captions": [
+    {
+      "from": 0,
+      "to": 0.3,
+      "text": "まっすぐ立ち、バンドを胸の前で持ちます"
+    },
+    {
+      "from": 0.3,
+      "to": 2.7,
+      "text": "肘を伸ばしたまま、左右に引き広げます"
+    },
+    {
+      "from": 2.7,
+      "to": 5.2,
+      "text": "肩甲骨を寄せて止めます。肩は上げません"
+    },
+    {
+      "from": 5.2,
+      "to": 8,
+      "text": "ゆっくり戻します"
+    }
+  ],
+  "marks": [
+    {
+      "type": "line",
+      "from": 0,
+      "to": 8,
+      "anchor": "chest",
+      "dx": 0,
+      "dy": 0.055,
+      "angle": 90,
+      "length": 0.62
+    },
+    {
+      "type": "arrow",
+      "from": 0.3,
+      "to": 2.6,
+      "anchor": "r.hand",
+      "dx": 0.03,
+      "dy": -0.07,
+      "angle": 90,
+      "length": 0.09
+    },
+    {
+      "type": "arrow",
+      "from": 0.3,
+      "to": 2.6,
+      "anchor": "l.hand",
+      "dx": -0.03,
+      "dy": -0.07,
+      "angle": -90,
+      "length": 0.09
+    }
+  ]
+}

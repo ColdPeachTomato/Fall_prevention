@@ -75,8 +75,18 @@ function validateFront(a: Input): AnimationValidation {
   validateCommon(a, errors);
   const cycle = a.cycleSeconds;
 
-  if (!isObject(a.root) || a.root.mode !== 'seat' || !isNumber(a.root.x) || !isNumber(a.root.y)) {
-    errors.push('root が正しくありません（正面・後ろ向きは、いまは座位 mode = seat だけ）');
+  if (!isObject(a.root) || (a.root.mode !== 'seat' && a.root.mode !== 'stand') || !isNumber(a.root.x) || !isNumber(a.root.y)) {
+    errors.push('root が正しくありません（mode は seat か stand）');
+  }
+  if (a.support !== undefined) {
+    const s = a.support;
+    const ok =
+      isObject(s) &&
+      (s.hand === 'r' || s.hand === 'l') &&
+      (s.side === undefined || (isObject(s.side) && isNumber(s.side.x) && isNumber(s.side.y))) &&
+      isObject(s.front) &&
+      [s.front.x, s.front.half, s.front.y].every(isNumber);
+    if (!ok) errors.push('support（つかまる所の、手を置く点）が正しくありません');
   }
   if (a.plants !== undefined) {
     if (!isObject(a.plants)) {
@@ -96,8 +106,17 @@ function validateFront(a: Input): AnimationValidation {
   } else {
     a.props.forEach((p, i) => {
       if (isObject(p) && p.type === 'band') return;
-      if (!isObject(p) || p.type !== 'chair') errors.push(`props の${i + 1}番目：知らない種類です`);
-      else if (![p.x, p.width, p.seatHeight, p.backHeight].every(isNumber)) errors.push(`props の${i + 1}番目：椅子の寸法が正しくありません`);
+      if (!isObject(p) || (p.type !== 'chair' && p.type !== 'counter')) {
+        errors.push(`props の${i + 1}番目：知らない種類です`);
+        return;
+      }
+      const sizes = p.type === 'chair' ? [p.x, p.width, p.seatHeight, p.backHeight] : [p.x, p.width, p.height];
+      if (!sizes.every(isNumber)) errors.push(`props の${i + 1}番目：寸法が正しくありません`);
+      const stages = ['both', 'one', 'fingertip', 'none'];
+      if (p.showFor !== undefined && !(Array.isArray(p.showFor) && p.showFor.every((s) => stages.includes(s as string)))) {
+        errors.push(`props の${i + 1}番目：showFor が正しくありません`);
+      }
+      if (p.inFront !== undefined && typeof p.inFront !== 'boolean') errors.push(`props の${i + 1}番目：inFront が正しくありません`);
     });
   }
   if (!Array.isArray(a.highlight) || !a.highlight.every((s) => typeof s === 'string' && (s === 'scapula' || SEGMENTS.includes(s.replace(/^(r|l):/, ''))))) {
@@ -152,8 +171,8 @@ export function validateAnimation(input: unknown): AnimationValidation {
   const cycle = a.cycleSeconds;
   if (!isObject(a.root) || !isNumber(a.root.x)) {
     errors.push('root.x がありません');
-  } else if (a.root.mode === 'seat') {
-    if (!isNumber(a.root.y) || !isNumber(a.root.pelvis)) errors.push('root（座位）には y と pelvis が必要です');
+  } else if (a.root.mode === 'seat' || a.root.mode === 'hip') {
+    if (!isNumber(a.root.y) || !isNumber(a.root.pelvis)) errors.push('root（股関節が起点）には y と pelvis が必要です');
   } else if (a.root.mode !== undefined && a.root.mode !== 'foot') {
     errors.push(`知らない起点です（${String(a.root.mode)}）`);
   }
@@ -161,7 +180,6 @@ export function validateAnimation(input: unknown): AnimationValidation {
     if (!isObject(a.plants)) {
       errors.push('plants の形が正しくありません');
     } else {
-      if (!isObject(a.root) || a.root.mode !== 'seat') errors.push('plants は座位（root.mode = seat）でだけ使えます');
       for (const side of ['near', 'far'] as const) {
         const p = a.plants[side];
         if (p === undefined) continue;
@@ -186,6 +204,9 @@ export function validateAnimation(input: unknown): AnimationValidation {
     errors.push('highlight（目立たせる部位）が正しくありません');
   }
 
+  if (a.support !== undefined && !(isObject(a.support) && isNumber(a.support.x) && isNumber(a.support.y))) {
+    errors.push('support（つかまる所の、手を置く点）が正しくありません');
+  }
   if (a.contacts !== undefined) {
     if (!isObject(a.contacts)) {
       errors.push('contacts の形が正しくありません');

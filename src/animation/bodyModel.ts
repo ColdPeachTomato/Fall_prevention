@@ -142,6 +142,7 @@ export const FRONT_BODY_CHANNELS: ChannelDef[] = [
   { name: 'lean', label: '体幹を横に傾ける', min: -50, max: 50, unit: '°', fallback: 0 },
   { name: 'turn', label: '胸を回す（＋人物の右へ）', min: -40, max: 40, unit: '°', fallback: 0 },
   { name: 'scapula', label: '肩甲骨の寄り具合', min: 0, max: 1, unit: '', fallback: 0 },
+  { name: 'shift', label: '骨盤を横に動かす（＋画面の右へ）', min: -0.5, max: 0.5, unit: '', fallback: 0 },
 ];
 export const FRONT_RIGHT_CHANNELS: ChannelDef[] = LIMB_CHANNELS.map((c) => ({
   name: `r${c.key}` as FrontChannel,

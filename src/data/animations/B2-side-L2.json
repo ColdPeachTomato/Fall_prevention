@@ -1,0 +1,87 @@
+{
+  "id": "B2-side-L2",
+  "exercise": "B2",
+  "level": 2,
+  "view": "side",
+  "checked": false,
+  "cycleSeconds": 4,
+  "root": {
+    "mode": "hip",
+    "x": -0.17,
+    "y": 0.527,
+    "pelvis": 0
+  },
+  "plants": {
+    "near": {
+      "pivot": "heel",
+      "x": -0.174
+    },
+    "far": {
+      "pivot": "heel",
+      "x": -0.25
+    }
+  },
+  "props": [
+    {
+      "type": "chair",
+      "x": 0.08,
+      "seatHeight": 0.242,
+      "seatDepth": 0.22,
+      "backHeight": 0.54
+    }
+  ],
+  "support": {
+    "x": 0.07,
+    "y": 0.54
+  },
+  "highlight": [
+    "foot"
+  ],
+  "keyframes": [
+    {
+      "t": 0,
+      "pose": {
+        "ankle": 0,
+        "knee": 0,
+        "hip": 0,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8
+      },
+      "label": "足を半歩ずらして立つ"
+    },
+    {
+      "t": 2,
+      "pose": {
+        "ankle": 0,
+        "knee": 0,
+        "hip": 0,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8
+      },
+      "label": "そのまま保つ"
+    }
+  ],
+  "captions": [
+    {
+      "from": 0,
+      "to": 4,
+      "text": "前の足の親指を、後ろの足の土踏まずの横に置きます"
+    }
+  ],
+  "marks": [
+    {
+      "type": "line",
+      "from": 0,
+      "to": 4,
+      "anchor": "hip",
+      "dx": 0,
+      "dy": 0.3,
+      "angle": 0,
+      "length": 0.72
+    }
+  ]
+}

@@ -1,7 +1,8 @@
 // データの型。要件メモ「データ定義」を出発点にしている。
 
 export type Level = 1 | 2 | 3;
-export type SupportStage = 'both' | 'one' | 'fingertip' | 'none'; // 両手・片手・指先・なし
+export type { SupportStage } from '../animation/types'; // 両手・片手・指先・なし
+import type { SupportStage } from '../animation/types';
 export type View = 'front' | 'side' | 'back';
 export type Category = 'warmup' | 'strength' | 'balance' | 'dynamic' | 'walking';
 export type Unit = 'reps' | 'seconds' | 'laps' | 'minutes';

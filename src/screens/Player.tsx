@@ -130,6 +130,8 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
   // 2つ目の向き（内回し・前回しなど）は、同じアニメを逆向きに再生する
   const direction = step.kind === 'countdown' || step.kind === 'exercise' ? step.direction : null;
   const reverse = direction?.index === 1 && anim?.reverseCaptions !== undefined;
+  // S-10：人物は、メニューの支えの段階どおりにつかまる
+  const support = step.kind === 'countdown' || step.kind === 'exercise' ? step.support : null;
   // 見ている向きが分かりにくい視点は、言葉で添える
   const viewNote = anim?.view === 'back' ? '後ろから見た図' : null;
   // 最初の1往復だけ、動きの説明（字幕）も読み上げる。短すぎる字幕は読まない
@@ -220,7 +222,7 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
         <h1>{ex.name}</h1>
         {(step.side || direction) && <p className="side">{[step.side && SIDE_LABEL[step.side], direction?.label].filter(Boolean).join('　')}</p>}
         {/* 始める前に、最初の姿勢を見せる */}
-        {anim && <AnimationCanvas key={`${anim.id}-${index}`} anim={anim} getTime={() => 0} label={`${ex.name}の最初の姿勢`} showCaption={false} mirror={mirror} reverse={reverse} />}
+        {anim && <AnimationCanvas key={`${anim.id}-${index}`} anim={anim} getTime={() => 0} label={`${ex.name}の最初の姿勢`} showCaption={false} mirror={mirror} reverse={reverse} support={support} />}
         {viewNote && <p className="muted view-note">{viewNote}</p>}
         <p className="lead countdown-lead">
           まもなく始めます
@@ -257,7 +259,7 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
         </p>
       )}
       {anim ? (
-        <AnimationCanvas key={`${anim.id}-${index}`} anim={anim} getTime={() => elapsedRef.current / 1000} label={`${ex.name}の動きの見本`} mirror={mirror} reverse={reverse} onCaption={speakCaption} />
+        <AnimationCanvas key={`${anim.id}-${index}`} anim={anim} getTime={() => elapsedRef.current / 1000} label={`${ex.name}の動きの見本`} mirror={mirror} reverse={reverse} support={support} onCaption={speakCaption} />
       ) : (
         <PlaceholderFigure posture={variant.posture} />
       )}

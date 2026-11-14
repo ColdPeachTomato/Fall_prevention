@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { wrapTime } from './interpolate';
 import { drawScene, viewBoxOf } from './scene';
-import type { AnimationData, Caption } from './types';
+import type { AnimationData, Caption, SupportStage } from './types';
 
 interface Props {
   anim: AnimationData;
@@ -14,6 +14,7 @@ interface Props {
   showJoints?: boolean;
   mirror?: boolean; // 左右反転（左側で行うとき）
   reverse?: boolean; // 逆向きに再生する（内回し・前回しなど）。字幕は reverseCaptions を使う
+  support?: SupportStage | null; // 支えの段階。人物は、この段階どおりに支持物につかまる（S-10）
   onCaption?: (caption: Caption) => void; // 字幕が切り替わったとき（読み上げに使う）
 }
 
@@ -22,10 +23,10 @@ function captionAt(anim: AnimationData, t: number, reverse: boolean | undefined)
   return captions.find((c) => t >= c.from && t < c.to);
 }
 
-export function AnimationCanvas({ anim, getTime, label, showCaption = true, showBalance, showJoints, mirror, reverse, onCaption }: Props) {
+export function AnimationCanvas({ anim, getTime, label, showCaption = true, showBalance, showJoints, mirror, reverse, support, onCaption }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const latest = useRef({ anim, getTime, showBalance, showJoints, mirror, reverse, onCaption });
-  latest.current = { anim, getTime, showBalance, showJoints, mirror, reverse, onCaption };
+  const latest = useRef({ anim, getTime, showBalance, showJoints, mirror, reverse, support, onCaption });
+  latest.current = { anim, getTime, showBalance, showJoints, mirror, reverse, support, onCaption };
   const [caption, setCaption] = useState(() => captionAt(anim, wrapTime(getTime(), anim.cycleSeconds), reverse)?.text ?? '');
 
   useEffect(() => {
@@ -35,7 +36,7 @@ export function AnimationCanvas({ anim, getTime, label, showCaption = true, show
       raf = requestAnimationFrame(tick);
       const canvas = canvasRef.current;
       if (!canvas) return;
-      const { anim: a, getTime: time, showBalance: balance, showJoints: joints, mirror: flip, reverse: backward } = latest.current;
+      const { anim: a, getTime: time, showBalance: balance, showJoints: joints, mirror: flip, reverse: backward, support: stage } = latest.current;
       const width = canvas.clientWidth;
       const height = canvas.clientHeight;
       if (width === 0 || height === 0) return;
@@ -49,7 +50,7 @@ export function AnimationCanvas({ anim, getTime, label, showCaption = true, show
       const t = wrapTime(time(), a.cycleSeconds); // 再生の時刻
       // 逆向きの再生では、同じキーフレームを終わりから始めへたどる
       const animTime = backward ? wrapTime(a.cycleSeconds - t, a.cycleSeconds) : t;
-      drawScene(ctx, a, animTime, { width, height, dpr, showBalance: balance, showJoints: joints, mirror: flip, reverse: backward });
+      drawScene(ctx, a, animTime, { width, height, dpr, showBalance: balance, showJoints: joints, mirror: flip, reverse: backward, support: stage });
       const current = captionAt(a, t, backward);
       if (current !== lastCaption) {
         lastCaption = current;

@@ -1,0 +1,158 @@
+{
+  "id": "S7-side-L2",
+  "exercise": "S7",
+  "level": 2,
+  "view": "side",
+  "checked": false,
+  "cycleSeconds": 6,
+  "root": {
+    "mode": "hip",
+    "x": -0.17,
+    "y": 0.53,
+    "pelvis": 0
+  },
+  "props": [
+    {
+      "type": "chair",
+      "x": 0.08,
+      "seatHeight": 0.242,
+      "seatDepth": 0.22,
+      "backHeight": 0.54
+    }
+  ],
+  "support": {
+    "x": 0.07,
+    "y": 0.54
+  },
+  "highlight": [
+    "near:thigh",
+    "near:shank",
+    "near:foot"
+  ],
+  "keyframes": [
+    {
+      "t": 0,
+      "pose": {
+        "ankle": 0,
+        "knee": 0,
+        "hip": 0,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "farAnkle": 0,
+        "farKnee": 0,
+        "farHip": 0
+      },
+      "label": "まっすぐ立つ"
+    },
+    {
+      "t": 0.3,
+      "pose": {
+        "ankle": 0,
+        "knee": 0,
+        "hip": 0,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "farAnkle": 0,
+        "farKnee": 0,
+        "farHip": 0
+      },
+      "label": "動き始め"
+    },
+    {
+      "t": 2.5,
+      "pose": {
+        "ankle": 14,
+        "knee": 8,
+        "hip": -14,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "farAnkle": 0,
+        "farKnee": 0,
+        "farHip": 0
+      },
+      "label": "後ろへ上げる"
+    },
+    {
+      "t": 3.5,
+      "pose": {
+        "ankle": 14,
+        "knee": 8,
+        "hip": -14,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "farAnkle": 0,
+        "farKnee": 0,
+        "farHip": 0
+      },
+      "label": "止める（下ろし始め）"
+    },
+    {
+      "t": 5.7,
+      "pose": {
+        "ankle": 0,
+        "knee": 0,
+        "hip": 0,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "farAnkle": 0,
+        "farKnee": 0,
+        "farHip": 0
+      },
+      "label": "下ろす"
+    }
+  ],
+  "captions": [
+    {
+      "from": 0,
+      "to": 0.3,
+      "text": "つかまる所の前に、まっすぐ立ちます"
+    },
+    {
+      "from": 0.3,
+      "to": 2.5,
+      "text": "片方の脚を、ゆっくり後ろへ上げます"
+    },
+    {
+      "from": 2.5,
+      "to": 3.5,
+      "text": "上げたまま止めます"
+    },
+    {
+      "from": 3.5,
+      "to": 6,
+      "text": "ゆっくり下ろします"
+    }
+  ],
+  "marks": [
+    {
+      "type": "line",
+      "from": 0,
+      "to": 6,
+      "anchor": "hip",
+      "dx": 0,
+      "dy": 0.3,
+      "angle": 0,
+      "length": 0.72
+    },
+    {
+      "type": "arrow",
+      "from": 0.3,
+      "to": 2.4,
+      "anchor": "heel",
+      "dx": -0.04,
+      "dy": 0.02,
+      "angle": -70,
+      "length": 0.09
+    }
+  ]
+}

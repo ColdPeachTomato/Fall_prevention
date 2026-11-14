@@ -1,0 +1,237 @@
+{
+  "id": "S5-side-L2",
+  "exercise": "S5",
+  "level": 2,
+  "view": "side",
+  "checked": false,
+  "cycleSeconds": 9.6,
+  "countsPerCycle": 2,
+  "root": {
+    "mode": "hip",
+    "x": -0.17,
+    "y": 0.53,
+    "pelvis": 0
+  },
+  "props": [
+    {
+      "type": "chair",
+      "x": 0.09,
+      "seatHeight": 0.242,
+      "seatDepth": 0.22,
+      "backHeight": 0.54
+    }
+  ],
+  "support": {
+    "x": 0.08,
+    "y": 0.54
+  },
+  "highlight": [
+    "thigh",
+    "shank"
+  ],
+  "keyframes": [
+    {
+      "t": 0,
+      "pose": {
+        "ankle": 0,
+        "knee": 0,
+        "hip": 0,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "farAnkle": 0,
+        "farKnee": 0,
+        "farHip": 0
+      },
+      "label": "まっすぐ立つ"
+    },
+    {
+      "t": 0.2,
+      "pose": {
+        "ankle": 0,
+        "knee": 0,
+        "hip": 0,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "farAnkle": 0,
+        "farKnee": 0,
+        "farHip": 0
+      },
+      "label": "手前の膝を上げ始める"
+    },
+    {
+      "t": 2.2,
+      "pose": {
+        "ankle": 15,
+        "knee": 62,
+        "hip": 45,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "farAnkle": 0,
+        "farKnee": 0,
+        "farHip": 0
+      },
+      "label": "手前の膝を上げる"
+    },
+    {
+      "t": 2.5,
+      "pose": {
+        "ankle": 15,
+        "knee": 62,
+        "hip": 45,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "farAnkle": 0,
+        "farKnee": 0,
+        "farHip": 0
+      },
+      "label": "手前を下ろし始める"
+    },
+    {
+      "t": 4.5,
+      "pose": {
+        "ankle": 0,
+        "knee": 0,
+        "hip": 0,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "farAnkle": 0,
+        "farKnee": 0,
+        "farHip": 0
+      },
+      "label": "手前を下ろす"
+    },
+    {
+      "t": 5,
+      "pose": {
+        "ankle": 0,
+        "knee": 0,
+        "hip": 0,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "farAnkle": 0,
+        "farKnee": 0,
+        "farHip": 0
+      },
+      "label": "奥の膝を上げ始める"
+    },
+    {
+      "t": 7,
+      "pose": {
+        "ankle": 0,
+        "knee": 0,
+        "hip": 0,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "farHip": 45,
+        "farKnee": 62,
+        "farAnkle": 15
+      },
+      "label": "奥の膝を上げる"
+    },
+    {
+      "t": 7.3,
+      "pose": {
+        "ankle": 0,
+        "knee": 0,
+        "hip": 0,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "farHip": 45,
+        "farKnee": 62,
+        "farAnkle": 15
+      },
+      "label": "奥を下ろし始める"
+    },
+    {
+      "t": 9.3,
+      "pose": {
+        "ankle": 0,
+        "knee": 0,
+        "hip": 0,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "farAnkle": 0,
+        "farKnee": 0,
+        "farHip": 0
+      },
+      "label": "奥を下ろす"
+    }
+  ],
+  "captions": [
+    {
+      "from": 0,
+      "to": 0.2,
+      "text": "つかまる所の前に、まっすぐ立ちます"
+    },
+    {
+      "from": 0.2,
+      "to": 2.5,
+      "text": "片方の膝をゆっくり上げます"
+    },
+    {
+      "from": 2.5,
+      "to": 4.8,
+      "text": "ゆっくり下ろします"
+    },
+    {
+      "from": 4.8,
+      "to": 7.3,
+      "text": "反対の膝をゆっくり上げます"
+    },
+    {
+      "from": 7.3,
+      "to": 9.6,
+      "text": "ゆっくり下ろします"
+    }
+  ],
+  "marks": [
+    {
+      "type": "line",
+      "from": 0,
+      "to": 9.6,
+      "anchor": "hip",
+      "dx": 0,
+      "dy": 0.3,
+      "angle": 0,
+      "length": 0.72
+    },
+    {
+      "type": "arrow",
+      "from": 0.2,
+      "to": 2.2,
+      "anchor": "knee",
+      "dx": -0.02,
+      "dy": 0.07,
+      "angle": 0,
+      "length": 0.08
+    },
+    {
+      "type": "arrow",
+      "from": 5,
+      "to": 7,
+      "anchor": "farKnee",
+      "dx": -0.02,
+      "dy": 0.07,
+      "angle": 0,
+      "length": 0.08
+    }
+  ]
+}

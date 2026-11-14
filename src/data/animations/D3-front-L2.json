@@ -1,0 +1,762 @@
+{
+  "id": "D3-front-L2",
+  "exercise": "D3",
+  "level": 2,
+  "view": "front",
+  "checked": false,
+  "cycleSeconds": 13.5,
+  "root": {
+    "mode": "stand",
+    "x": 0,
+    "y": 0.5202
+  },
+  "viewBox": {
+    "minX": -0.48,
+    "maxX": 0.48,
+    "minY": -0.075,
+    "maxY": 1.06
+  },
+  "support": {
+    "hand": "l",
+    "front": {
+      "x": 0,
+      "half": 0.1,
+      "y": 0.54,
+      "follow": true
+    }
+  },
+  "props": [
+    {
+      "type": "counter",
+      "x": 0,
+      "width": 0.9,
+      "height": 0.54,
+      "inFront": true
+    }
+  ],
+  "highlight": [
+    "thigh",
+    "shank",
+    "foot"
+  ],
+  "keyframes": [
+    {
+      "t": 0,
+      "pose": {
+        "shift": -0.15,
+        "rKneeOut": -0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": -0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": -0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "右へ：足を出し始める"
+    },
+    {
+      "t": 0.5,
+      "pose": {
+        "shift": -0.125,
+        "rKneeOut": 0,
+        "rKneeUp": -0.955,
+        "rAnkleOut": 0,
+        "rAnkleUp": -0.955,
+        "lKneeOut": 0,
+        "lKneeUp": -0.98,
+        "lAnkleOut": 0,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "右へ：足を出す（途中）"
+    },
+    {
+      "t": 1,
+      "pose": {
+        "shift": -0.1,
+        "rKneeOut": 0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": 0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": 0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "右へ：足を出した"
+    },
+    {
+      "t": 1.05,
+      "pose": {
+        "shift": -0.1,
+        "rKneeOut": 0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": 0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": 0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "右へ：足を寄せ始める"
+    },
+    {
+      "t": 1.55,
+      "pose": {
+        "shift": -0.075,
+        "rKneeOut": 0,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0,
+        "rAnkleUp": -0.98,
+        "lKneeOut": 0,
+        "lKneeUp": -0.955,
+        "lAnkleOut": 0,
+        "lAnkleUp": -0.955,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "右へ：足を寄せる（途中）"
+    },
+    {
+      "t": 2.05,
+      "pose": {
+        "shift": -0.05,
+        "rKneeOut": -0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": -0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": -0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "右へ：足を寄せた"
+    },
+    {
+      "t": 2.25,
+      "pose": {
+        "shift": -0.05,
+        "rKneeOut": -0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": -0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": -0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "右へ：足を出し始める"
+    },
+    {
+      "t": 2.75,
+      "pose": {
+        "shift": -0.025,
+        "rKneeOut": 0,
+        "rKneeUp": -0.955,
+        "rAnkleOut": 0,
+        "rAnkleUp": -0.955,
+        "lKneeOut": 0,
+        "lKneeUp": -0.98,
+        "lAnkleOut": 0,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "右へ：足を出す（途中）"
+    },
+    {
+      "t": 3.25,
+      "pose": {
+        "shift": 0,
+        "rKneeOut": 0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": 0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": 0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "右へ：足を出した"
+    },
+    {
+      "t": 3.3,
+      "pose": {
+        "shift": 0,
+        "rKneeOut": 0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": 0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": 0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "右へ：足を寄せ始める"
+    },
+    {
+      "t": 3.8,
+      "pose": {
+        "shift": 0.025,
+        "rKneeOut": 0,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0,
+        "rAnkleUp": -0.98,
+        "lKneeOut": 0,
+        "lKneeUp": -0.955,
+        "lAnkleOut": 0,
+        "lAnkleUp": -0.955,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "右へ：足を寄せる（途中）"
+    },
+    {
+      "t": 4.3,
+      "pose": {
+        "shift": 0.05,
+        "rKneeOut": -0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": -0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": -0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "右へ：足を寄せた"
+    },
+    {
+      "t": 4.5,
+      "pose": {
+        "shift": 0.05,
+        "rKneeOut": -0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": -0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": -0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "右へ：足を出し始める"
+    },
+    {
+      "t": 5,
+      "pose": {
+        "shift": 0.075,
+        "rKneeOut": 0,
+        "rKneeUp": -0.955,
+        "rAnkleOut": 0,
+        "rAnkleUp": -0.955,
+        "lKneeOut": 0,
+        "lKneeUp": -0.98,
+        "lAnkleOut": 0,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "右へ：足を出す（途中）"
+    },
+    {
+      "t": 5.5,
+      "pose": {
+        "shift": 0.1,
+        "rKneeOut": 0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": 0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": 0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "右へ：足を出した"
+    },
+    {
+      "t": 5.55,
+      "pose": {
+        "shift": 0.1,
+        "rKneeOut": 0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": 0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": 0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "右へ：足を寄せ始める"
+    },
+    {
+      "t": 6.05,
+      "pose": {
+        "shift": 0.125,
+        "rKneeOut": 0,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0,
+        "rAnkleUp": -0.98,
+        "lKneeOut": 0,
+        "lKneeUp": -0.955,
+        "lAnkleOut": 0,
+        "lAnkleUp": -0.955,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "右へ：足を寄せる（途中）"
+    },
+    {
+      "t": 6.55,
+      "pose": {
+        "shift": 0.15,
+        "rKneeOut": -0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": -0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": -0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "右へ：足を寄せた"
+    },
+    {
+      "t": 6.75,
+      "pose": {
+        "shift": 0.15,
+        "rKneeOut": -0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": -0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": -0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "左へ：足を出し始める"
+    },
+    {
+      "t": 7.25,
+      "pose": {
+        "shift": 0.125,
+        "rKneeOut": 0,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0,
+        "rAnkleUp": -0.98,
+        "lKneeOut": 0,
+        "lKneeUp": -0.955,
+        "lAnkleOut": 0,
+        "lAnkleUp": -0.955,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "左へ：足を出す（途中）"
+    },
+    {
+      "t": 7.75,
+      "pose": {
+        "shift": 0.1,
+        "rKneeOut": 0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": 0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": 0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "左へ：足を出した"
+    },
+    {
+      "t": 7.8,
+      "pose": {
+        "shift": 0.1,
+        "rKneeOut": 0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": 0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": 0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "左へ：足を寄せ始める"
+    },
+    {
+      "t": 8.3,
+      "pose": {
+        "shift": 0.075,
+        "rKneeOut": 0,
+        "rKneeUp": -0.955,
+        "rAnkleOut": 0,
+        "rAnkleUp": -0.955,
+        "lKneeOut": 0,
+        "lKneeUp": -0.98,
+        "lAnkleOut": 0,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "左へ：足を寄せる（途中）"
+    },
+    {
+      "t": 8.8,
+      "pose": {
+        "shift": 0.05,
+        "rKneeOut": -0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": -0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": -0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "左へ：足を寄せた"
+    },
+    {
+      "t": 9,
+      "pose": {
+        "shift": 0.05,
+        "rKneeOut": -0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": -0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": -0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "左へ：足を出し始める"
+    },
+    {
+      "t": 9.5,
+      "pose": {
+        "shift": 0.025,
+        "rKneeOut": 0,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0,
+        "rAnkleUp": -0.98,
+        "lKneeOut": 0,
+        "lKneeUp": -0.955,
+        "lAnkleOut": 0,
+        "lAnkleUp": -0.955,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "左へ：足を出す（途中）"
+    },
+    {
+      "t": 10,
+      "pose": {
+        "shift": 0,
+        "rKneeOut": 0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": 0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": 0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "左へ：足を出した"
+    },
+    {
+      "t": 10.05,
+      "pose": {
+        "shift": 0,
+        "rKneeOut": 0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": 0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": 0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "左へ：足を寄せ始める"
+    },
+    {
+      "t": 10.55,
+      "pose": {
+        "shift": -0.025,
+        "rKneeOut": 0,
+        "rKneeUp": -0.955,
+        "rAnkleOut": 0,
+        "rAnkleUp": -0.955,
+        "lKneeOut": 0,
+        "lKneeUp": -0.98,
+        "lAnkleOut": 0,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "左へ：足を寄せる（途中）"
+    },
+    {
+      "t": 11.05,
+      "pose": {
+        "shift": -0.05,
+        "rKneeOut": -0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": -0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": -0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "左へ：足を寄せた"
+    },
+    {
+      "t": 11.25,
+      "pose": {
+        "shift": -0.05,
+        "rKneeOut": -0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": -0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": -0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "左へ：足を出し始める"
+    },
+    {
+      "t": 11.75,
+      "pose": {
+        "shift": -0.075,
+        "rKneeOut": 0,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0,
+        "rAnkleUp": -0.98,
+        "lKneeOut": 0,
+        "lKneeUp": -0.955,
+        "lAnkleOut": 0,
+        "lAnkleUp": -0.955,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "左へ：足を出す（途中）"
+    },
+    {
+      "t": 12.25,
+      "pose": {
+        "shift": -0.1,
+        "rKneeOut": 0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": 0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": 0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "左へ：足を出した"
+    },
+    {
+      "t": 12.3,
+      "pose": {
+        "shift": -0.1,
+        "rKneeOut": 0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": 0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": 0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "左へ：足を寄せ始める"
+    },
+    {
+      "t": 12.8,
+      "pose": {
+        "shift": -0.125,
+        "rKneeOut": 0,
+        "rKneeUp": -0.955,
+        "rAnkleOut": 0,
+        "rAnkleUp": -0.955,
+        "lKneeOut": 0,
+        "lKneeUp": -0.98,
+        "lAnkleOut": 0,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "左へ：足を寄せる（途中）"
+    },
+    {
+      "t": 13.3,
+      "pose": {
+        "shift": -0.15,
+        "rKneeOut": -0.0509,
+        "rKneeUp": -0.98,
+        "rAnkleOut": -0.0509,
+        "rAnkleUp": -0.98,
+        "lKneeOut": -0.0509,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.0509,
+        "lAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "label": "左へ：足を寄せた"
+    }
+  ],
+  "captions": [
+    {
+      "from": 0,
+      "to": 6.75,
+      "text": "カウンターに向かい、小さく右へ進みます"
+    },
+    {
+      "from": 6.75,
+      "to": 13.5,
+      "text": "足を交差させず、小さく左へ戻ります"
+    }
+  ],
+  "marks": [
+    {
+      "type": "arrow",
+      "from": 0,
+      "to": 6.55,
+      "anchor": "head",
+      "dx": 0.09,
+      "dy": 0,
+      "angle": 90,
+      "length": 0.1
+    },
+    {
+      "type": "arrow",
+      "from": 6.75,
+      "to": 13.3,
+      "anchor": "head",
+      "dx": -0.09,
+      "dy": 0,
+      "angle": -90,
+      "length": 0.1
+    }
+  ]
+}

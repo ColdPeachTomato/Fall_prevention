@@ -1,0 +1,202 @@
+{
+  "id": "S6-front-L2",
+  "exercise": "S6",
+  "level": 2,
+  "view": "front",
+  "checked": false,
+  "cycleSeconds": 6,
+  "root": {
+    "mode": "stand",
+    "x": 0,
+    "y": 0.5202
+  },
+  "viewBox": {
+    "minX": -0.62,
+    "maxX": 0.36,
+    "minY": -0.075,
+    "maxY": 1.06
+  },
+  "support": {
+    "hand": "l",
+    "side": {
+      "x": -0.3,
+      "y": 0.54
+    },
+    "front": {
+      "x": -0.06,
+      "half": 0.1,
+      "y": 0.54
+    }
+  },
+  "props": [
+    {
+      "type": "chair",
+      "x": -0.44,
+      "width": 0.3,
+      "seatHeight": 0.242,
+      "backHeight": 0.54,
+      "showFor": [
+        "one",
+        "fingertip",
+        "none"
+      ]
+    },
+    {
+      "type": "chair",
+      "x": -0.06,
+      "width": 0.3,
+      "seatHeight": 0.242,
+      "backHeight": 0.54,
+      "showFor": [
+        "both"
+      ],
+      "inFront": true
+    }
+  ],
+  "highlight": [
+    "r:thigh",
+    "r:shank",
+    "r:foot"
+  ],
+  "keyframes": [
+    {
+      "t": 0,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "rKneeOut": 0.0713,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0.0713,
+        "rAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0
+      },
+      "label": "体重を反対の足に乗せて立つ"
+    },
+    {
+      "t": 0.3,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "rKneeOut": 0.0713,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0.0713,
+        "rAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0
+      },
+      "label": "動き始め"
+    },
+    {
+      "t": 2.5,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "rKneeOut": 0.4695,
+        "rKneeUp": -0.8829,
+        "rAnkleOut": 0.4695,
+        "rAnkleUp": -0.8829,
+        "rToeOut": 0.1,
+        "rToeUp": 0
+      },
+      "label": "横へ上げる"
+    },
+    {
+      "t": 3.5,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "rKneeOut": 0.4695,
+        "rKneeUp": -0.8829,
+        "rAnkleOut": 0.4695,
+        "rAnkleUp": -0.8829,
+        "rToeOut": 0.1,
+        "rToeUp": 0
+      },
+      "label": "止める（下ろし始め）"
+    },
+    {
+      "t": 5.7,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "rKneeOut": 0.0713,
+        "rKneeUp": -0.98,
+        "rAnkleOut": 0.0713,
+        "rAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0
+      },
+      "label": "下ろす"
+    }
+  ],
+  "captions": [
+    {
+      "from": 0,
+      "to": 0.3,
+      "text": "つかまって、まっすぐ立ちます"
+    },
+    {
+      "from": 0.3,
+      "to": 2.5,
+      "text": "片方の脚を、ゆっくり横へ上げます"
+    },
+    {
+      "from": 2.5,
+      "to": 3.5,
+      "text": "上げたまま止めます。上体は傾けません"
+    },
+    {
+      "from": 3.5,
+      "to": 6,
+      "text": "ゆっくり下ろします"
+    }
+  ],
+  "marks": [
+    {
+      "type": "line",
+      "from": 0,
+      "to": 6,
+      "anchor": "lumbar",
+      "dx": 0,
+      "dy": 0,
+      "angle": 90,
+      "length": 0.36
+    },
+    {
+      "type": "arrow",
+      "from": 0.3,
+      "to": 2.4,
+      "anchor": "r.ankle",
+      "dx": 0.06,
+      "dy": 0.02,
+      "angle": 65,
+      "length": 0.09
+    }
+  ]
+}

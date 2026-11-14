@@ -1,0 +1,104 @@
+{
+  "id": "B1-front-L2",
+  "exercise": "B1",
+  "level": 2,
+  "view": "front",
+  "checked": false,
+  "cycleSeconds": 4,
+  "root": {
+    "mode": "stand",
+    "x": 0,
+    "y": 0.5202
+  },
+  "viewBox": {
+    "minX": -0.62,
+    "maxX": 0.34,
+    "minY": -0.075,
+    "maxY": 1.06
+  },
+  "support": {
+    "hand": "l",
+    "side": {
+      "x": -0.3,
+      "y": 0.54
+    },
+    "front": {
+      "x": 0,
+      "half": 0.1,
+      "y": 0.54
+    }
+  },
+  "props": [
+    {
+      "type": "chair",
+      "x": -0.44,
+      "width": 0.3,
+      "seatHeight": 0.242,
+      "backHeight": 0.54,
+      "showFor": [
+        "one",
+        "fingertip",
+        "none"
+      ]
+    },
+    {
+      "type": "chair",
+      "x": 0,
+      "width": 0.3,
+      "seatHeight": 0.242,
+      "backHeight": 0.54,
+      "showFor": [
+        "both"
+      ],
+      "inFront": true
+    }
+  ],
+  "highlight": [
+    "foot"
+  ],
+  "keyframes": [
+    {
+      "t": 0,
+      "pose": {
+        "rKneeOut": -0.1018,
+        "rKneeUp": -0.98,
+        "rAnkleOut": -0.1018,
+        "rAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0
+      },
+      "label": "足をそろえて立つ"
+    },
+    {
+      "t": 2,
+      "pose": {
+        "rKneeOut": -0.1018,
+        "rKneeUp": -0.98,
+        "rAnkleOut": -0.1018,
+        "rAnkleUp": -0.98,
+        "rToeOut": 0.1,
+        "rToeUp": 0
+      },
+      "label": "そのまま保つ"
+    }
+  ],
+  "captions": [
+    {
+      "from": 0,
+      "to": 4,
+      "text": "足をそろえて立ちます。ふらついたら、つかまります"
+    }
+  ],
+  "marks": [
+    {
+      "type": "line",
+      "from": 0,
+      "to": 4,
+      "anchor": "pelvis",
+      "dx": 0,
+      "dy": 0.1,
+      "angle": 0,
+      "length": 1
+    }
+  ]
+}

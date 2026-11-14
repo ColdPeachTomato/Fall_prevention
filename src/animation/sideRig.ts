@@ -16,14 +16,17 @@
 
 import { BODY, MASS } from './bodyModel';
 import { sampleAnimation, type Sample } from './interpolate';
-import type { ContactTarget, FullPose, Plant, Prop, SideAnimation } from './types';
+import type { ContactTarget, FullPose, Plant, Prop, SideAnimation, SupportStage } from './types';
 
 export interface Vec {
   x: number;
   y: number;
 }
 
-export type RigConfig = Pick<SideAnimation, 'root' | 'contacts' | 'plants'>;
+export type RigConfig = Pick<SideAnimation, 'root' | 'contacts' | 'plants' | 'support'>;
+
+// 指先を添えるとき、手を置く点より少し上に手を描く（握らず、上から触れるだけ）
+export const FINGERTIP_LIFT = 0.022;
 
 const RAD = Math.PI / 180;
 
@@ -34,6 +37,14 @@ export function dir(deg: number): Vec {
 function along(from: Vec, deg: number, length: number): Vec {
   const d = dir(deg);
   return { x: from.x + d.x * length, y: from.y + d.y * length };
+}
+
+// 角度を -180 より大きく 180 以下に直す
+function wrapAngle(deg: number): number {
+  let a = deg % 360;
+  if (a > 180) a -= 360;
+  if (a <= -180) a += 360;
+  return a;
 }
 
 function lerp(a: number, b: number, w: number): number {
@@ -82,6 +93,8 @@ export interface Skeleton {
   // 手の接触先（あれば）
   handTarget?: Vec;
   farHandTarget?: Vec;
+  // 支持物につかまっている手（支えの段階による）
+  holding: { near: boolean; far: boolean };
 }
 
 // 足首と足の向きから、足の裏の3点を求める
@@ -119,27 +132,35 @@ function legFromHip(hip: Vec, pelvisAngle: number, hipFlex: number, kneeFlex: nu
   };
 }
 
-// 足を床の決まった位置に付けたまま、足の傾きに合わせて脚の関節を決める
-function legPlanted(hip: Vec, pelvisAngle: number, plant: Plant, pitch: number): Leg {
+// 床に付けた足の、足首の位置と足の向き
+function plantedFoot(plant: Plant, pitch: number): { ankle: Vec; footAngle: number; toeBend: number } {
   const pivot: Vec = { x: plant.x, y: 0 };
-  let footAngle: number;
-  let toeBend = 0;
-  let ankle: Vec;
   if (plant.pivot === 'ball') {
     // かかと上げ：母趾球を支点にして、かかとが上がる。つま先は床に付いたまま
     const p = Math.max(0, pitch);
-    footAngle = 90 + p;
-    toeBend = p;
+    const footAngle = 90 + p;
     const u = dir(footAngle);
     const v = { x: -u.y, y: u.x };
-    ankle = { x: pivot.x - u.x * BODY.ballFront + v.x * BODY.ankleHeight, y: pivot.y - u.y * BODY.ballFront + v.y * BODY.ankleHeight };
-  } else {
-    // つま先上げ：かかとを支点にして、つま先が上がる
-    footAngle = 90 + Math.min(0, pitch);
-    const u = dir(footAngle);
-    const v = { x: -u.y, y: u.x };
-    ankle = { x: pivot.x + u.x * BODY.heelBack + v.x * BODY.ankleHeight, y: pivot.y + u.y * BODY.heelBack + v.y * BODY.ankleHeight };
+    return {
+      ankle: { x: pivot.x - u.x * BODY.ballFront + v.x * BODY.ankleHeight, y: pivot.y - u.y * BODY.ballFront + v.y * BODY.ankleHeight },
+      footAngle,
+      toeBend: p,
+    };
   }
+  // つま先上げ：かかとを支点にして、つま先が上がる
+  const footAngle = 90 + Math.min(0, pitch);
+  const u = dir(footAngle);
+  const v = { x: -u.y, y: u.x };
+  return {
+    ankle: { x: pivot.x + u.x * BODY.heelBack + v.x * BODY.ankleHeight, y: pivot.y + u.y * BODY.heelBack + v.y * BODY.ankleHeight },
+    footAngle,
+    toeBend: 0,
+  };
+}
+
+// 足を床の決まった位置に付けたまま、足の傾きに合わせて脚の関節を決める
+function legPlanted(hip: Vec, pelvisAngle: number, plant: Plant, pitch: number): Leg {
+  const { ankle, footAngle, toeBend } = plantedFoot(plant, pitch);
   const dx = ankle.x - hip.x;
   const dy = ankle.y - hip.y;
   const l1 = BODY.thigh;
@@ -156,9 +177,9 @@ function legPlanted(hip: Vec, pelvisAngle: number, plant: Plant, pitch: number):
     ankle,
     footAngle,
     toeBend,
-    hip: pelvisAngle + 180 - thighDown,
+    hip: wrapAngle(pelvisAngle + 180 - thighDown),
     kneeAngle: kneeFlex,
-    ankleAngle: shankDown - 90 - footAngle,
+    ankleAngle: wrapAngle(shankDown - 90 - footAngle),
   };
 }
 
@@ -195,15 +216,15 @@ function armPoints(shoulder: Vec, trunkAngle: number, flex: number, elbowFlex: n
   return { elbow, wrist: along(elbow, fore, BODY.forearm), hand: along(elbow, fore, BODY.forearm + BODY.palm) };
 }
 
-export function solveSide(pose: FullPose, rig: RigConfig, hands = 0): Skeleton {
+export function solveSide(pose: FullPose, rig: RigConfig, hands = 0, stage: SupportStage | null = null): Skeleton {
   const effective: Partial<FullPose> = {};
   let hip: Vec;
   let pelvisAngle: number;
   let near: Leg;
   let far: Leg;
 
-  if (rig.root.mode === 'seat') {
-    // 座って行う種目：股関節は座面の上で動かない
+  if (rig.root.mode === 'seat' || rig.root.mode === 'hip') {
+    // 座って行う種目、立って片脚ずつ動かす種目：股関節は動かない
     hip = { x: rig.root.x, y: rig.root.y };
     pelvisAngle = rig.root.pelvis;
     if (rig.plants?.near) {
@@ -215,16 +236,20 @@ export function solveSide(pose: FullPose, rig: RigConfig, hands = 0): Skeleton {
       near = legFromHip(hip, pelvisAngle, pose.hip, pose.knee, pose.ankle);
     }
   } else {
-    // 立つ・立ち上がる種目：手前側の足首から上へ。足は床に平らに付いたまま動かない
-    const ankle: Vec = { x: rig.root.x, y: BODY.ankleHeight };
-    const knee = along(ankle, pose.ankle, BODY.shank);
-    const thighUp = pose.ankle - pose.knee;
+    // 立つ・立ち上がる種目：手前側の足首から上へ。足は床に付いたまま滑らない。
+    // かかと上げ・つま先上げでは、足の傾き（footPitch）で足首の位置が決まる
+    const foot = rig.plants?.near
+      ? plantedFoot(rig.plants.near, pose.footPitch)
+      : { ankle: { x: rig.root.x, y: BODY.ankleHeight }, footAngle: 90, toeBend: 0 };
+    const shankUp = pose.ankle + (foot.footAngle - 90); // ankle は足に対するすねの角度（背屈が正）
+    const knee = along(foot.ankle, shankUp, BODY.shank);
+    const thighUp = shankUp - pose.knee;
     hip = along(knee, thighUp, BODY.thigh);
     pelvisAngle = thighUp + pose.hip;
-    near = { knee, ankle, footAngle: 90, toeBend: 0, hip: pose.hip, kneeAngle: pose.knee, ankleAngle: pose.ankle };
+    near = { knee, ankle: foot.ankle, footAngle: foot.footAngle, toeBend: foot.toeBend, hip: pose.hip, kneeAngle: pose.knee, ankleAngle: pose.ankle };
   }
 
-  if (rig.root.mode === 'seat' && rig.plants?.far) {
+  if (rig.plants?.far) {
     far = legPlanted(hip, pelvisAngle, rig.plants.far, pose.farFootPitch);
     effective.farHip = far.hip;
     effective.farKnee = far.kneeAngle;
@@ -256,6 +281,21 @@ export function solveSide(pose: FullPose, rig: RigConfig, hands = 0): Skeleton {
     const ik = solveArm(shoulder, farHandTarget, trunkAngle);
     arm.farShoulder = lerp(pose.farShoulder, ik.shoulder, hands);
     arm.farElbow = lerp(pose.farElbow, ik.elbow, hands);
+  }
+  // 支持物につかまる腕：支えの段階に合わせて、手を支持物に付ける。下半身は変えない
+  const holding = { near: false, far: false };
+  if (rig.support && stage !== null && stage !== 'none') {
+    handTarget = { x: rig.support.x, y: rig.support.y + (stage === 'fingertip' ? FINGERTIP_LIFT : 0) };
+    const ik = solveArm(shoulder, handTarget, trunkAngle);
+    arm.shoulder = ik.shoulder;
+    arm.elbow = ik.elbow;
+    holding.near = true;
+    if (stage === 'both') {
+      farHandTarget = handTarget;
+      arm.farShoulder = ik.shoulder;
+      arm.farElbow = ik.elbow;
+      holding.far = true;
+    }
   }
   const nearArm = armPoints(shoulder, trunkAngle, arm.shoulder, arm.elbow);
   const farArm = armPoints(shoulder, trunkAngle, arm.farShoulder, arm.farElbow);
@@ -292,6 +332,7 @@ export function solveSide(pose: FullPose, rig: RigConfig, hands = 0): Skeleton {
     headAngle,
     arm,
     effective,
+    holding,
   };
   if (handTarget) sk.handTarget = handTarget;
   if (farHandTarget) sk.farHandTarget = farHandTarget;
@@ -328,6 +369,7 @@ export function centerOfMass(sk: Skeleton): Vec {
 }
 
 const FLOOR_TOLERANCE = 0.006; // 足が床についているとみなす高さの誤差
+const HEEL_ROUND = 0.012; // かかとだけ、母趾球だけで立つときの、接地の幅（半分）
 const BUTTOCK_BACK = 0.08; // 股関節から、お尻の後ろの接点まで
 const THIGH_REST = 0.5; // 太もものうち、座面に乗る部分（股関節から膝への割合の上限）
 
@@ -339,12 +381,14 @@ export interface SupportRange {
 // 足の裏のうち、床についている部分の範囲（ついていなければ null）
 export function footContact(heel: Vec, ball: Vec, toe: Vec): SupportRange | null {
   const xs = [heel, ball, toe].filter((p) => Math.abs(p.y) < FLOOR_TOLERANCE).map((p) => p.x);
-  return xs.length === 0 ? null : { min: Math.min(...xs), max: Math.max(...xs) };
+  if (xs.length === 0) return null;
+  if (xs.length === 1) return { min: xs[0]! - HEEL_ROUND, max: xs[0]! + HEEL_ROUND };
+  return { min: Math.min(...xs), max: Math.max(...xs) };
 }
 
-// 体を支えている範囲（前後方向）。床についた足と、座っている間の座面を合わせた範囲。
-// どこも支えていなければ null
-export function supportRange(sk: Skeleton, onSeat: boolean, props: Prop[]): SupportRange | null {
+// 体を支えている範囲（前後方向）。床についた足と、座っている間の座面、手でつかまっている支持物を合わせた範囲。
+// 指先を添えるだけのときは、支持物を支えに数えない。どこも支えていなければ null
+export function supportRange(sk: Skeleton, onSeat: boolean, props: Prop[], stage: SupportStage | null = null): SupportRange | null {
   const parts: SupportRange[] = [];
   const nearFoot = footContact(sk.heel, sk.ball, sk.toe);
   const farFoot = footContact(sk.farHeel, sk.farBall, sk.farToe);
@@ -359,6 +403,9 @@ export function supportRange(sk: Skeleton, onSeat: boolean, props: Prop[]): Supp
       if (front > back) parts.push({ min: back, max: front });
     }
   }
+  if (sk.holding.near && sk.handTarget && (stage === 'both' || stage === 'one')) {
+    parts.push({ min: sk.handTarget.x, max: sk.handTarget.x });
+  }
   if (parts.length === 0) return null;
   return { min: Math.min(...parts.map((p) => p.min)), max: Math.max(...parts.map((p) => p.max)) };
 }
@@ -372,11 +419,11 @@ export interface Frame extends Sample {
 }
 
 // 時刻 t の1コマ分（姿勢、体の各点、重心、支えの範囲）を求める
-export function computeFrame(anim: SideAnimation, t: number): Frame {
+export function computeFrame(anim: SideAnimation, t: number, stage: SupportStage | null = null): Frame {
   const sample = sampleAnimation(anim, t);
-  const sk = solveSide(sample.pose, anim, sample.hands);
+  const sk = solveSide(sample.pose, anim, sample.hands, stage);
   const com = centerOfMass(sk);
-  const range = supportRange(sk, sample.onSeat, anim.props);
+  const range = supportRange(sk, sample.onSeat, anim.props, stage);
   const support = range ?? { min: com.x, max: com.x };
   return {
     ...sample,

@@ -7,7 +7,7 @@ import { FAR_DEFAULT, FAR_JOINTS, FOOT_PITCH, FRONT_BODY_CHANNELS, FRONT_LEFT_CH
 import { wrapTime } from '../animation/interpolate';
 import { ANIMATIONS } from '../animation/registry';
 import { frameOf } from '../animation/scene';
-import type { AnimationData } from '../animation/types';
+import type { AnimationData, SupportStage } from '../animation/types';
 import { validateAnimation } from '../animation/validate';
 
 const FRAME_STEP = 0.1; // コマ送りの幅（秒）
@@ -37,13 +37,13 @@ function clone(anim: AnimationData): AnimationData {
 }
 
 // 重心が支えの範囲の外に出る時間帯を探す
-function findUnstable(anim: AnimationData): { from: number; to: number }[] {
+function findUnstable(anim: AnimationData, stage: SupportStage | null): { from: number; to: number }[] {
   const ranges: { from: number; to: number }[] = [];
   let start: number | null = null;
   const count = Math.round(anim.cycleSeconds / SCAN_STEP);
   for (let i = 0; i <= count; i++) {
     const t = Math.min(i * SCAN_STEP, anim.cycleSeconds - 1e-6);
-    const stable = frameOf(anim, t).stable;
+    const stable = frameOf(anim, t, stage).stable;
     if (!stable && start === null) start = t;
     if (stable && start !== null) {
       ranges.push({ from: start, to: t });
@@ -77,6 +77,7 @@ export default function Preview() {
   const [showJoints, setShowJoints] = useState(false);
   const [mirror, setMirror] = useState(false);
   const [reverse, setReverse] = useState(false);
+  const [stage, setStage] = useState<SupportStage>('none');
   const [copied, setCopied] = useState(false);
   const timeRef = useRef(0);
 
@@ -101,8 +102,8 @@ export default function Preview() {
     return () => cancelAnimationFrame(raf);
   }, [playing, speed, anim.cycleSeconds]);
 
-  const frame = useMemo(() => frameOf(anim, time), [anim, time]);
-  const unstable = useMemo(() => findUnstable(anim), [anim]);
+  const frame = useMemo(() => frameOf(anim, time, anim.support ? stage : null), [anim, time, stage]);
+  const unstable = useMemo(() => findUnstable(anim, anim.support ? stage : null), [anim, stage]);
   const validation = useMemo(() => validateAnimation(JSON.parse(JSON.stringify(anim))), [anim]);
   const json = useMemo(() => JSON.stringify(anim, null, 2) + '\n', [anim]);
   const changed = useMemo(() => {
@@ -224,7 +225,7 @@ export default function Preview() {
       </label>
 
       <div className="preview-stage">
-        <AnimationCanvas anim={anim} getTime={() => timeRef.current} label="アニメのプレビュー" showBalance={showBalance} showJoints={showJoints} mirror={mirror} reverse={reverse} />
+        <AnimationCanvas anim={anim} getTime={() => timeRef.current} label="アニメのプレビュー" showBalance={showBalance} showJoints={showJoints} mirror={mirror} reverse={reverse} support={anim.support ? stage : null} />
       </div>
 
       <div className="preview-transport">
@@ -273,6 +274,17 @@ export default function Preview() {
           <input type="checkbox" checked={mirror} onChange={(e) => setMirror(e.target.checked)} />
           左右反転（左側）
         </label>
+        {anim.support && (
+          <label>
+            支えの段階
+            <select value={stage} onChange={(e) => setStage(e.target.value as SupportStage)}>
+              <option value="both">両手</option>
+              <option value="one">片手</option>
+              <option value="fingertip">指先</option>
+              <option value="none">なし</option>
+            </select>
+          </label>
+        )}
         {anim.reverseCaptions && (
           <label className="editor-check">
             <input type="checkbox" checked={reverse} onChange={(e) => setReverse(e.target.checked)} />

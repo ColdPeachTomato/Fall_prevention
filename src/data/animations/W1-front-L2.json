@@ -1,0 +1,229 @@
+{
+  "id": "W1-front-L2",
+  "exercise": "W1",
+  "level": 2,
+  "view": "front",
+  "checked": false,
+  "cycleSeconds": 3,
+  "root": {
+    "mode": "stand",
+    "x": 0,
+    "y": 0.5202
+  },
+  "viewBox": {
+    "minX": -0.62,
+    "maxX": 0.34,
+    "minY": -0.075,
+    "maxY": 1.06
+  },
+  "plants": {
+    "r": {
+      "x": 0.055
+    }
+  },
+  "support": {
+    "hand": "l",
+    "side": {
+      "x": -0.3,
+      "y": 0.54
+    },
+    "front": {
+      "x": -0.06,
+      "half": 0.1,
+      "y": 0.54
+    }
+  },
+  "props": [
+    {
+      "type": "chair",
+      "x": -0.44,
+      "width": 0.3,
+      "seatHeight": 0.242,
+      "backHeight": 0.54,
+      "showFor": [
+        "one",
+        "fingertip",
+        "none"
+      ]
+    },
+    {
+      "type": "chair",
+      "x": -0.06,
+      "width": 0.3,
+      "seatHeight": 0.242,
+      "backHeight": 0.54,
+      "showFor": [
+        "both"
+      ],
+      "inFront": true
+    }
+  ],
+  "highlight": [
+    "r:foot"
+  ],
+  "keyframes": [
+    {
+      "t": 0,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "rKneeOut": 0.05,
+        "rKneeUp": -0.96,
+        "rToeOut": 0,
+        "rToeUp": 0.02
+      },
+      "label": "つま先を下げる"
+    },
+    {
+      "t": 0.375,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "rKneeOut": 0.05,
+        "rKneeUp": -0.96,
+        "rToeOut": -0.2121,
+        "rToeUp": 0.0727
+      },
+      "label": "内へ"
+    },
+    {
+      "t": 0.75,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "rKneeOut": 0.05,
+        "rKneeUp": -0.96,
+        "rToeOut": -0.3,
+        "rToeUp": 0.2
+      },
+      "label": "内から上へ"
+    },
+    {
+      "t": 1.125,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "rKneeOut": 0.05,
+        "rKneeUp": -0.96,
+        "rToeOut": -0.2121,
+        "rToeUp": 0.3273
+      },
+      "label": "上へ"
+    },
+    {
+      "t": 1.5,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "rKneeOut": 0.05,
+        "rKneeUp": -0.96,
+        "rToeOut": 0,
+        "rToeUp": 0.38
+      },
+      "label": "上から外へ"
+    },
+    {
+      "t": 1.875,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "rKneeOut": 0.05,
+        "rKneeUp": -0.96,
+        "rToeOut": 0.2121,
+        "rToeUp": 0.3273
+      },
+      "label": "外へ"
+    },
+    {
+      "t": 2.25,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "rKneeOut": 0.05,
+        "rKneeUp": -0.96,
+        "rToeOut": 0.3,
+        "rToeUp": 0.2
+      },
+      "label": "外から下へ"
+    },
+    {
+      "t": 2.625,
+      "pose": {
+        "shift": -0.06,
+        "lKneeOut": -0.1731,
+        "lKneeUp": -0.98,
+        "lAnkleOut": -0.1731,
+        "lAnkleUp": -0.98,
+        "lToeOut": 0.1,
+        "lToeUp": 0,
+        "rKneeOut": 0.05,
+        "rKneeUp": -0.96,
+        "rToeOut": 0.2121,
+        "rToeUp": 0.0727
+      },
+      "label": "下へ"
+    }
+  ],
+  "captions": [
+    {
+      "from": 0,
+      "to": 3,
+      "text": "かかとを床につけたまま、つま先で外へ円を描きます"
+    }
+  ],
+  "reverseCaptions": [
+    {
+      "from": 0,
+      "to": 3,
+      "text": "かかとを床につけたまま、つま先で内へ円を描きます"
+    }
+  ],
+  "marks": [
+    {
+      "type": "arc",
+      "from": 0,
+      "to": 3,
+      "anchor": "r.heel",
+      "dx": 0,
+      "dy": 0.045,
+      "radius": 0.085,
+      "start": -75,
+      "sweep": 150
+    }
+  ]
+}

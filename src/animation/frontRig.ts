@@ -9,16 +9,16 @@
 // 手足の各節は、付け根から先への向きを (Out, Up) の2つの数で表す（節の長さを 1 とした割合）。
 //   Out：体の外側へ、Up：上へ。2つを合わせた長さが 1 より短い分は、手前か奥に向いて短く見えている。
 //
-// 起点（root）は、いまは seat（座って行う種目。左右の股関節の中央が座面の上で動かない）だけ。
+// 起点（root）は、左右の股関節の中央。seat：座って行う種目。stand：立って行う種目（shift で骨盤を横に動かせる）。
 
 import { BODY, BODY_FRONT, MASS } from './bodyModel';
 import { sampleFrontAnimation, type FrontSample } from './interpolate';
-import type { SupportRange, Vec } from './sideRig';
-import type { BodySide, FrontAnchorName, FrontAnimation, FrontChannel, FrontFullPose, FrontLimbPoint, FrontProp } from './types';
+import { FINGERTIP_LIFT, type SupportRange, type Vec } from './sideRig';
+import type { BodySide, FrontAnchorName, FrontAnimation, FrontChannel, FrontFullPose, FrontLimbPoint, FrontProp, SupportStage } from './types';
 
 const RAD = Math.PI / 180;
 
-export type FrontRigConfig = Pick<FrontAnimation, 'view' | 'root' | 'plants'>;
+export type FrontRigConfig = Pick<FrontAnimation, 'view' | 'root' | 'plants' | 'support'>;
 
 export interface FrontLimb {
   shoulder: Vec;
@@ -32,6 +32,8 @@ export interface FrontLimb {
   toe: Vec; // つま先の床側の点
   sign: number; // 体の外側の向き（画面の右が +1）
   planted: boolean; // かかとを床に付ける指定があるか
+  holding: boolean; // 支持物につかまっているか（支えの段階による）
+  handTarget?: Vec; // つかまる点
 }
 
 export interface FrontSkeleton {
@@ -100,11 +102,43 @@ function solveLimb(side: BodySide, pose: FrontFullPose, rig: FrontRigConfig, sho
   }
   const toe = { x: heel.x + sign * toeVec.x * BODY_FRONT.footLength, y: heel.y + toeVec.y * BODY_FRONT.footLength };
 
-  return { shoulder, elbow, wrist, hand, hip, knee, ankle, heel, toe, sign, planted: plant !== undefined };
+  return { shoulder, elbow, wrist, hand, hip, knee, ankle, heel, toe, sign, planted: plant !== undefined, holding: false };
 }
 
-export function solveFront(pose: FrontFullPose, rig: FrontRigConfig): FrontSkeleton {
-  const pelvis: Vec = { x: rig.root.x, y: rig.root.y };
+// 手を支持物の点に付ける。
+// side：体の横の支持物。肘を曲げて下へ張る（絵の面の中で2関節を合わせる）。
+// front：体の前の支持物。腕は手前に伸びるので、短く見える（肩から手へまっすぐ、肘は少し外）
+function holdAt(limb: FrontLimb, target: Vec, place: 'side' | 'front'): void {
+  const l1 = BODY.upperArm;
+  const l2 = BODY.forearm + BODY.palm;
+  const dx = target.x - limb.shoulder.x;
+  const dy = target.y - limb.shoulder.y;
+  const dist = Math.hypot(dx, dy);
+  let elbow: Vec;
+  if (place === 'front' || dist < Math.abs(l1 - l2) + 1e-6) {
+    const w = l1 / (l1 + l2);
+    elbow = { x: limb.shoulder.x + dx * w + limb.sign * 0.018, y: limb.shoulder.y + dy * w };
+  } else {
+    const d = Math.min(l1 + l2 - 1e-6, dist);
+    const a = (l1 * l1 - l2 * l2 + d * d) / (2 * d);
+    const h = Math.sqrt(Math.max(0, l1 * l1 - a * a));
+    const ux = dx / dist;
+    const uy = dy / dist;
+    // 肘は、肩と手を結ぶ線より体の外・下の側に張る
+    const nx = -uy;
+    const ny = ux;
+    const s = nx * limb.sign - ny * 0.5 >= 0 ? 1 : -1;
+    elbow = { x: limb.shoulder.x + ux * a + nx * h * s, y: limb.shoulder.y + uy * a + ny * h * s };
+  }
+  limb.elbow = elbow;
+  limb.hand = target;
+  limb.wrist = lerpVec(elbow, target, BODY.forearm / l2);
+  limb.holding = true;
+  limb.handTarget = target;
+}
+
+export function solveFront(pose: FrontFullPose, rig: FrontRigConfig, stage: SupportStage | null = null): FrontSkeleton {
+  const pelvis: Vec = { x: rig.root.x + pose.shift, y: rig.root.y };
   const up: Vec = { x: Math.sin(pose.lean * RAD), y: Math.cos(pose.lean * RAD) };
   const across: Vec = { x: up.y, y: -up.x };
   const along = (from: Vec, d: Vec, length: number): Vec => ({ x: from.x + d.x * length, y: from.y + d.y * length });
@@ -120,7 +154,7 @@ export function solveFront(pose: FrontFullPose, rig: FrontRigConfig): FrontSkele
   const shoulderOf = (side: BodySide) => along(chest, across, sideSign(rig.view, side) * half);
   const hipOf = (side: BodySide): Vec => ({ x: pelvis.x + sideSign(rig.view, side) * BODY_FRONT.hipHalf, y: pelvis.y });
 
-  return {
+  const sk: FrontSkeleton = {
     view: rig.view,
     pelvis,
     lumbar,
@@ -134,6 +168,23 @@ export function solveFront(pose: FrontFullPose, rig: FrontRigConfig): FrontSkele
     turn: pose.turn,
     scapula: pose.scapula,
   };
+
+  // 支持物につかまる腕：支えの段階に合わせて、手を支持物に付ける。下半身は変えない
+  const support = rig.support;
+  if (support && stage !== null && stage !== 'none') {
+    const lift = stage === 'fingertip' ? FINGERTIP_LIFT : 0;
+    const center = support.front.follow ? pelvis.x : support.front.x;
+    const frontPoint = (side: BodySide): Vec => ({ x: center + sideSign(rig.view, side) * support.front.half, y: support.front.y + lift });
+    if (stage === 'both') {
+      holdAt(sk.r, frontPoint('r'), 'front');
+      holdAt(sk.l, frontPoint('l'), 'front');
+    } else if (support.side) {
+      holdAt(sk[support.hand], { x: support.side.x, y: support.side.y + lift }, 'side');
+    } else {
+      holdAt(sk[support.hand], frontPoint(support.hand), 'front');
+    }
+  }
+  return sk;
 }
 
 // 印を付ける体の点
@@ -181,8 +232,9 @@ export function frontFootContact(limb: FrontLimb): SupportRange | null {
   return { min: Math.min(...xs) - BODY_FRONT.footHalfWidth, max: Math.max(...xs) + BODY_FRONT.footHalfWidth };
 }
 
-// 体を支えている範囲（左右方向）。床についた足と、座っている間の座面を合わせた範囲
-export function frontSupportRange(sk: FrontSkeleton, onSeat: boolean, props: FrontProp[]): SupportRange | null {
+// 体を支えている範囲（左右方向）。床についた足と、座っている間の座面、手でつかまっている支持物を合わせた範囲。
+// 指先を添えるだけのときは、支持物を支えに数えない
+export function frontSupportRange(sk: FrontSkeleton, onSeat: boolean, props: FrontProp[], stage: SupportStage | null = null): SupportRange | null {
   const parts: SupportRange[] = [];
   for (const limb of [sk.r, sk.l]) {
     const foot = frontFootContact(limb);
@@ -194,6 +246,11 @@ export function frontSupportRange(sk: FrontSkeleton, onSeat: boolean, props: Fro
       const min = Math.max(prop.x - prop.width / 2, sk.pelvis.x - BODY_FRONT.hipHalf - BUTTOCK_SIDE);
       const max = Math.min(prop.x + prop.width / 2, sk.pelvis.x + BODY_FRONT.hipHalf + BUTTOCK_SIDE);
       if (max > min) parts.push({ min, max });
+    }
+  }
+  if (stage === 'both' || stage === 'one') {
+    for (const limb of [sk.r, sk.l]) {
+      if (limb.holding && limb.handTarget) parts.push({ min: limb.handTarget.x, max: limb.handTarget.x });
     }
   }
   if (parts.length === 0) return null;
@@ -209,11 +266,11 @@ export interface FrontFrame extends FrontSample {
 }
 
 // 時刻 t の1コマ分（姿勢、体の各点、重心、支えの範囲）を求める
-export function computeFrontFrame(anim: FrontAnimation, t: number): FrontFrame {
+export function computeFrontFrame(anim: FrontAnimation, t: number, stage: SupportStage | null = null): FrontFrame {
   const sample = sampleFrontAnimation(anim, t);
-  const sk = solveFront(sample.pose, anim);
+  const sk = solveFront(sample.pose, anim, stage);
   const com = frontCenterOfMass(sk);
-  const range = frontSupportRange(sk, sample.onSeat, anim.props);
+  const range = frontSupportRange(sk, sample.onSeat, anim.props, stage);
   const support = range ?? { min: com.x, max: com.x };
   return { ...sample, t, sk, com, support, stable: range !== null && com.x >= range.min && com.x <= range.max };
 }

@@ -30,10 +30,13 @@ export type Root =
   // 立つ・立ち上がる種目：床についた手前側の足首を起点にする（足は動かない）
   | { mode?: 'foot'; x: number }
   // 座って行う種目：座面に乗った股関節を起点にする。pelvis は骨盤の前傾（まっすぐ座ると 0）
-  | { mode: 'seat'; x: number; y: number; pelvis: number };
+  | { mode: 'seat'; x: number; y: number; pelvis: number }
+  // 立って片脚ずつ動かす種目：股関節の位置を動かさず、脚は股関節から下へ計算する（足踏み、脚の後ろ上げ など）
+  | { mode: 'hip'; x: number; y: number; pelvis: number };
 
-// 足を床の決まった位置に付けたままにする指定（座って行う種目で使う）。
+// 足を床の決まった位置に付けたままにする指定。
 // 足の傾き（footPitch）に合わせて、脚の関節は自動で決まる。
+// 足首を起点にする種目（root.mode = foot）の手前側だけは、足首から上をキーフレームの角度で計算する。
 export interface Plant {
   pivot: 'ball' | 'heel'; // 支点。ball：母趾球（かかと上げ）、heel：かかと（つま先上げ）
   x: number; // 支点の位置
@@ -124,9 +127,14 @@ export interface SideAnimation extends AnimationBase {
   props: Prop[]; // 支持物の種類と位置
   highlight: HighlightName[]; // 動かしている部位（目立つ色で描く）
   contacts?: { near?: ContactTarget; far?: ContactTarget }; // 手の接触
+  // つかまる所（支持物）の、手を置く点。支えの段階に合わせて、腕だけがここに付く（下半身のキーフレームは共通）
+  support?: { x: number; y: number };
   keyframes: Keyframe[];
   marks: Mark[];
 }
+
+// 支えの段階（両手・片手・指先・なし）。つかまらない種目は null
+export type SupportStage = 'both' | 'one' | 'fingertip' | 'none';
 
 // ── 正面・後ろ向き ───────────────────────────────────────────
 // 体の左右は、人物から見た右（r）と左（l）で表す。
@@ -151,8 +159,8 @@ export type FrontLimbChannel =
 export type FrontRightChannel = `r${FrontLimbChannel}`;
 export type FrontLeftChannel = `l${FrontLimbChannel}`; // 省略すると右と同じ値（左右対称）
 // lean：体幹を横に傾ける角度（正：画面の右へ）。turn：胸を回す角度（正：人物の右へ）。
-// scapula：肩甲骨の寄り具合（0：ふつう、1：寄せきった）
-export type FrontBodyChannel = 'lean' | 'turn' | 'scapula';
+// scapula：肩甲骨の寄り具合（0：ふつう、1：寄せきった）。shift：骨盤を横に動かす距離（正：画面の右へ。身長 = 1）
+export type FrontBodyChannel = 'lean' | 'turn' | 'scapula' | 'shift';
 export type FrontChannel = FrontBodyChannel | FrontRightChannel | FrontLeftChannel;
 
 export type FrontPose = Partial<Record<FrontChannel, number>>;
@@ -165,9 +173,10 @@ export interface FrontKeyframe {
   label?: string;
 }
 
-// 正面・後ろ向きの起点。いまは座って行う種目だけ（立って行う種目は今後足す）。x, y は左右の股関節の中央
+// 正面・後ろ向きの起点。x, y は左右の股関節の中央（shift が 0 のとき）。
+// seat：座って行う種目。stand：立って行う種目（脚は股関節から下へ計算する。足が床で滑らないことはテストで確かめる）
 export interface FrontRoot {
-  mode: 'seat';
+  mode: 'seat' | 'stand';
   x: number;
   y: number;
 }
@@ -179,18 +188,39 @@ export interface FrontPlant {
   x: number; // かかとの位置
 }
 
-export interface FrontChairProp {
+// 支えの段階によって、置く場所を変える支持物のための指定
+interface SupportPropOptions {
+  showFor?: SupportStage[]; // この段階のときだけ描く（省略すると、いつも描く。つかまらない種目は none として扱う）
+  inFront?: boolean; // 体の手前にある。体が見えるよう、薄く描く
+}
+export interface FrontChairProp extends SupportPropOptions {
   type: 'chair';
   x: number; // 座面の中央
   width: number;
   seatHeight: number;
   backHeight: number;
 }
+// カウンター（D3）
+export interface CounterProp extends SupportPropOptions {
+  type: 'counter';
+  x: number; // 中央
+  width: number;
+  height: number;
+}
 // 両手で持つバンド（S8）。手から手へ描く
 export interface BandProp {
   type: 'band';
 }
-export type FrontProp = FrontChairProp | BandProp;
+export type FrontProp = FrontChairProp | CounterProp | BandProp;
+
+// つかまる所の、手を置く点（正面・後ろ向き）。支えの段階に合わせて、腕だけがここに付く
+export interface FrontSupport {
+  hand: BodySide; // 片手・指先のときに使う手
+  side?: { x: number; y: number }; // 体の横の支持物（片手・指先のとき）
+  // 体の前の支持物。中心 x から左右に half の点をつかむ。follow：体と一緒に動く（カウンターに沿って進む種目）。
+  // 両手のときに使う。side がなければ、片手・指先のときも使う
+  front: { x: number; half: number; y: number; follow?: boolean };
+}
 
 export type FrontHighlightName = SegmentName | 'scapula' | `r:${SegmentName}` | `l:${SegmentName}`;
 
@@ -228,6 +258,7 @@ export interface FrontAnimation extends AnimationBase {
   view: 'front' | 'back';
   root: FrontRoot;
   plants?: Partial<Record<BodySide, FrontPlant>>;
+  support?: FrontSupport;
   props: FrontProp[];
   highlight: FrontHighlightName[];
   // 表示する範囲（身長 = 1）。種目ごとに、全身と足元、支持物が入るように決める

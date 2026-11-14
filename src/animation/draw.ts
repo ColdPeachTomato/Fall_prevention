@@ -2,7 +2,7 @@
 // 画風（体型、色、線の太さ）はこのファイルの STYLE と SHAPE を変えると調整できる。
 
 import { dir, type Frame, type Skeleton, type Vec } from './sideRig';
-import type { AnchorName, ArrowMark, ChairProp, SegmentName, SideAnimation } from './types';
+import type { AnchorName, ArrowMark, ChairProp, SegmentName, SideAnimation, SupportStage } from './types';
 
 // 色。動かしている部位は目立つ色、椅子は落ち着いた色にする
 export const STYLE = {
@@ -59,6 +59,7 @@ export interface DrawOptions {
   showJoints?: boolean; // 関節の点を重ねる（プレビュー用）
   mirror?: boolean; // 左右反転（左側で行うとき）
   reverse?: boolean; // 逆向きに再生している（回す向きの矢印を反対にする）
+  support?: SupportStage | null; // 支えの段階（つかまる種目で、腕の形を決める）
 }
 
 export type Ctx = CanvasRenderingContext2D;

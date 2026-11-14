@@ -1,0 +1,177 @@
+{
+  "id": "S2-side-L2",
+  "exercise": "S2",
+  "level": 2,
+  "view": "side",
+  "checked": false,
+  "cycleSeconds": 5.7,
+  "root": {
+    "x": -0.17
+  },
+  "plants": {
+    "near": {
+      "pivot": "ball",
+      "x": -0.09
+    },
+    "far": {
+      "pivot": "ball",
+      "x": -0.09
+    }
+  },
+  "props": [
+    {
+      "type": "chair",
+      "x": 0.08,
+      "seatHeight": 0.242,
+      "seatDepth": 0.22,
+      "backHeight": 0.54
+    }
+  ],
+  "support": {
+    "x": 0.07,
+    "y": 0.54
+  },
+  "highlight": [
+    "shank",
+    "foot"
+  ],
+  "keyframes": [
+    {
+      "t": 0,
+      "pose": {
+        "ankle": 4,
+        "knee": 0,
+        "hip": 0,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "footPitch": 0
+      },
+      "label": "まっすぐ立つ"
+    },
+    {
+      "t": 0.3,
+      "pose": {
+        "ankle": 4,
+        "knee": 0,
+        "hip": 0,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "footPitch": 0
+      },
+      "label": "動き始め"
+    },
+    {
+      "t": 1,
+      "pose": {
+        "ankle": 9.5,
+        "knee": 0,
+        "hip": 0,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "footPitch": 0
+      },
+      "label": "体重を前に乗せる"
+    },
+    {
+      "t": 2.6,
+      "pose": {
+        "ankle": -22.5,
+        "knee": 0,
+        "hip": 0,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "footPitch": 30
+      },
+      "label": "かかとを上げる"
+    },
+    {
+      "t": 3.1,
+      "pose": {
+        "ankle": -22.5,
+        "knee": 0,
+        "hip": 0,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "footPitch": 30
+      },
+      "label": "下ろし始め"
+    },
+    {
+      "t": 4.7,
+      "pose": {
+        "ankle": 9.5,
+        "knee": 0,
+        "hip": 0,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "footPitch": 0
+      },
+      "label": "かかとを下ろす"
+    },
+    {
+      "t": 5.4,
+      "pose": {
+        "ankle": 4,
+        "knee": 0,
+        "hip": 0,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 3,
+        "elbow": 8,
+        "footPitch": 0
+      },
+      "label": "体重を戻す"
+    }
+  ],
+  "captions": [
+    {
+      "from": 0,
+      "to": 0.3,
+      "text": "つかまる所の前に、まっすぐ立ちます"
+    },
+    {
+      "from": 0.3,
+      "to": 3.1,
+      "text": "親指側に体重を乗せ、かかとを上げます"
+    },
+    {
+      "from": 3.1,
+      "to": 5.7,
+      "text": "ゆっくり下ろします"
+    }
+  ],
+  "marks": [
+    {
+      "type": "arrow",
+      "from": 1,
+      "to": 2.6,
+      "anchor": "heel",
+      "dx": -0.05,
+      "dy": 0.01,
+      "angle": 0,
+      "length": 0.09
+    },
+    {
+      "type": "arrow",
+      "from": 3.2,
+      "to": 4.7,
+      "anchor": "heel",
+      "dx": -0.05,
+      "dy": 0.1,
+      "angle": 180,
+      "length": 0.09
+    }
+  ]
+}

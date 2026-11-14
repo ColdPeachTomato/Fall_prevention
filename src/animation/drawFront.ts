@@ -6,7 +6,7 @@
 import { arrow, balanceOverlay, beginScene, capsule, circle, guideLine, markAlpha, SHAPE, STYLE, type Ctx, type DrawOptions } from './draw';
 import { frontAnchor, sideSign, type FrontFrame, type FrontLimb, type FrontSkeleton } from './frontRig';
 import { dir, type Vec } from './sideRig';
-import type { BodySide, FrontAnimation, FrontArcMark, FrontChairProp, SegmentName } from './types';
+import type { BodySide, CounterProp, FrontAnimation, FrontArcMark, FrontChairProp, SegmentName } from './types';
 
 // 正面から見た体の幅（半分の値。身長 = 1）
 const FRONT_SHAPE = {
@@ -54,6 +54,20 @@ function chairBack(ctx: Ctx, c: FrontChairProp, px: number): void {
   rect(ctx, left + 0.004, c.seatHeight, 0.024, c.backHeight - c.seatHeight, px);
   rect(ctx, left + c.width - 0.028, c.seatHeight, 0.024, c.backHeight - c.seatHeight, px);
   rect(ctx, left, c.backHeight - 0.09, c.width, 0.09, px);
+}
+
+// カウンター（天板と、その下）。体の手前にあるときは、下の部分をごく薄くして脚を見せる
+function counter(ctx: Ctx, c: CounterProp, px: number): void {
+  const left = c.x - c.width / 2;
+  if (c.inFront) {
+    ctx.save();
+    ctx.globalAlpha *= 0.35;
+    rect(ctx, left + 0.01, 0, c.width - 0.02, c.height - 0.03, px);
+    ctx.restore();
+  } else {
+    rect(ctx, left + 0.01, 0, c.width - 0.02, c.height - 0.03, px);
+  }
+  rect(ctx, left, c.height - 0.03, c.width, 0.03, px);
 }
 
 // 体幹の上の点（across：横、along：腰からの高さ）
@@ -121,7 +135,7 @@ function head(ctx: Ctx, sk: FrontSkeleton, fill: string, px: number): void {
   headPath();
   outline(ctx, fill, px);
   // 頭髪で、こちら向きか向こう向きかを見分けられるようにする。
-  // 正面：額のあたりまで。後ろ向き：後頭部から首のあたりまで、頭全体を覆う
+  // 正面：額のあたりまで。後ろ向き：頭全体を覆い、裾は首のあたりでギザギザにする
   const hp = (a: number, u: number): [number, number] => [sk.head.x + sk.across.x * a + sk.up.x * u, sk.head.y + sk.across.y * a + sk.up.y * u];
   ctx.save();
   headPath();
@@ -143,6 +157,30 @@ function head(ctx: Ctx, sk: FrontSkeleton, fill: string, px: number): void {
   ctx.lineWidth = SHAPE.outlinePx * px;
   ctx.strokeStyle = STYLE.outline;
   ctx.stroke();
+  if (sk.view === 'back') {
+    // 後ろ向き：髪の裾を首のあたりまで下ろし、ギザギザにして、後頭部だと分かるようにする
+    const side = 0.047; // 裾の幅（半分）
+    const teeth = 5; // ギザギザの山の数
+    const hem: [number, number][] = [];
+    for (let i = 0; i <= teeth * 2; i++) {
+      const across = side - (side * 2 * i) / (teeth * 2);
+      hem.push(hp(across, i % 2 === 1 ? -0.097 : -0.076)); // 奇数番目が毛先
+    }
+    const hemPath = () => {
+      ctx.beginPath();
+      ctx.moveTo(...hp(side, -0.03));
+      for (const p of hem) ctx.lineTo(...p);
+      ctx.lineTo(...hp(-side, -0.03));
+    };
+    hemPath();
+    ctx.closePath();
+    ctx.fillStyle = STYLE.hair;
+    ctx.fill();
+    hemPath();
+    ctx.lineJoin = 'miter';
+    ctx.stroke();
+    ctx.lineJoin = 'round';
+  }
   if (sk.view === 'front') {
     // 顔の細部は描かない。向きが分かるよう鼻だけ付ける（胸を回すと、顔も少し同じ向きを向く）
     const shift = sideSign(sk.view, 'r') * Math.sin((sk.turn * 0.5 * Math.PI) / 180) * FRONT_SHAPE.headWide;
@@ -227,7 +265,26 @@ export function drawFrontFrame(ctx: Ctx, anim: FrontAnimation, f: FrontFrame, o:
   ctx.fillStyle = STYLE.floor;
   ctx.fillRect(anim.viewBox.minX, -0.008, anim.viewBox.maxX - anim.viewBox.minX, 0.008);
 
-  const chairs = anim.props.filter((p): p is FrontChairProp => p.type === 'chair');
+  // 支持物は、支えの段階に合うものだけを描く（つかまらない種目は none として扱う）
+  const stage = o.support ?? 'none';
+  const shown = anim.props.filter((p) => p.type === 'band' || p.showFor === undefined || p.showFor.includes(stage));
+  const chairs = shown.filter((p): p is FrontChairProp => p.type === 'chair' && !p.inFront);
+  const counters = shown.filter((p): p is CounterProp => p.type === 'counter' && !p.inFront);
+  const standing = anim.root.mode === 'stand';
+  // 体の手前にある支持物：体が見えるよう薄く描く
+  const propsInFront = () => {
+    ctx.save();
+    ctx.globalAlpha = 0.45;
+    for (const p of shown) {
+      if (p.type === 'chair' && p.inFront) {
+        chairSeat(ctx, p, px);
+        chairBack(ctx, p, px);
+      } else if (p.type === 'counter' && p.inFront) {
+        counter(ctx, p, px);
+      }
+    }
+    ctx.restore();
+  };
   const hasBand = anim.props.some((p) => p.type === 'band');
 
   const legs = () => {
@@ -270,8 +327,9 @@ export function drawFrontFrame(ctx: Ctx, anim: FrontAnimation, f: FrontFrame, o:
     head(ctx, sk, color('head', STYLE.skin), px);
   };
 
-  if (back) {
-    // 後ろ向き：脚と、前に出した腕は体の向こう側
+  for (const c of counters) counter(ctx, c, px);
+  if (back && !standing) {
+    // 後ろ向き・座位：脚と、前に出した腕は体の向こう側
     legs();
     band();
     arms();
@@ -281,16 +339,34 @@ export function drawFrontFrame(ctx: Ctx, anim: FrontAnimation, f: FrontFrame, o:
     ctx.globalAlpha = 0.4; // 椅子の背は常に描くが、背中の動きが見えるよう薄くする
     for (const c of chairs) chairBack(ctx, c, px);
     ctx.restore();
+  } else if (back) {
+    // 後ろ向き・立位：横に置いた椅子、脚、前に出した腕、体の順
+    for (const c of chairs) {
+      chairSeat(ctx, c, px);
+      chairBack(ctx, c, px);
+    }
+    legs();
+    band();
+    arms();
+    body();
   } else {
     for (const c of chairs) {
       chairBack(ctx, c, px);
       chairSeat(ctx, c, px);
     }
-    body();
-    legs();
+    if (standing) {
+      // 立位：脚の付け根は骨盤の下に隠れる
+      legs();
+      body();
+    } else {
+      // 座位：太ももは手前に伸びて、骨盤の前に来る
+      body();
+      legs();
+    }
     band();
     arms();
   }
+  propsInFront();
 
   // 注意点の印
   for (const m of anim.marks) {
