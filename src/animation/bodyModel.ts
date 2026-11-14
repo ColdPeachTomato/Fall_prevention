@@ -131,6 +131,7 @@ const LIMB_CHANNELS: { key: FrontLimbChannel; label: string; fallback: number; l
   { key: 'ElbowOut', label: '肩→肘（外へ）', fallback: 0 },
   { key: 'ElbowUp', label: '肩→肘（上へ）', fallback: -1 },
   { key: 'ElbowDepth', label: '肘の前後（＋手前、−奥。重なりと濃さ）', fallback: 0 },
+  { key: 'HandDepth', label: '手の前後（＋手前、−奥。重なりと濃さ）', fallback: 0 },
   { key: 'HandOut', label: '肘→手（外へ）', fallback: 0 },
   { key: 'HandUp', label: '肘→手（上へ）', fallback: -1 },
   { key: 'KneeOut', label: '股関節→膝（外へ）', fallback: 0 },

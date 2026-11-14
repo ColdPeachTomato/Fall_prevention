@@ -3,7 +3,7 @@
   "exercise": "S3",
   "level": 1,
   "view": "side",
-  "checked": false,
+  "checked": true,
   "cycleSeconds": 5,
   "root": {
     "mode": "seat",

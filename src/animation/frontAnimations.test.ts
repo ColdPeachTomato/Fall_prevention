@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { getExercise } from '../data/exercises';
 import { BODY, FRONT_CHANNELS, FRONT_VECTORS } from './bodyModel';
-import { faceShift, handCover, shadeByDepth } from './drawFront';
+import { faceShift, HAND_HIDDEN_MAX, handBite, handCover, NEAR_SHADE, shadeByDepth, thighInset } from './drawFront';
 import { computeFrontFrame, frontFootContact, type FrontFrame } from './frontRig';
 import { ANIMATIONS, getAnimation } from './registry';
 import type { Vec } from './sideRig';
@@ -465,7 +465,7 @@ describe('W2 腕回し（動きの仕様との照合）', () => {
     expect(top.sk.r.shoulder.y).toBeGreaterThan(bottom.sk.r.shoulder.y + 0.04);
   });
 
-  it('肘が前に来ると腕を濃く描いて手を隠し、後ろへ行くと薄く描く（回す向きが分かるように）', () => {
+  it('肘が前に来ると腕を少し濃く描き、腕が手に少し重なる。手は消えない（回す向きが分かるように）', () => {
     const q = anim.cycleSeconds / 4;
     const depth = (t: number) => computeFrontFrame(anim, t).pose.rElbowDepth;
     expect(depth(q)).toBeGreaterThan(0.9); // 前
@@ -473,7 +473,8 @@ describe('W2 腕回し（動きの仕様との照合）', () => {
     expect(Math.abs(depth(0))).toBeLessThan(0.05); // 下
     expect(Math.abs(depth(2 * q))).toBeLessThan(0.05); // 上
     for (const f of frames) expect(f.pose.lElbowDepth).toBeCloseTo(f.pose.rElbowDepth, 9); // 左右同じ
-    // 手は、肘が前に来るにつれてなめらかに隠れ、前を過ぎると現れる
+    for (const f of frames) expect(f.pose.rHandDepth).toBe(0); // 手は肩に置いたまま
+    // 腕は、肘が前に来るにつれてなめらかに手に重なり、前を過ぎると離れる
     expect(handCover(depth(q))).toBe(1);
     expect(handCover(depth(0))).toBeLessThan(0.05);
     expect(handCover(depth(3 * q))).toBe(0);
@@ -482,18 +483,24 @@ describe('W2 腕回し（動きの仕様との照合）', () => {
       expect(covers[i]!).toBeGreaterThanOrEqual(covers[i - 1]! - 1e-9);
       expect(covers[i]! - covers[i - 1]!).toBeLessThan(0.08); // 急に切り替わらない
     }
-    // 濃さ：手前は元の色より暗く、奥は明るい
-    const sum = (rgb: string) => rgb.match(/\d+/g)!.map(Number).reduce((a, b) => a + b, 0);
-    expect(sum(shadeByDepth('#e8743b', 1))).toBeLessThan(sum(shadeByDepth('#e8743b', 0)));
-    expect(sum(shadeByDepth('#e8743b', -1))).toBeGreaterThan(sum(shadeByDepth('#e8743b', 0)));
-  });
-
-  it('ほかの種目では、腕の濃さや重なりを変えない', () => {
-    for (const other of FRONT) {
-      if (other.exercise === 'W2') continue;
-      for (const k of other.keyframes) {
-        expect(k.pose.rElbowDepth ?? 0, other.id).toBe(0);
-        expect(k.pose.lElbowDepth ?? 0, other.id).toBe(0);
+    // 手は消えない：いちばん重なったときでも、隠れるのは手の直径の3割まで。隠れるのは肘のある側
+    expect(HAND_HIDDEN_MAX).toBeLessThanOrEqual(0.3);
+    for (const f of frames) {
+      for (const limb of [f.sk.r, f.sk.l]) {
+        const cover = handCover(f.pose.rElbowDepth);
+        const bite = handBite(limb, cover);
+        if (cover === 0) {
+          expect(bite, at(f)).toBeNull();
+          continue;
+        }
+        // 手の中心から、隠す円のふちまでの距離（手の半径 0.025 のうち、残る分）
+        const gap = Math.hypot(bite!.x - limb.hand.x, bite!.y - limb.hand.y) - bite!.r;
+        expect(gap, at(f)).toBeGreaterThanOrEqual(0.025 * (1 - 2 * HAND_HIDDEN_MAX) - 1e-9);
+        expect(gap, at(f)).toBeLessThanOrEqual(0.025 + 1e-9);
+        // 隠す円は、手から見て肘の側にある
+        const toElbow = { x: limb.elbow.x - limb.hand.x, y: limb.elbow.y - limb.hand.y };
+        const toBite = { x: bite!.x - limb.hand.x, y: bite!.y - limb.hand.y };
+        if (Math.hypot(toElbow.x, toElbow.y) > 0.03) expect(toElbow.x * toBite.x + toElbow.y * toBite.y, at(f)).toBeGreaterThan(0);
       }
     }
   });
@@ -508,6 +515,63 @@ describe('W2 腕回し（動きの仕様との照合）', () => {
     for (const f of frames) {
       expect(dist(f.sk.head, first.sk.head)).toBeLessThan(1e-9);
       for (const s of SIDES) expect(dist(f.sk[s].toe, first.sk[s].toe)).toBeLessThan(1e-9);
+    }
+  });
+});
+
+describe('前後の見せ方（正面・後ろ向きで共通）', () => {
+  const sum = (rgb: string) => rgb.match(/\d+/g)!.map(Number).reduce((a, b) => a + b, 0);
+  const BASE = '#e8743b';
+
+  it('手前にある所は少しだけ濃く、奥にある所は元の色のまま', () => {
+    expect(shadeByDepth(BASE, 0)).toBe('rgb(232, 116, 59)');
+    expect(shadeByDepth(BASE, -1)).toBe(shadeByDepth(BASE, 0)); // 奥は薄くしない
+    expect(sum(shadeByDepth(BASE, 1))).toBeLessThan(sum(shadeByDepth(BASE, 0)));
+    expect(sum(shadeByDepth(BASE, 0.5))).toBeLessThan(sum(shadeByDepth(BASE, 0)));
+    expect(sum(shadeByDepth(BASE, 0.5))).toBeGreaterThan(sum(shadeByDepth(BASE, 1)));
+    // 「少しだけ」：いちばん手前でも、元の色の8割より暗くしない
+    expect(NEAR_SHADE).toBeLessThanOrEqual(0.2);
+    expect(sum(shadeByDepth(BASE, 1))).toBeGreaterThanOrEqual(sum(shadeByDepth(BASE, 0)) * 0.79);
+  });
+
+  it('腕の前後を持つのは、腕が前後に動く種目だけ（W2：肘を回す、W3：腕をこちらへ伸ばす）', () => {
+    for (const other of FRONT) {
+      if (other.exercise === 'W2' || other.exercise === 'W3') continue;
+      for (const k of other.keyframes) {
+        for (const key of ['rElbowDepth', 'lElbowDepth', 'rHandDepth', 'lHandDepth'] as const) expect(k.pose[key] ?? 0, other.id).toBe(0);
+      }
+    }
+  });
+
+  it('W3：こちらへ伸ばした腕は、手がいちばん手前。腕が手に重なることはない', () => {
+    const anim = frontAnim('W3-front-L1');
+    for (const f of framesOf(anim)) {
+      for (const side of ['r', 'l'] as const) {
+        const elbow = f.pose[`${side}ElbowDepth`];
+        const hand = f.pose[`${side}HandDepth`];
+        expect(hand).toBeGreaterThan(0.45); // ひねった側の反対の腕は、肩が後ろへ引かれる分だけ奥になる
+        expect(hand).toBeLessThanOrEqual(1);
+        expect(elbow).toBeCloseTo(hand / 2, 2);
+        expect(handCover(elbow - hand)).toBe(0);
+      }
+    }
+  });
+
+  it('立って内へ傾いた脚だけ、付け根を少し内側に寄せて描く。確認済みのアニメの見え方は変えない', () => {
+    expect(thighInset(0)).toBe(0);
+    expect(thighInset(0.5)).toBe(0); // 外へ上げた脚は寄せない
+    expect(thighInset(-0.06)).toBe(0);
+    expect(thighInset(-1)).toBeLessThanOrEqual(0.018); // 「ほんの少し」（身長160cmで3cmまで）
+    const s6 = frontAnim('S6-front-L2');
+    for (const f of framesOf(s6)) {
+      expect(thighInset(f.pose.lKneeOut)).toBeGreaterThan(0.01); // 支える脚（左）
+      expect(thighInset(f.pose.rKneeOut)).toBeLessThan(0.006); // 上げる脚（右）は、ほぼそのまま
+    }
+    for (const done of FRONT.filter((a) => a.checked === true && a.root.mode === 'stand')) {
+      for (const f of framesOf(done)) {
+        expect(thighInset(f.pose.rKneeOut), done.id).toBe(0);
+        expect(thighInset(f.pose.lKneeOut), done.id).toBe(0);
+      }
     }
   });
 });

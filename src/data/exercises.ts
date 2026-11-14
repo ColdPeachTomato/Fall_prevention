@@ -1,5 +1,7 @@
 // 運動データ 23種類。要件メモ「運動データ」の表と、付録「動きの仕様」から転記した。内容は要件メモを正とする。
 // 行い方（howTo）の文は、注意点と動きの仕様をもとに作った暫定の文。医師・理学療法士の確認を受ける。
+// 目的（purpose）の文は、何のための運動かを一文で伝える（2026-11-14 利用者の依頼で追加。文は確認待ち）。
+// 病気の治療や予防の効果をうたう言葉は使わない（要件メモ「やらないこと」）。テストで確かめる。
 
 import { getAnimation } from '../animation/registry';
 import type { Exercise } from './types';
@@ -9,6 +11,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'W1',
     name: '足首回し',
+    purpose: '足首をやわらかく動かしましょう',
     category: 'warmup',
     highRisk: false,
     unit: 'reps',
@@ -23,6 +26,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'W2',
     name: '腕回し',
+    purpose: '肩のまわりをほぐしましょう',
     category: 'warmup',
     highRisk: false,
     unit: 'reps',
@@ -38,6 +42,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'W3',
     name: '腕を上げて体をひねる',
+    purpose: '背中と腰をゆっくりほぐしましょう',
     category: 'warmup',
     highRisk: false,
     unit: 'reps',
@@ -52,6 +57,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'W4',
     name: 'ふくらはぎ伸ばし',
+    purpose: 'ふくらはぎをゆっくり伸ばしましょう',
     category: 'warmup',
     highRisk: false,
     unit: 'reps',
@@ -66,6 +72,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'S1',
     name: '椅子からの立ち座り',
+    purpose: '立ち上がる脚の力をつけましょう',
     category: 'strength',
     highRisk: false,
     unit: 'reps',
@@ -80,6 +87,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'S2',
     name: 'かかと上げ',
+    purpose: 'ふくらはぎの力をつけましょう',
     category: 'strength',
     highRisk: false,
     unit: 'reps',
@@ -93,6 +101,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'S3',
     name: 'つま先上げ',
+    purpose: 'つま先を上げる力をつけましょう',
     category: 'strength',
     highRisk: false,
     unit: 'reps',
@@ -107,6 +116,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'S4',
     name: '膝伸ばし（座って）',
+    purpose: '太ももの前の力をつけましょう',
     category: 'strength',
     highRisk: false,
     unit: 'reps',
@@ -119,6 +129,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'S5',
     name: '膝上げ（足踏み）',
+    purpose: '脚を持ち上げる力をつけましょう',
     category: 'strength',
     highRisk: false,
     unit: 'reps',
@@ -132,6 +143,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'S6',
     name: '脚の横上げ',
+    purpose: 'お尻の横の力をつけましょう',
     category: 'strength',
     highRisk: false,
     unit: 'reps',
@@ -144,6 +156,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'S7',
     name: '脚の後ろ上げ',
+    purpose: 'お尻と脚の後ろの力をつけましょう',
     category: 'strength',
     highRisk: false,
     unit: 'reps',
@@ -156,6 +169,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'S8',
     name: '肩甲骨寄せ（バンド）',
+    purpose: '姿勢を支える背中の力をつけましょう',
     category: 'strength',
     highRisk: false,
     unit: 'reps',
@@ -170,6 +184,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'S9',
     name: 'ランジ（浅め）',
+    purpose: '踏み出して支える力をつけましょう',
     category: 'strength',
     highRisk: true,
     unit: 'reps',
@@ -184,6 +199,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'B1',
     name: '足をそろえて立つ',
+    purpose: '立ったままバランスを保ちましょう',
     category: 'balance',
     highRisk: false,
     unit: 'seconds',
@@ -196,6 +212,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'B2',
     name: '足を半歩ずらして立つ',
+    purpose: 'せまい足幅でバランスを保ちましょう',
     category: 'balance',
     highRisk: false,
     unit: 'seconds',
@@ -208,6 +225,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'B3',
     name: '足を一直線にして立つ',
+    purpose: 'せまい足幅でバランスを保ちましょう',
     category: 'balance',
     highRisk: true,
     unit: 'seconds',
@@ -220,6 +238,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'B4',
     name: '片足で立つ',
+    purpose: '片足でバランスを保ちましょう',
     category: 'balance',
     highRisk: true,
     unit: 'seconds',
@@ -234,6 +253,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'D1',
     name: '足先タッチ（前・横・後ろ）',
+    purpose: '片足で支えて、足を動かしましょう',
     category: 'dynamic',
     highRisk: true,
     unit: 'reps',
@@ -246,6 +266,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'D2',
     name: 'つま先歩き・かかと歩き',
+    purpose: '足首を使って歩く練習をしましょう',
     category: 'dynamic',
     highRisk: true,
     unit: 'laps',
@@ -259,6 +280,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'D3',
     name: '横歩き（カウンター沿い）',
+    purpose: '横へ足を運ぶ練習をしましょう',
     category: 'dynamic',
     highRisk: false,
     unit: 'laps',
@@ -271,6 +293,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'D4',
     name: '継ぎ足歩き（カウンター沿い）',
+    purpose: 'バランスを保って歩きましょう',
     category: 'dynamic',
     highRisk: true,
     unit: 'laps',
@@ -283,6 +306,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'D5',
     name: '後ろ歩き（カウンター沿い）',
+    purpose: '後ろへ足を運ぶ練習をしましょう',
     category: 'dynamic',
     highRisk: true,
     unit: 'laps',
@@ -297,6 +321,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'G1',
     name: '日々の歩行',
+    purpose: '毎日の歩く習慣を続けましょう',
     category: 'walking',
     highRisk: false,
     unit: 'minutes',

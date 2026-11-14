@@ -163,12 +163,15 @@ describe('アニメの登録', () => {
       'S1-side-L3',
       'S2-side-L1',
       'S2-side-L2',
+      'S3-side-L1',
+      'S3-side-L2',
       'S4-side-L1',
       'S5-side-L1',
       'S5-side-L2',
       'S7-side-L2',
       'S8-back-L1',
       'S8-back-L2',
+      'S9-side-L3',
     ];
     for (const anim of ANIMATIONS) expect(anim.checked === true, anim.id).toBe(confirmed.includes(anim.id));
   });

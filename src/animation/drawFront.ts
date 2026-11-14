@@ -22,18 +22,73 @@ const FRONT_SHAPE = {
   scapulaTall: 0.046,
 } as const;
 
-// 色を、手前（depth > 0）なら濃く、奥（depth < 0）なら薄くする。depth は -1〜1
+// 前後の見せ方（正面・後ろ向きで共通。2026-11-14 利用者の指摘で決めた）：
+// 見ている側に近い所は少しだけ濃く、離れている所は元の色のままにする。薄くはしない。
+// いちばん手前（depth = 1）で、元の色からこの割合だけ暗くする
+export const NEAR_SHADE = 0.2;
+
+// 色を、手前（depth > 0）にあるほど少し濃くする。奥（depth <= 0）は元の色のまま。depth は -1〜1
 export function shadeByDepth(hex: string, depth: number): string {
-  const d = Math.max(-1, Math.min(1, depth));
+  const d = Math.max(0, Math.min(1, depth));
   const rgb = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
-  const shaded = rgb.map((c) => (d >= 0 ? c * (1 - 0.42 * d) : c + (255 - c) * 0.55 * -d));
-  return `rgb(${shaded.map((c) => Math.round(c)).join(', ')})`;
+  return `rgb(${rgb.map((c) => Math.round(c * (1 - NEAR_SHADE * d))).join(', ')})`;
 }
 
-// 手前にある腕が、手をどれだけ隠すか（0：隠さない、1：すっかり腕の後ろ）。肘が前に来るにつれて、なめらかに増える
+// 手前にある腕が、手にどれだけ重なるか（0：重ならない、1：いちばん重なる）。
+// depth：肘が手よりどれだけ手前にあるか。肘が前に来るにつれて、なめらかに増える
 export function handCover(depth: number): number {
   const x = Math.max(0, Math.min(1, depth / 0.6));
   return x * x * (3 - 2 * x);
+}
+
+// 腕がいちばん重なったときに隠れる、手の直径の割合。手が消えることはなく、少し欠けて見えるだけにする
+export const HAND_HIDDEN_MAX = 0.3;
+// 手に重なる腕のふちの丸み（半径）
+const ARM_EDGE = 0.036;
+
+// 手のうち、腕に隠れる部分（円で表す）。隠れるのは肘のある側。cover が 0 なら隠れない
+export function handBite(limb: Pick<FrontLimb, 'hand' | 'elbow' | 'sign'>, cover: number): { x: number; y: number; r: number } | null {
+  if (cover <= 0) return null;
+  // 肘が手のすぐ近くに重なって見えるときは、下・外の側から隠す（向きが急に変わらないよう、少しだけ足しておく）
+  const dx = limb.elbow.x - limb.hand.x + limb.sign * 0.008;
+  const dy = limb.elbow.y - limb.hand.y - 0.008;
+  const n = Math.hypot(dx, dy);
+  const reach = SHAPE.hand + ARM_EDGE - Math.min(1, cover) * HAND_HIDDEN_MAX * 2 * SHAPE.hand;
+  return { x: limb.hand.x + (dx / n) * reach, y: limb.hand.y + (dy / n) * reach, r: ARM_EDGE };
+}
+
+// 手。腕より手前に描き、腕が重なる分だけ欠けさせて、欠けた所に腕のふちの線を入れる
+function hand(ctx: Ctx, limb: FrontLimb, cover: number, px: number): void {
+  const bite = handBite(limb, cover);
+  if (!bite) {
+    circle(ctx, limb.hand, SHAPE.hand, STYLE.skin, px);
+    return;
+  }
+  const span = SHAPE.hand * 2;
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(limb.hand.x - span, limb.hand.y - span, span * 2, span * 2);
+  ctx.arc(bite.x, bite.y, bite.r, 0, Math.PI * 2);
+  ctx.clip('evenodd');
+  circle(ctx, limb.hand, SHAPE.hand, STYLE.skin, px);
+  ctx.restore();
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(limb.hand.x, limb.hand.y, SHAPE.hand, 0, Math.PI * 2);
+  ctx.clip();
+  ctx.beginPath();
+  ctx.arc(bite.x, bite.y, bite.r, 0, Math.PI * 2);
+  ctx.lineWidth = SHAPE.outlinePx * px;
+  ctx.strokeStyle = STYLE.outline;
+  ctx.stroke();
+  ctx.restore();
+}
+
+// 立って体重を片足に乗せると、支える脚は内へ傾き、脚の付け根が骨盤の外へ飛び出して見える。
+// 内へ傾いた分だけ、付け根を少し内側に寄せて描く（位置の計算は変えず、描き方だけ。2026-11-14 利用者の指摘）。
+// kneeOut：股関節→膝の、外への成分。ほぼまっすぐな脚（-0.06 まで）は寄せない
+export function thighInset(kneeOut: number): number {
+  return Math.max(0, Math.min(0.018, (-kneeOut - 0.06) * 0.16));
 }
 
 // 胸を回すと、頭も少し同じ向きを向く（胸の半分の角度）。そのときの、顔の中心の横へのずれ（画面の右が正）。
@@ -238,12 +293,21 @@ function head(ctx: Ctx, sk: FrontSkeleton, fill: string, px: number): void {
   }
 }
 
-// 足。depth：脚の前後（手前が正）。手前の足は少し大きく・下に、奥の足は小さく・上に描く（床の奥行きの見え方）
-function foot(ctx: Ctx, limb: FrontLimb, fill: string, px: number, depth = 0): void {
+// 足。depth：脚の前後（手前が正）。手前の足は少し大きく・下に、奥の足は小さく・上に描く（床の奥行きの見え方）。
+// 正面では、つま先の部分を別に描いて区切りの線を入れる（横向きの足と同じ考え方）。
+// つま先はかかとより手前にあるので、少し濃くする。つま先を回す動きが見やすくなる（2026-11-14 利用者の指摘）。
+// 後ろ向きでは、つま先はかかとの向こう側なので、区切りは描かない
+function foot(ctx: Ctx, limb: FrontLimb, base: string, px: number, depth: number, view: 'front' | 'back'): void {
   const r = FRONT_SHAPE.shoe * (1 + 0.18 * depth);
   const dy = DEPTH_DROP * depth;
-  capsule(ctx, { x: limb.heel.x, y: limb.heel.y + r - dy }, { x: limb.toe.x, y: limb.toe.y + r * 0.9 - dy }, r, r * 0.9, fill, px);
+  const heel = { x: limb.heel.x, y: limb.heel.y + r - dy };
+  const toe = { x: limb.toe.x, y: limb.toe.y + r * 0.9 - dy };
+  capsule(ctx, heel, toe, r, r * 0.9, shadeByDepth(base, depth * 0.8), px);
+  if (view === 'front') circle(ctx, toe, r * 0.9, shadeByDepth(base, depth * 0.8 + TOE_NEAR), px);
 }
+
+// つま先が、かかとよりどれだけ手前にあるか（濃さに使う値）
+const TOE_NEAR = 0.6;
 
 // 手前・奥にある足を、絵の上で上下にずらす量（身長 = 1。depth が 1 のとき）
 export const DEPTH_DROP = 0.028;
@@ -345,14 +409,17 @@ export function drawFrontFrame(ctx: Ctx, anim: FrontAnimation, f: FrontFrame, o:
   const legs = () => {
     for (const side of ['r', 'l'] as const) {
       const limb = sk[side];
-      // 脚の前後（KneeDepth）：足先を前に出すと手前（濃く・大きく・下）、後ろに出すと奥（薄く・小さく・上）
+      // 脚の前後（KneeDepth）：足先を前に出すと手前（少し濃く・大きく・下）、後ろに出すと奥（元の色・小さく・上）
       const depth = f.pose[`${side}KneeDepth`];
-      const tint = (base: string, d: number) => (d === 0 ? base : shadeByDepth(base, d));
+      const tint = (base: string, d: number) => (d <= 0 ? base : shadeByDepth(base, d));
       const ankle = { x: limb.ankle.x, y: limb.ankle.y - DEPTH_DROP * depth };
       const knee = { x: limb.knee.x, y: limb.knee.y - DEPTH_DROP * depth * 0.5 };
+      // 立位で内へ傾いた脚は、付け根を少し内側に寄せて描く
+      const inset = standing ? thighInset(f.pose[`${side}KneeOut`]) : 0;
+      const hip = { x: limb.hip.x - limb.sign * inset, y: limb.hip.y };
       capsule(ctx, knee, ankle, SHAPE.shank[0], SHAPE.shank[1] * (1 + 0.18 * depth), tint(color('shank', STYLE.bottom, side), depth * 0.8), px);
-      foot(ctx, limb, tint(color('foot', STYLE.shoe, side), depth * 0.8), px, depth);
-      capsule(ctx, limb.hip, knee, SHAPE.thigh[0], SHAPE.thigh[1], tint(color('thigh', STYLE.bottom, side), depth * 0.4), px);
+      foot(ctx, limb, color('foot', STYLE.shoe, side), px, depth, anim.view);
+      capsule(ctx, hip, knee, SHAPE.thigh[0], SHAPE.thigh[1], tint(color('thigh', STYLE.bottom, side), depth * 0.4), px);
     }
   };
   const band = () => {
@@ -373,10 +440,10 @@ export function drawFrontFrame(ctx: Ctx, anim: FrontAnimation, f: FrontFrame, o:
   const arms = () => {
     // 胸を回したとき、前に出ている側の肩の腕を後に描く（手前に来る）
     const order: BodySide[] = sk.turn > 0 ? ['r', 'l'] : ['l', 'r'];
-    // 肘の前後（ElbowDepth）で、腕の濃さと、手との重なりを変える：
-    // 手前に来るほど肘の側を濃くし、手を腕の後ろに隠す。奥へ行くほど薄くする
+    // 肘と手の前後（ElbowDepth・HandDepth）で、腕の濃さと、手との重なりを変える：
+    // 手前にある所ほど少し濃くする（肩は元の色。奥は元の色のまま）。肘が手より手前に来ると、腕が手に少し重なる
     const shaded = (from: Vec, to: Vec, base: string, depthFrom: number, depthTo: number): string | CanvasGradient => {
-      if (depthFrom === 0 && depthTo === 0) return base;
+      if (depthFrom <= 0 && depthTo <= 0) return base;
       if (Math.hypot(to.x - from.x, to.y - from.y) < 0.004) return shadeByDepth(base, depthTo);
       const g = ctx.createLinearGradient(from.x, from.y, to.x, to.y);
       g.addColorStop(0, shadeByDepth(base, depthFrom));
@@ -385,21 +452,14 @@ export function drawFrontFrame(ctx: Ctx, anim: FrontAnimation, f: FrontFrame, o:
     };
     for (const side of order) {
       const limb = sk[side];
-      const depth = f.pose[`${side}ElbowDepth`];
-      const cover = handCover(depth);
+      const elbowDepth = f.pose[`${side}ElbowDepth`];
+      const handDepth = f.pose[`${side}HandDepth`];
       const upper = color('upperArm', STYLE.top, side);
       const fore = color('forearm', STYLE.top, side);
-      if (cover > 0) circle(ctx, limb.hand, SHAPE.hand, STYLE.skin, px); // 腕の後ろになる手
-      // 肩の側は元の色、肘の側ほど前後の濃淡が強い
-      capsule(ctx, limb.shoulder, limb.elbow, SHAPE.upperArm[0], SHAPE.upperArm[1], shaded(limb.shoulder, limb.elbow, upper, depth * 0.25, depth), px);
-      capsule(ctx, limb.elbow, limb.wrist, SHAPE.forearm[0], SHAPE.forearm[1], shaded(limb.elbow, limb.wrist, fore, depth, depth * 0.25), px);
-      if (cover < 1) {
-        // 腕の手前に見える手。肘が前に来るにつれて、腕に隠れていく
-        ctx.save();
-        ctx.globalAlpha *= 1 - cover;
-        circle(ctx, limb.hand, SHAPE.hand, STYLE.skin, px);
-        ctx.restore();
-      }
+      capsule(ctx, limb.shoulder, limb.elbow, SHAPE.upperArm[0], SHAPE.upperArm[1], shaded(limb.shoulder, limb.elbow, upper, 0, elbowDepth), px);
+      capsule(ctx, limb.elbow, limb.wrist, SHAPE.forearm[0], SHAPE.forearm[1], shaded(limb.elbow, limb.wrist, fore, elbowDepth, handDepth), px);
+      // 手は消さない。肘が手より手前に来たときだけ、肘の側が少し欠けて見える
+      hand(ctx, limb, handCover(elbowDepth - handDepth), px);
     }
   };
   const body = () => {

@@ -128,7 +128,7 @@ for (let i = 0; i < 8; i++) {
     rShoulderUp: round(SHOULDER_MOVE.up * e[1]),
     rElbowOut: round(e[0]),
     rElbowUp: round(e[1]),
-    // 肘の前後：前に来たとき 1、後ろへ行ったとき -1 に近づく（重なりの順と、腕の濃さに使う）
+    // 肘の前後：前に来たとき 1、後ろへ行ったとき -1 に近づく（腕の濃さと、手との重なりに使う。濃くするのは手前だけ）
     rElbowDepth: round(Math.max(-1, Math.min(1, e[2] > 0 ? e[2] : e[2] * 1.8))),
     rHandOut: round(hand[0]),
     rHandUp: round(hand[1]),
@@ -169,6 +169,10 @@ function twistPose(phi) {
     pose[`${side}ElbowUp`] = 0;
     pose[`${side}HandOut`] = round(out);
     pose[`${side}HandUp`] = 0;
+    // 腕はこちらへ伸びている：手がいちばん手前、肘はその半分（色の濃さに使う。手前ほど少し濃い）
+    const forward = (forwardLength * c - sign * SHOULDER_HALF * s) / (L1 + L2);
+    pose[`${side}ElbowDepth`] = round(forward / 2);
+    pose[`${side}HandDepth`] = round(forward);
   }
   return pose;
 }

@@ -181,6 +181,7 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
       <main className="screen player">
         {header}
         <h1>{ex.name}</h1>
+        <p className="purpose">{ex.purpose}</p>
         <section className="notice">
           <h2>つかまる所の確認</h2>
           <p className="big-text">動かない椅子の背か、カウンターが、すぐ横にありますか。</p>
@@ -208,6 +209,7 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
           あと {remaining} 秒
         </p>
         <p className="lead">{step.reason === 'set' ? `次は ${ex.name} の次のセットです。` : `次は「${ex.name}」です。`}</p>
+        <p className="purpose">{ex.purpose}</p>
         {paused && <p className="paused">一時停止中</p>}
         {controls}
         {stopOverlay}
@@ -220,6 +222,8 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
       <main className="screen player">
         {header}
         <h1>{ex.name}</h1>
+        {/* 何のための運動かを、始める前に伝える。運動中は、回数が下へ押し出されないよう出さない */}
+        <p className="purpose">{ex.purpose}</p>
         {(step.side || direction) && <p className="side">{[step.side && SIDE_LABEL[step.side], direction?.label].filter(Boolean).join('　')}</p>}
         {/* 始める前に、最初の姿勢を見せる */}
         {anim && <AnimationCanvas key={`${anim.id}-${index}`} anim={anim} getTime={() => 0} label={`${ex.name}の最初の姿勢`} showCaption={false} mirror={mirror} reverse={reverse} support={support} />}

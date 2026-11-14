@@ -46,10 +46,14 @@
         "rElbowUp": 0,
         "rHandOut": -0.3089,
         "rHandUp": 0,
+        "rElbowDepth": 0.4598,
+        "rHandDepth": 0.9195,
         "lElbowOut": -0.3089,
         "lElbowUp": 0,
         "lHandOut": -0.3089,
-        "lHandUp": 0
+        "lHandUp": 0,
+        "lElbowDepth": 0.4598,
+        "lHandDepth": 0.9195
       },
       "onSeat": true,
       "label": "正面を向く"
@@ -68,10 +72,14 @@
         "rElbowUp": 0,
         "rHandOut": -0.3089,
         "rHandUp": 0,
+        "rElbowDepth": 0.4598,
+        "rHandDepth": 0.9195,
         "lElbowOut": -0.3089,
         "lElbowUp": 0,
         "lHandOut": -0.3089,
-        "lHandUp": 0
+        "lHandUp": 0,
+        "lElbowDepth": 0.4598,
+        "lHandDepth": 0.9195
       },
       "onSeat": true,
       "label": "右へひねり始める"
@@ -90,10 +98,14 @@
         "rElbowUp": 0,
         "rHandOut": 0.0242,
         "rHandUp": 0,
+        "rElbowDepth": 0.4848,
+        "rHandDepth": 0.9697,
         "lElbowOut": -0.6048,
         "lElbowUp": 0,
         "lHandOut": -0.6048,
-        "lHandUp": 0
+        "lHandUp": 0,
+        "lElbowDepth": 0.3792,
+        "lHandDepth": 0.7584
       },
       "onSeat": true,
       "label": "右へ（途中）"
@@ -112,10 +124,14 @@
         "rElbowUp": 0,
         "rHandOut": 0.3544,
         "rHandUp": 0,
+        "rElbowDepth": 0.4515,
+        "rHandDepth": 0.9029,
         "lElbowOut": -0.8277,
         "lElbowUp": 0,
         "lHandOut": -0.8277,
-        "lHandUp": 0
+        "lHandUp": 0,
+        "lElbowDepth": 0.2529,
+        "lHandDepth": 0.5058
       },
       "onSeat": true,
       "label": "右へひねる"
@@ -134,10 +150,14 @@
         "rElbowUp": 0,
         "rHandOut": 0.3544,
         "rHandUp": 0,
+        "rElbowDepth": 0.4515,
+        "rHandDepth": 0.9029,
         "lElbowOut": -0.8277,
         "lElbowUp": 0,
         "lHandOut": -0.8277,
-        "lHandUp": 0
+        "lHandUp": 0,
+        "lElbowDepth": 0.2529,
+        "lHandDepth": 0.5058
       },
       "onSeat": true,
       "label": "戻し始める"
@@ -156,10 +176,14 @@
         "rElbowUp": 0,
         "rHandOut": 0.0242,
         "rHandUp": 0,
+        "rElbowDepth": 0.4848,
+        "rHandDepth": 0.9697,
         "lElbowOut": -0.6048,
         "lElbowUp": 0,
         "lHandOut": -0.6048,
-        "lHandUp": 0
+        "lHandUp": 0,
+        "lElbowDepth": 0.3792,
+        "lHandDepth": 0.7584
       },
       "onSeat": true,
       "label": "戻す（途中）"
@@ -178,10 +202,14 @@
         "rElbowUp": 0,
         "rHandOut": -0.3089,
         "rHandUp": 0,
+        "rElbowDepth": 0.4598,
+        "rHandDepth": 0.9195,
         "lElbowOut": -0.3089,
         "lElbowUp": 0,
         "lHandOut": -0.3089,
-        "lHandUp": 0
+        "lHandUp": 0,
+        "lElbowDepth": 0.4598,
+        "lHandDepth": 0.9195
       },
       "onSeat": true,
       "label": "正面に戻る"
@@ -200,10 +228,14 @@
         "rElbowUp": 0,
         "rHandOut": -0.3089,
         "rHandUp": 0,
+        "rElbowDepth": 0.4598,
+        "rHandDepth": 0.9195,
         "lElbowOut": -0.3089,
         "lElbowUp": 0,
         "lHandOut": -0.3089,
-        "lHandUp": 0
+        "lHandUp": 0,
+        "lElbowDepth": 0.4598,
+        "lHandDepth": 0.9195
       },
       "onSeat": true,
       "label": "左へひねり始める"
@@ -222,10 +254,14 @@
         "rElbowUp": 0,
         "rHandOut": -0.6048,
         "rHandUp": 0,
+        "rElbowDepth": 0.3792,
+        "rHandDepth": 0.7584,
         "lElbowOut": 0.0242,
         "lElbowUp": 0,
         "lHandOut": 0.0242,
-        "lHandUp": 0
+        "lHandUp": 0,
+        "lElbowDepth": 0.4848,
+        "lHandDepth": 0.9697
       },
       "onSeat": true,
       "label": "左へ（途中）"
@@ -244,10 +280,14 @@
         "rElbowUp": 0,
         "rHandOut": -0.8277,
         "rHandUp": 0,
+        "rElbowDepth": 0.2529,
+        "rHandDepth": 0.5058,
         "lElbowOut": 0.3544,
         "lElbowUp": 0,
         "lHandOut": 0.3544,
-        "lHandUp": 0
+        "lHandUp": 0,
+        "lElbowDepth": 0.4515,
+        "lHandDepth": 0.9029
       },
       "onSeat": true,
       "label": "左へひねる"
@@ -266,10 +306,14 @@
         "rElbowUp": 0,
         "rHandOut": -0.8277,
         "rHandUp": 0,
+        "rElbowDepth": 0.2529,
+        "rHandDepth": 0.5058,
         "lElbowOut": 0.3544,
         "lElbowUp": 0,
         "lHandOut": 0.3544,
-        "lHandUp": 0
+        "lHandUp": 0,
+        "lElbowDepth": 0.4515,
+        "lHandDepth": 0.9029
       },
       "onSeat": true,
       "label": "戻し始める"
@@ -288,10 +332,14 @@
         "rElbowUp": 0,
         "rHandOut": -0.6048,
         "rHandUp": 0,
+        "rElbowDepth": 0.3792,
+        "rHandDepth": 0.7584,
         "lElbowOut": 0.0242,
         "lElbowUp": 0,
         "lHandOut": 0.0242,
-        "lHandUp": 0
+        "lHandUp": 0,
+        "lElbowDepth": 0.4848,
+        "lHandDepth": 0.9697
       },
       "onSeat": true,
       "label": "戻す（途中）"
@@ -310,10 +358,14 @@
         "rElbowUp": 0,
         "rHandOut": -0.3089,
         "rHandUp": 0,
+        "rElbowDepth": 0.4598,
+        "rHandDepth": 0.9195,
         "lElbowOut": -0.3089,
         "lElbowUp": 0,
         "lHandOut": -0.3089,
-        "lHandUp": 0
+        "lHandUp": 0,
+        "lElbowDepth": 0.4598,
+        "lHandDepth": 0.9195
       },
       "onSeat": true,
       "label": "正面に戻る"

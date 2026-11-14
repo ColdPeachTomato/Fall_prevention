@@ -234,6 +234,11 @@ export default function Preview() {
         </select>
       </label>
 
+      {/* アプリの「始める前の画面」に出す、運動名と目的の一文 */}
+      <p>
+        <strong>{getExercise(anim.exercise).name}</strong>：{getExercise(anim.exercise).purpose}
+      </p>
+
       <div className="preview-stage">
         <AnimationCanvas anim={anim} getTime={() => timeRef.current} label="アニメのプレビュー" showBalance={showBalance} showJoints={showJoints} mirror={mirror} reverse={reverse} support={anim.support ? stage : null} />
       </div>
