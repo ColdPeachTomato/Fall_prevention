@@ -6,6 +6,9 @@
 import { getAnimation } from '../animation/registry';
 import type { Exercise } from './types';
 
+// 目的の一文の前に付ける見出し（太字で出す。2026-11-14 利用者の指示）
+export const PURPOSE_LABEL = '＜目的＞';
+
 export const EXERCISES: Exercise[] = [
   // ウォームアップ
   {
@@ -306,7 +309,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'D5',
     name: '後ろ歩き（カウンター沿い）',
-    purpose: '後ろへ足を運ぶ練習をしましょう',
+    purpose: '後ろへ歩く練習をしましょう',
     category: 'dynamic',
     highRisk: true,
     unit: 'laps',

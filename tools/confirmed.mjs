@@ -15,7 +15,6 @@ export const CONFIRMED = [
   'S5-side-L1',
   'S5-side-L2',
   'S7-side-L2',
-  'S8-back-L1',
-  'S8-back-L2',
+  // S8-back-L1・L2 は、拳への腕の重なりを足したので外した（2026-11-14。もう一度確かめてもらう）
   'S9-side-L3',
 ];

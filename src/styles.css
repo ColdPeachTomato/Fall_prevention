@@ -71,9 +71,9 @@ p {
   font-size: max(20px, 1.2rem);
 }
 
-/* 何のための運動かを伝える一文。運動名のすぐ下に出す */
+/* 何のための運動かを伝える一文。運動名のすぐ下に出す。前に「＜目的＞」の見出しが付くので、2行になることがある */
 .purpose {
-  font-size: max(20px, 1.2rem);
+  font-size: max(18px, 1.1rem);
   color: var(--primary); /* 背景との比 約6:1 */
   font-weight: 700;
   margin: 0 0 8px;

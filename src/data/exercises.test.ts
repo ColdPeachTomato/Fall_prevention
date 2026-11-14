@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { EXERCISES } from './exercises';
 
 describe('目的の一文', () => {
-  it('23種目すべてにあり、一文で、17文字以内（スマホの画面で1行に収まる）', () => {
+  it('23種目すべてにあり、一文で、17文字以内（見出し「＜目的＞」を付けて、スマホの画面で2行までに収まる）', () => {
     expect(EXERCISES).toHaveLength(23);
     for (const ex of EXERCISES) {
       expect(ex.purpose.length, ex.id).toBeGreaterThanOrEqual(8);

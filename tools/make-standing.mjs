@@ -384,7 +384,9 @@ const stanceLeft = { shift: WEIGHT_SHIFT, ...leg('l', legOut(-FOOT, WEIGHT_SHIFT
   const band = (alpha, scapula) => {
     const out = round(Math.sin(alpha * RAD) * Math.cos(DOWN * RAD));
     const up = round(-Math.sin(DOWN * RAD));
-    return { ...legs, scapula, rElbowOut: out, rElbowUp: up, rHandOut: out, rHandUp: up };
+    // 前に伸ばした腕は奥（負）。肘が手より手前なので、腕が拳に少し重なる（座って行うレベル1と同じ）
+    const forward = Math.cos(alpha * RAD) * Math.cos(DOWN * RAD);
+    return { ...legs, scapula, rElbowOut: out, rElbowUp: up, rElbowDepth: round(-forward * 0.4), rHandOut: out, rHandUp: up, rHandDepth: round(-forward) };
   };
   save.push({
     ...frontCommon('S8-back-L2', 'S8', 'back', fullBox(-0.58, 0.47), { cycleSeconds: 8 }),

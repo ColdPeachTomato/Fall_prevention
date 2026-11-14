@@ -534,9 +534,9 @@ describe('前後の見せ方（正面・後ろ向きで共通）', () => {
     expect(sum(shadeByDepth(BASE, 1))).toBeGreaterThanOrEqual(sum(shadeByDepth(BASE, 0)) * 0.79);
   });
 
-  it('腕の前後を持つのは、腕が前後に動く種目だけ（W2：肘を回す、W3：腕をこちらへ伸ばす）', () => {
+  it('腕の前後を持つのは、腕が前後に動く種目だけ（W2：肘を回す、W3：腕をこちらへ伸ばす、S8：腕を向こうへ伸ばす）', () => {
     for (const other of FRONT) {
-      if (other.exercise === 'W2' || other.exercise === 'W3') continue;
+      if (['W2', 'W3', 'S8'].includes(other.exercise)) continue;
       for (const k of other.keyframes) {
         for (const key of ['rElbowDepth', 'lElbowDepth', 'rHandDepth', 'lHandDepth'] as const) expect(k.pose[key] ?? 0, other.id).toBe(0);
       }
@@ -553,6 +553,37 @@ describe('前後の見せ方（正面・後ろ向きで共通）', () => {
         expect(hand).toBeLessThanOrEqual(1);
         expect(elbow).toBeCloseTo(hand / 2, 2);
         expect(handCover(elbow - hand)).toBe(0);
+      }
+    }
+  });
+
+  it('S8：後ろから見ると、拳は腕の向こう。腕が拳に少し重なり、バンドを緩めるほど重なりが増える。拳は消えない', () => {
+    for (const id of ['S8-back-L1', 'S8-back-L2']) {
+      const anim = frontAnim(id);
+      const cover = (t: number) => {
+        const f = computeFrontFrame(anim, t);
+        expect(f.pose.rHandDepth, id).toBeLessThan(f.pose.rElbowDepth); // 手は、肘より奥
+        expect(f.pose.rElbowDepth, id).toBeLessThan(0); // 腕は奥へ伸びている（色は濃くしない）
+        expect(f.pose.lHandDepth, id).toBeCloseTo(f.pose.rHandDepth, 9);
+        return handCover(f.pose.rElbowDepth - f.pose.rHandDepth);
+      };
+      const slack = cover(0); // バンドを肩幅に持つ
+      const spread = cover(4); // 引き広げて止めている
+      expect(spread, id).toBeGreaterThan(0.3); // 引き広げたときも、少し重なっている
+      expect(slack, id).toBeGreaterThan(spread + 0.3); // 緩めるほど、重なりが増える
+      // 戻す間（5.2〜7.6 秒）、重なりは減らない。急にも変わらない
+      let prev = cover(5.2);
+      for (let t = 5.25; t <= 7.6; t += 0.05) {
+        const c = cover(t);
+        expect(c, `${id} t=${t.toFixed(2)}`).toBeGreaterThanOrEqual(prev - 1e-9);
+        expect(c - prev, `${id} t=${t.toFixed(2)}`).toBeLessThan(0.05);
+        prev = c;
+      }
+      // いちばん重なっても、隠れるのは拳の直径の3割まで
+      for (const f of framesOf(anim)) {
+        const bite = handBite(f.sk.r, handCover(f.pose.rElbowDepth - f.pose.rHandDepth))!;
+        const gap = Math.hypot(bite.x - f.sk.r.hand.x, bite.y - f.sk.r.hand.y) - bite.r;
+        expect(gap, `${id} ${at(f)}`).toBeGreaterThanOrEqual(0.025 * (1 - 2 * HAND_HIDDEN_MAX) - 1e-9);
       }
     }
   });

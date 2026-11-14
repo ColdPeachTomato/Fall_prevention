@@ -8,7 +8,7 @@ import { wrapTime } from '../animation/interpolate';
 import { ANIMATIONS } from '../animation/registry';
 import { frameOf } from '../animation/scene';
 import type { AnimationData, SupportStage } from '../animation/types';
-import { getExercise } from '../data/exercises';
+import { getExercise, PURPOSE_LABEL } from '../data/exercises';
 import { validateAnimation } from '../animation/validate';
 
 const FRAME_STEP = 0.1; // コマ送りの幅（秒）
@@ -236,7 +236,7 @@ export default function Preview() {
 
       {/* アプリの「始める前の画面」に出す、運動名と目的の一文 */}
       <p>
-        <strong>{getExercise(anim.exercise).name}</strong>：{getExercise(anim.exercise).purpose}
+        <strong>{getExercise(anim.exercise).name}</strong>：<strong>{PURPOSE_LABEL}</strong> {getExercise(anim.exercise).purpose}
       </p>
 
       <div className="preview-stage">

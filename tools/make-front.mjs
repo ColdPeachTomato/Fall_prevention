@@ -215,7 +215,10 @@ const SPREAD = 55; // 引き広げたときの、前からの開き
 function bandPose(alpha, scapula) {
   const out = round(Math.sin(alpha * RAD) * Math.cos(DOWN * RAD));
   const up = round(-Math.sin(DOWN * RAD));
-  return { ...LEGS, scapula, rElbowOut: out, rElbowUp: up, rHandOut: out, rHandUp: up };
+  // 後ろから見るので、前に伸ばした腕は奥（負）：手がいちばん奥、肘はその4割。肘が手より手前なので、腕が拳に少し重なる。
+  // バンドを緩めて腕が前を向くほど、重なりが増える（拳が消えることはない。色の濃さは変わらない）
+  const forward = Math.cos(alpha * RAD) * Math.cos(DOWN * RAD);
+  return { ...LEGS, scapula, rElbowOut: out, rElbowUp: up, rElbowDepth: round(-forward * 0.4), rHandOut: out, rHandUp: up, rHandDepth: round(-forward) };
 }
 const s8 = {
   ...common('S8-back-L1', 'S8', 'back', box(0.47), { cycleSeconds: 8 }),

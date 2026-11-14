@@ -57,31 +57,30 @@ export function handBite(limb: Pick<FrontLimb, 'hand' | 'elbow' | 'sign'>, cover
   return { x: limb.hand.x + (dx / n) * reach, y: limb.hand.y + (dy / n) * reach, r: ARM_EDGE };
 }
 
-// 手。腕より手前に描き、腕が重なる分だけ欠けさせて、欠けた所に腕のふちの線を入れる
-function hand(ctx: Ctx, limb: FrontLimb, cover: number, px: number): void {
-  const bite = handBite(limb, cover);
-  if (!bite) {
-    circle(ctx, limb.hand, SHAPE.hand, STYLE.skin, px);
-    return;
-  }
-  const span = SHAPE.hand * 2;
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(limb.hand.x - span, limb.hand.y - span, span * 2, span * 2);
-  ctx.arc(bite.x, bite.y, bite.r, 0, Math.PI * 2);
-  ctx.clip('evenodd');
+// 手。腕より手前に描いたうえで、腕が重なる分だけ、手の肘の側を腕の色で覆う（袖口が手に少しかぶさるように見える）。
+// 覆う所は手の円の中だけなので、下に腕が描かれていなくても、欠けた所に穴が開かない。sleeve：腕の、手首の側の色
+function hand(ctx: Ctx, limb: FrontLimb, cover: number, sleeve: string, px: number): void {
   circle(ctx, limb.hand, SHAPE.hand, STYLE.skin, px);
-  ctx.restore();
+  const bite = handBite(limb, cover);
+  if (!bite) return;
   ctx.save();
   ctx.beginPath();
   ctx.arc(limb.hand.x, limb.hand.y, SHAPE.hand, 0, Math.PI * 2);
   ctx.clip();
   ctx.beginPath();
   ctx.arc(bite.x, bite.y, bite.r, 0, Math.PI * 2);
+  ctx.fillStyle = sleeve;
+  ctx.fill();
   ctx.lineWidth = SHAPE.outlinePx * px;
   ctx.strokeStyle = STYLE.outline;
   ctx.stroke();
   ctx.restore();
+  // 手のふちの線を、覆った所も含めて引き直す
+  ctx.beginPath();
+  ctx.arc(limb.hand.x, limb.hand.y, SHAPE.hand, 0, Math.PI * 2);
+  ctx.lineWidth = SHAPE.outlinePx * px;
+  ctx.strokeStyle = STYLE.outline;
+  ctx.stroke();
 }
 
 // 立って体重を片足に乗せると、支える脚は内へ傾き、脚の付け根が骨盤の外へ飛び出して見える。
@@ -485,7 +484,7 @@ export function drawFrontFrame(ctx: Ctx, anim: FrontAnimation, f: FrontFrame, o:
       capsule(ctx, limb.shoulder, limb.elbow, SHAPE.upperArm[0], SHAPE.upperArm[1], shaded(limb.shoulder, limb.elbow, upper, 0, elbowDepth), px);
       capsule(ctx, limb.elbow, limb.wrist, SHAPE.forearm[0], SHAPE.forearm[1], shaded(limb.elbow, limb.wrist, fore, elbowDepth, handDepth), px);
       // 手は消さない。肘が手より手前に来たときだけ、肘の側が少し欠けて見える
-      hand(ctx, limb, handCover(elbowDepth - handDepth), px);
+      hand(ctx, limb, handCover(elbowDepth - handDepth), shadeByDepth(fore, handDepth), px);
     }
   };
   const body = () => {
