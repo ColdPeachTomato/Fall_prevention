@@ -1,0 +1,175 @@
+{
+  "id": "S4-side-L1",
+  "exercise": "S4",
+  "level": 1,
+  "view": "side",
+  "checked": false,
+  "cycleSeconds": 6,
+  "root": {
+    "mode": "seat",
+    "x": -0.2,
+    "y": 0.298,
+    "pelvis": 0
+  },
+  "props": [
+    {
+      "type": "chair",
+      "x": -0.33,
+      "seatHeight": 0.242,
+      "seatDepth": 0.26,
+      "backHeight": 0.52
+    }
+  ],
+  "contacts": {
+    "near": {
+      "on": "world",
+      "x": -0.17,
+      "y": 0.257
+    },
+    "far": {
+      "on": "world",
+      "x": -0.17,
+      "y": 0.257
+    }
+  },
+  "highlight": [
+    "near:shank",
+    "near:foot"
+  ],
+  "keyframes": [
+    {
+      "t": 0,
+      "pose": {
+        "ankle": 0,
+        "knee": 87,
+        "hip": 87,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 0,
+        "elbow": 10,
+        "farAnkle": 0,
+        "farKnee": 87,
+        "farHip": 87
+      },
+      "onSeat": true,
+      "hands": 1,
+      "label": "足を床につける"
+    },
+    {
+      "t": 0.3,
+      "pose": {
+        "ankle": 0,
+        "knee": 87,
+        "hip": 87,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 0,
+        "elbow": 10,
+        "farAnkle": 0,
+        "farKnee": 87,
+        "farHip": 87
+      },
+      "onSeat": true,
+      "hands": 1,
+      "label": "動き始め"
+    },
+    {
+      "t": 2.5,
+      "pose": {
+        "ankle": 8,
+        "knee": 12,
+        "hip": 87,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 0,
+        "elbow": 10,
+        "farAnkle": 0,
+        "farKnee": 87,
+        "farHip": 87
+      },
+      "onSeat": true,
+      "hands": 1,
+      "label": "膝を伸ばす"
+    },
+    {
+      "t": 3.5,
+      "pose": {
+        "ankle": 8,
+        "knee": 12,
+        "hip": 87,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 0,
+        "elbow": 10,
+        "farAnkle": 0,
+        "farKnee": 87,
+        "farHip": 87
+      },
+      "onSeat": true,
+      "hands": 1,
+      "label": "止める（下ろし始め）"
+    },
+    {
+      "t": 5.7,
+      "pose": {
+        "ankle": 0,
+        "knee": 87,
+        "hip": 87,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 0,
+        "elbow": 10,
+        "farAnkle": 0,
+        "farKnee": 87,
+        "farHip": 87
+      },
+      "onSeat": true,
+      "hands": 1,
+      "label": "下ろす"
+    }
+  ],
+  "captions": [
+    {
+      "from": 0,
+      "to": 0.3,
+      "text": "背筋を伸ばして座ります"
+    },
+    {
+      "from": 0.3,
+      "to": 2.5,
+      "text": "片方の膝をゆっくり伸ばします"
+    },
+    {
+      "from": 2.5,
+      "to": 3.5,
+      "text": "伸ばしたまま止めます"
+    },
+    {
+      "from": 3.5,
+      "to": 6,
+      "text": "ゆっくり下ろします"
+    }
+  ],
+  "marks": [
+    {
+      "type": "arrow",
+      "from": 0.3,
+      "to": 2.4,
+      "anchor": "ankle",
+      "dx": 0.07,
+      "dy": 0.02,
+      "angle": 40,
+      "length": 0.1
+    },
+    {
+      "type": "arrow",
+      "from": 3.6,
+      "to": 5.7,
+      "anchor": "ankle",
+      "dx": 0.08,
+      "dy": 0.04,
+      "angle": 200,
+      "length": 0.1
+    }
+  ]
+}

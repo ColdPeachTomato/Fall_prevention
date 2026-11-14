@@ -469,6 +469,12 @@ p {
   background: #f6f2e9;
 }
 
+/* 見ている向きの添え書き（後ろから見た図など） */
+.view-note {
+  text-align: center;
+  margin: 2px 0 0;
+}
+
 .anim-caption {
   text-align: center;
   font-size: max(20px, 1.2rem);

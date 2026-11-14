@@ -1,7 +1,7 @@
-// 運動データ 23種類。要件メモ「運動データ」の表から転記した。
-// 食い違ったときは別文書の「運動リスト」を正とする。
-// 行い方（howTo）の文は、注意点をもとに作った暫定の文。医師・理学療法士の確認を受ける。
+// 運動データ 23種類。要件メモ「運動データ」の表と、付録「動きの仕様」から転記した。内容は要件メモを正とする。
+// 行い方（howTo）の文は、注意点と動きの仕様をもとに作った暫定の文。医師・理学療法士の確認を受ける。
 
+import { getAnimation } from '../animation/registry';
 import type { Exercise } from './types';
 
 export const EXERCISES: Exercise[] = [
@@ -13,10 +13,11 @@ export const EXERCISES: Exercise[] = [
     highRisk: false,
     unit: 'reps',
     bilateral: true,
+    directions: ['外回し', '内回し'],
     cues: ['片足ずつ、両方向に回す', '立っているのが不安なら座って行う'],
     variants: [
-      { level: 1, howTo: '椅子に座り、片足を少し浮かせて、足首をゆっくり回します。', posture: 'sitting', usesSupport: false, view: 'front', animationId: null },
-      { level: 2, howTo: 'つかまって立ち、片足を少し浮かせて、足首をゆっくり回します。', posture: 'standing', usesSupport: true, view: 'front', animationId: null },
+      { level: 1, howTo: '椅子に座り、片足を少し前に出します。かかとを床につけたまま、つま先で円を描きます。', posture: 'sitting', usesSupport: false, view: 'front', animationId: 'W1-front-L1' },
+      { level: 2, howTo: 'つかまって立ち、体重を反対の足に乗せます。片足を少し前に出し、かかとを床につけたまま、つま先で円を描きます。', posture: 'standing', usesSupport: true, view: 'front', animationId: null },
     ],
   },
   {
@@ -26,10 +27,12 @@ export const EXERCISES: Exercise[] = [
     highRisk: false,
     unit: 'reps',
     bilateral: false,
+    directions: ['後ろ回し', '前回し'],
     cues: ['肩がつらければ、円を小さくする'],
+    // どのレベルでも椅子に座って行う（両手を使うため、立ってつかまることができない）。動きはレベル1と2で同じ
     variants: [
-      { level: 1, howTo: '椅子に座り、腕を大きくゆっくり回します。', posture: 'sitting', usesSupport: false, view: 'front', animationId: null },
-      { level: 2, howTo: '片手でつかまって立ち、もう片方の腕をゆっくり回します。半分の回数で手を替えます。', posture: 'standing', usesSupport: true, maxSupport: 'one', view: 'front', animationId: null },
+      { level: 1, howTo: '椅子に座り、指先を肩に置きます。両方の肘で、同時に大きな円を描きます。', posture: 'sitting', usesSupport: false, view: 'front', animationId: 'W2-front-L1' },
+      { level: 2, howTo: '椅子に座り、指先を肩に置きます。両方の肘で、同時に大きな円を描きます。', posture: 'sitting', usesSupport: false, view: 'front', animationId: 'W2-front-L1' },
     ],
   },
   {
@@ -40,9 +43,10 @@ export const EXERCISES: Exercise[] = [
     unit: 'reps',
     bilateral: false,
     cues: ['無理のない範囲で、左右交互に'],
+    // どのレベルでも椅子に座って行う。動きはレベル1と2で同じ
     variants: [
-      { level: 1, howTo: '椅子に座り、腕を上げて、体を左右交互にゆっくりひねります。', posture: 'sitting', usesSupport: false, view: 'front', animationId: null },
-      { level: 2, howTo: '片手でつかまって立ち、もう片方の腕を上げて、体を左右交互にゆっくりひねります。', posture: 'standing', usesSupport: true, maxSupport: 'one', view: 'front', animationId: null },
+      { level: 1, howTo: '椅子に座り、両腕を肩の高さで前に伸ばして、手のひらを合わせます。腰と足は正面に向けたまま、胸と腕を一緒に、右、左とゆっくりひねります。', posture: 'sitting', usesSupport: false, view: 'front', animationId: 'W3-front-L1' },
+      { level: 2, howTo: '椅子に座り、両腕を肩の高さで前に伸ばして、手のひらを合わせます。腰と足は正面に向けたまま、胸と腕を一緒に、右、左とゆっくりひねります。', posture: 'sitting', usesSupport: false, view: 'front', animationId: 'W3-front-L1' },
     ],
   },
   {
@@ -82,7 +86,7 @@ export const EXERCISES: Exercise[] = [
     bilateral: false,
     cues: ['親指側に体重を乗せ、足首を外に倒さない'],
     variants: [
-      { level: 1, howTo: '椅子に座り、かかとをゆっくり上げて、ゆっくり下ろします。', posture: 'sitting', usesSupport: false, view: 'side', animationId: null },
+      { level: 1, howTo: '椅子に座り、かかとをゆっくり上げて、ゆっくり下ろします。', posture: 'sitting', usesSupport: false, view: 'side', animationId: 'S2-side-L1' },
       { level: 2, howTo: 'つかまって立ち、かかとをゆっくり上げて、ゆっくり下ろします。', posture: 'standing', usesSupport: true, view: 'side', animationId: null },
     ],
   },
@@ -96,7 +100,7 @@ export const EXERCISES: Exercise[] = [
     cues: ['後ろに倒れないよう、立って行うときは両手でつかまる'],
     minSupport: 'both',
     variants: [
-      { level: 1, howTo: '椅子に座り、つま先をゆっくり上げて、ゆっくり下ろします。', posture: 'sitting', usesSupport: false, view: 'side', animationId: null },
+      { level: 1, howTo: '椅子に座り、つま先をゆっくり上げて、ゆっくり下ろします。', posture: 'sitting', usesSupport: false, view: 'side', animationId: 'S3-side-L1' },
       { level: 2, howTo: '両手でつかまって立ち、つま先をゆっくり上げて、ゆっくり下ろします。', posture: 'standing', usesSupport: true, view: 'side', animationId: null },
     ],
   },
@@ -109,7 +113,7 @@ export const EXERCISES: Exercise[] = [
     bilateral: true,
     cues: ['ゆっくり伸ばして止め、ゆっくり下ろす'],
     variants: [
-      { level: 1, howTo: '椅子に座り、片方の膝をゆっくり伸ばして止め、ゆっくり下ろします。', posture: 'sitting', usesSupport: false, view: 'side', animationId: null },
+      { level: 1, howTo: '椅子に座り、片方の膝をゆっくり伸ばして止め、ゆっくり下ろします。', posture: 'sitting', usesSupport: false, view: 'side', animationId: 'S4-side-L1' },
     ],
   },
   {
@@ -121,7 +125,7 @@ export const EXERCISES: Exercise[] = [
     bilateral: false,
     cues: ['上体を倒さず反らさず、肩を腰の真上に保つ'],
     variants: [
-      { level: 1, howTo: '椅子に座り、膝を左右交互にゆっくり上げます。', posture: 'sitting', usesSupport: false, view: 'side', animationId: null },
+      { level: 1, howTo: '椅子に座り、膝を左右交互にゆっくり上げます。', posture: 'sitting', usesSupport: false, view: 'side', animationId: 'S5-side-L1' },
       { level: 2, howTo: 'つかまって立ち、膝を左右交互にゆっくり上げて足踏みします。', posture: 'standing', usesSupport: true, view: 'side', animationId: null },
     ],
   },
@@ -156,9 +160,9 @@ export const EXERCISES: Exercise[] = [
     highRisk: false,
     unit: 'reps',
     bilateral: false,
-    cues: ['背筋を伸ばし、肩をすくめない', 'バンドがなくてもできる'],
+    cues: ['背筋を伸ばし、肩をすくめない', 'バンドがないときは、肘を曲げて脇につけ、肘を後ろに引く'],
     variants: [
-      { level: 1, howTo: '椅子に座り、背筋を伸ばして、肩甲骨をゆっくり寄せます。', posture: 'sitting', usesSupport: false, view: 'back', animationId: null },
+      { level: 1, howTo: '椅子に座り、背筋を伸ばして、バンドを胸の前で肩幅に持ちます。肘を伸ばしたまま左右に引き広げ、肩甲骨を寄せて止め、ゆっくり戻します。', posture: 'sitting', usesSupport: false, view: 'back', animationId: 'S8-back-L1' },
       // 両手でバンドを持つため、つかまらずに行う。立位なので支持物の確認は出す
       { level: 2, howTo: 'つかまる所のすぐ横に立ち、背筋を伸ばして、肩甲骨をゆっくり寄せます。', posture: 'standing', usesSupport: false, view: 'back', animationId: null },
     ],
@@ -319,7 +323,9 @@ export function getExercise(id: string): Exercise {
 }
 
 // 医師用のメニュー作成画面で選べる種目か。
-// 高リスクの種目は、アニメの確認済みの印が付くまで選べない（フェーズ3で確認の仕組みを入れる）。
+// 高リスクの種目は、すべてのレベルのアニメに確認済みの印が付くまで選べない。
 export function isSelectableInEditor(ex: Exercise): boolean {
-  return ex.category !== 'walking' && !ex.highRisk;
+  if (ex.category === 'walking') return false;
+  if (!ex.highRisk) return true;
+  return ex.variants.every((v) => getAnimation(v.animationId)?.checked === true);
 }

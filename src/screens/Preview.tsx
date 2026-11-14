@@ -3,16 +3,34 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimationCanvas } from '../animation/AnimationCanvas';
-import { FAR_DEFAULT, FAR_JOINTS, NEAR_JOINTS, type JointDef } from '../animation/bodyModel';
+import { FAR_DEFAULT, FAR_JOINTS, FOOT_PITCH, FRONT_BODY_CHANNELS, FRONT_LEFT_CHANNELS, FRONT_RIGHT_CHANNELS, NEAR_JOINTS } from '../animation/bodyModel';
 import { wrapTime } from '../animation/interpolate';
 import { ANIMATIONS } from '../animation/registry';
-import { computeFrame } from '../animation/sideRig';
-import type { AnimationData, FarJoint, Keyframe } from '../animation/types';
+import { frameOf } from '../animation/scene';
+import type { AnimationData } from '../animation/types';
 import { validateAnimation } from '../animation/validate';
 
 const FRAME_STEP = 0.1; // コマ送りの幅（秒）
 const SCAN_STEP = 0.05; // 警告を探す間隔（秒）
 const MIN_GAP = 0.05; // キーフレームどうしの最小の間隔（秒）
+
+// 視点によらず同じ画面で編集できるよう、キーフレームと値の定義をゆるい形で扱う
+interface EditKeyframe {
+  t: number;
+  pose: Record<string, number | undefined>;
+  onSeat?: boolean;
+  hands?: number;
+  label?: string;
+}
+interface SliderDef {
+  name: string;
+  label: string;
+  min: number;
+  max: number;
+  unit?: string;
+}
+
+const VIEW_LABEL = { side: '横向き', front: '正面', back: '後ろ向き' } as const;
 
 function clone(anim: AnimationData): AnimationData {
   return JSON.parse(JSON.stringify(anim)) as AnimationData;
@@ -25,7 +43,7 @@ function findUnstable(anim: AnimationData): { from: number; to: number }[] {
   const count = Math.round(anim.cycleSeconds / SCAN_STEP);
   for (let i = 0; i <= count; i++) {
     const t = Math.min(i * SCAN_STEP, anim.cycleSeconds - 1e-6);
-    const stable = computeFrame(anim, t).stable;
+    const stable = frameOf(anim, t).stable;
     if (!stable && start === null) start = t;
     if (stable && start !== null) {
       ranges.push({ from: start, to: t });
@@ -36,14 +54,15 @@ function findUnstable(anim: AnimationData): { from: number; to: number }[] {
   return ranges;
 }
 
-function Slider({ def, value, onChange }: { def: JointDef; value: number; onChange: (v: number) => void }) {
+function Slider({ def, value, onChange }: { def: SliderDef; value: number; onChange: (v: number) => void }) {
+  const degrees = def.unit !== '';
   return (
     <label className="preview-slider">
       <span>
-        {def.label}：<strong>{value.toFixed(1)}°</strong>
+        {def.label}：<strong>{degrees ? `${value.toFixed(1)}°` : value.toFixed(2)}</strong>
         <span className="muted">（{def.min}〜{def.max}）</span>
       </span>
-      <input type="range" min={def.min} max={def.max} step={0.5} value={value} onChange={(e) => onChange(Number(e.target.value))} />
+      <input type="range" min={def.min} max={def.max} step={degrees ? 0.5 : 0.01} value={value} onChange={(e) => onChange(Number(e.target.value))} />
     </label>
   );
 }
@@ -56,6 +75,8 @@ export default function Preview() {
   const [kfIndex, setKfIndex] = useState(0);
   const [showBalance, setShowBalance] = useState(true);
   const [showJoints, setShowJoints] = useState(false);
+  const [mirror, setMirror] = useState(false);
+  const [reverse, setReverse] = useState(false);
   const [copied, setCopied] = useState(false);
   const timeRef = useRef(0);
 
@@ -80,7 +101,7 @@ export default function Preview() {
     return () => cancelAnimationFrame(raf);
   }, [playing, speed, anim.cycleSeconds]);
 
-  const frame = useMemo(() => computeFrame(anim, time), [anim, time]);
+  const frame = useMemo(() => frameOf(anim, time), [anim, time]);
   const unstable = useMemo(() => findUnstable(anim), [anim]);
   const validation = useMemo(() => validateAnimation(JSON.parse(JSON.stringify(anim))), [anim]);
   const json = useMemo(() => JSON.stringify(anim, null, 2) + '\n', [anim]);
@@ -89,12 +110,25 @@ export default function Preview() {
     return JSON.stringify(original) !== JSON.stringify(anim);
   }, [anim]);
 
-  const kf = anim.keyframes[Math.min(kfIndex, anim.keyframes.length - 1)]!;
-  const index = anim.keyframes.indexOf(kf);
-  const hasFar = FAR_JOINTS.some((j) => kf.pose[j.name as FarJoint] !== undefined);
+  const side = anim.view === 'side';
+  const keyframes = anim.keyframes as EditKeyframe[];
+  const setKeyframes = (next: EditKeyframe[]) => setAnim({ ...anim, keyframes: next } as AnimationData);
+  const index = Math.min(kfIndex, keyframes.length - 1);
+  const kf = keyframes[index]!;
+  // 必ず出す値と、切り替えて出す値（横向き：奥側、正面・後ろ向き：左側）
+  const mainDefs: SliderDef[] = side ? NEAR_JOINTS : [...FRONT_BODY_CHANNELS, ...FRONT_RIGHT_CHANNELS];
+  const otherDefs: SliderDef[] = side ? FAR_JOINTS : FRONT_LEFT_CHANNELS;
+  const hasOther = otherDefs.some((j) => kf.pose[j.name] !== undefined);
+  // 省略した値の扱い（横向き：奥側は手前側と同じ。正面・後ろ向き：左側は右側と同じ、ほかは決まった値）
+  const mirrorOf = (name: string): string => (side ? FAR_DEFAULT[name as keyof typeof FAR_DEFAULT] : `r${name.slice(1)}`);
+  const fallbackOf = (name: string): number => {
+    if (side) return 0;
+    return [...FRONT_BODY_CHANNELS, ...FRONT_RIGHT_CHANNELS, ...FRONT_LEFT_CHANNELS].find((c) => c.name === name)?.fallback ?? 0;
+  };
+  const valueOf = (name: string): number => kf.pose[name] ?? fallbackOf(name);
 
-  const updateKeyframe = (patch: (k: Keyframe) => Keyframe) => {
-    setAnim({ ...anim, keyframes: anim.keyframes.map((k, i) => (i === index ? patch(k) : k)) });
+  const updateKeyframe = (patch: (k: EditKeyframe) => EditKeyframe) => {
+    setKeyframes(keyframes.map((k, i) => (i === index ? patch(k) : k)));
     setCopied(false);
   };
 
@@ -110,6 +144,7 @@ export default function Preview() {
     setAnim(clone(next));
     setKfIndex(0);
     setPlaying(false);
+    setReverse(false);
     timeRef.current = 0;
     setTime(0);
     setCopied(false);
@@ -131,25 +166,23 @@ export default function Preview() {
   const canDuplicate = nextTime - kf.t >= MIN_GAP * 4;
   const duplicate = () => {
     const t = Math.round(((kf.t + nextTime) / 2) * 100) / 100;
-    const copy: Keyframe = { ...clone(anim).keyframes[index]!, t, label: `${kf.label ?? 'キーフレーム'}（複製）` };
-    const keyframes = [...anim.keyframes.slice(0, index + 1), copy, ...anim.keyframes.slice(index + 1)];
-    setAnim({ ...anim, keyframes });
+    const copy: EditKeyframe = { ...(clone(anim).keyframes as EditKeyframe[])[index]!, t, label: `${kf.label ?? 'キーフレーム'}（複製）` };
+    setKeyframes([...keyframes.slice(0, index + 1), copy, ...keyframes.slice(index + 1)]);
     setKfIndex(index + 1);
     seek(t);
   };
   const remove = () => {
     if (anim.keyframes.length <= 2 || index === 0) return;
-    setAnim({ ...anim, keyframes: anim.keyframes.filter((_, i) => i !== index) });
+    setKeyframes(keyframes.filter((_, i) => i !== index));
     setKfIndex(index - 1);
   };
 
-  const toggleFar = (on: boolean) => {
+  const toggleOther = (on: boolean) => {
     updateKeyframe((k) => {
       const pose = { ...k.pose };
-      for (const j of FAR_JOINTS) {
-        const name = j.name as FarJoint;
-        if (on) pose[name] = pose[name] ?? pose[FAR_DEFAULT[name]];
-        else delete pose[name];
+      for (const j of otherDefs) {
+        if (on) pose[j.name] = pose[j.name] ?? pose[mirrorOf(j.name)] ?? fallbackOf(j.name);
+        else delete pose[j.name];
       }
       return { ...k, pose };
     });
@@ -184,14 +217,14 @@ export default function Preview() {
         <select value={anim.id} onChange={(e) => selectAnimation(e.target.value)}>
           {ANIMATIONS.map((a) => (
             <option key={a.id} value={a.id}>
-              {a.id}（1往復 {a.cycleSeconds}秒）
+              {a.id}（{VIEW_LABEL[a.view]}、1往復 {a.cycleSeconds}秒、{a.checked ? '確認済み' : '未確認'}）
             </option>
           ))}
         </select>
       </label>
 
       <div className="preview-stage">
-        <AnimationCanvas anim={anim} getTime={() => timeRef.current} label="アニメのプレビュー" showBalance={showBalance} showJoints={showJoints} />
+        <AnimationCanvas anim={anim} getTime={() => timeRef.current} label="アニメのプレビュー" showBalance={showBalance} showJoints={showJoints} mirror={mirror} reverse={reverse} />
       </div>
 
       <div className="preview-transport">
@@ -236,6 +269,16 @@ export default function Preview() {
           <input type="checkbox" checked={showJoints} onChange={(e) => setShowJoints(e.target.checked)} />
           関節の点
         </label>
+        <label className="editor-check">
+          <input type="checkbox" checked={mirror} onChange={(e) => setMirror(e.target.checked)} />
+          左右反転（左側）
+        </label>
+        {anim.reverseCaptions && (
+          <label className="editor-check">
+            <input type="checkbox" checked={reverse} onChange={(e) => setReverse(e.target.checked)} />
+            逆向きに再生（2つ目の向き）
+          </label>
+        )}
       </div>
 
       <section className={`notice${frame.stable ? '' : ' notice-warn'}`} aria-live="off">
@@ -245,8 +288,8 @@ export default function Preview() {
           ／余裕 {Math.min(frame.com.x - frame.support.min, frame.support.max - frame.com.x).toFixed(3)}
         </p>
         <p className="muted">
-          単位は「身長 = 1」。{frame.onSeat ? '座面を支えに数えています。' : '足だけで支えています。'}
-          手の接触 {frame.hands.toFixed(2)}
+          単位は「身長 = 1」。{side ? '前後方向' : '左右方向'}の範囲です。{frame.onSeat ? '座面を支えに数えています。' : '足だけで支えています。'}
+          {'hands' in frame && ` 手の接触 ${frame.hands.toFixed(2)}`}
         </p>
       </section>
 
@@ -274,7 +317,7 @@ export default function Preview() {
       <section className="editor-section">
         <h2>キーフレーム</h2>
         <div className="preview-keyframes">
-          {anim.keyframes.map((k, i) => (
+          {keyframes.map((k, i) => (
             <button key={i} type="button" className={`preview-kf${i === index ? ' is-selected' : ''}`} onClick={() => selectKeyframe(i)}>
               {k.t.toFixed(2)}
               <br />
@@ -305,7 +348,7 @@ export default function Preview() {
           <input type="checkbox" checked={kf.onSeat === true} onChange={(e) => updateKeyframe((k) => ({ ...k, onSeat: e.target.checked }))} />
           お尻が座面についている
         </label>
-        {anim.contacts && (
+        {anim.view === 'side' && anim.contacts && (
           <label className="preview-slider">
             <span>
               手の接触の強さ：<strong>{(kf.hands ?? 0).toFixed(2)}</strong>
@@ -314,21 +357,27 @@ export default function Preview() {
           </label>
         )}
 
-        {NEAR_JOINTS.map((j) => (
-          <Slider key={j.name} def={j} value={kf.pose[j.name] ?? 0} onChange={(v) => updateKeyframe((k) => ({ ...k, pose: { ...k.pose, [j.name]: v } }))} />
+        {!side && (
+          <p className="muted">
+            手足は「見かけの向き」で表します（節の長さを 1 とした割合）。外へ・上への2つを合わせた長さが 1 より短い分は、手前か奥を向いて短く見えています。
+          </p>
+        )}
+        {mainDefs.map((j) => (
+          <Slider key={j.name} def={j} value={valueOf(j.name)} onChange={(v) => updateKeyframe((k) => ({ ...k, pose: { ...k.pose, [j.name]: v } }))} />
         ))}
+        {anim.view === 'side' && anim.plants && (
+          <>
+            <p className="muted">足を床に付ける指定がある脚は、足の傾きから股関節・膝・足首の角度が自動で決まります。</p>
+            <Slider def={FOOT_PITCH} value={kf.pose.footPitch ?? 0} onChange={(v) => updateKeyframe((k) => ({ ...k, pose: { ...k.pose, footPitch: v } }))} />
+          </>
+        )}
         <label className="editor-check">
-          <input type="checkbox" checked={hasFar} onChange={(e) => toggleFar(e.target.checked)} />
-          奥側の手足を別の角度にする
+          <input type="checkbox" checked={hasOther} onChange={(e) => toggleOther(e.target.checked)} />
+          {side ? '奥側の手足を別の角度にする' : '左側の手足を、右側と別の値にする'}
         </label>
-        {hasFar &&
-          FAR_JOINTS.map((j) => (
-            <Slider
-              key={j.name}
-              def={j}
-              value={kf.pose[j.name as FarJoint] ?? 0}
-              onChange={(v) => updateKeyframe((k) => ({ ...k, pose: { ...k.pose, [j.name]: v } }))}
-            />
+        {hasOther &&
+          otherDefs.map((j) => (
+            <Slider key={j.name} def={j} value={kf.pose[j.name] ?? kf.pose[mirrorOf(j.name)] ?? fallbackOf(j.name)} onChange={(v) => updateKeyframe((k) => ({ ...k, pose: { ...k.pose, [j.name]: v } }))} />
           ))}
 
         <div className="preview-transport">

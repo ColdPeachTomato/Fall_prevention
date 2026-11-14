@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { BODY, MASS } from './bodyModel';
 import { fullPose } from './interpolate';
-import { centerOfMass, solveArm, solveSide, supportRange } from './sideRig';
+import { centerOfMass, footContact, solveArm, solveSide, supportRange, type RigConfig } from './sideRig';
 import type { ChairProp, Pose } from './types';
 
 const standing: Pose = { ankle: 0, knee: 0, hip: 0, spine: 0, neck: 0, shoulder: 0, elbow: 0 };
 const sitting: Pose = { ankle: 0, knee: 90, hip: 90, spine: 0, neck: 0, shoulder: 0, elbow: 0 };
+const FOOT: RigConfig = { root: { x: 0 } };
+const solve = (pose: Pose, rig: RigConfig = FOOT, hands = 0) => solveSide(fullPose(pose), rig, hands);
 
 describe('質量比', () => {
   it('全身の合計が 1 になる', () => {
@@ -14,9 +16,9 @@ describe('質量比', () => {
   });
 });
 
-describe('solveSide', () => {
+describe('solveSide（足を起点にする）', () => {
   it('まっすぐ立つと、各点が足首の真上に並び、高さが身長の割合どおりになる', () => {
-    const sk = solveSide(fullPose(standing), 0.1);
+    const sk = solve(standing, { root: { x: 0.1 } });
     for (const p of [sk.knee, sk.hip, sk.lumbar, sk.shoulder, sk.neckBase, sk.head]) expect(p.x).toBeCloseTo(0.1, 9);
     expect(sk.knee.y).toBeCloseTo(0.285, 3); // 膝の高さ
     expect(sk.hip.y).toBeCloseTo(0.53, 3); // 股関節の高さ
@@ -26,44 +28,96 @@ describe('solveSide', () => {
   });
 
   it('床についた足は、姿勢が変わっても動かない', () => {
-    const a = solveSide(fullPose(standing), 0);
-    const b = solveSide(fullPose({ ...sitting, ankle: 15, spine: 20 }), 0);
+    const a = solve(standing);
+    const b = solve({ ...sitting, ankle: 15, spine: 20 });
     expect(b.ankle).toEqual(a.ankle);
     expect(b.heel).toEqual(a.heel);
     expect(b.toe).toEqual(a.toe);
     expect(a.heel.y).toBeCloseTo(0, 9);
+    expect(a.ball.y).toBeCloseTo(0, 9);
     expect(a.toe.y).toBeCloseTo(0, 9);
   });
 
   it('奥の脚が同じ角度なら、奥の足も同じ位置で床につく', () => {
-    const sk = solveSide(fullPose({ ...sitting, ankle: 12, knee: 70, hip: 60 }), 0);
+    const sk = solve({ ...sitting, ankle: 12, knee: 70, hip: 60 });
     expect(sk.farAnkle.x).toBeCloseTo(sk.ankle.x, 9);
     expect(sk.farAnkle.y).toBeCloseTo(sk.ankle.y, 9);
     expect(sk.farFootAngle).toBeCloseTo(90, 9);
   });
 
   it('椅子に座った姿勢では、太ももが水平、体がまっすぐになる', () => {
-    const sk = solveSide(fullPose(sitting), 0);
+    const sk = solve(sitting);
     expect(sk.hip.y).toBeCloseTo(sk.knee.y, 9);
     expect(sk.hip.x).toBeCloseTo(-BODY.thigh, 9);
     expect(sk.head.x).toBeCloseTo(sk.hip.x, 9);
   });
 
   it('関節を曲げると、決めた向きに動く', () => {
-    const base = solveSide(fullPose(standing), 0);
-    expect(solveSide(fullPose({ ...standing, spine: 30 }), 0).head.x).toBeGreaterThan(base.head.x); // 前かがみ
-    expect(solveSide(fullPose({ ...standing, shoulder: 90 }), 0).wrist.x).toBeGreaterThan(base.wrist.x + 0.3); // 腕を前へ
-    expect(solveSide(fullPose({ ...standing, farHip: 60 }), 0).farKnee.x).toBeGreaterThan(base.farKnee.x + 0.2); // 膝上げ
-    const bent = solveSide(fullPose({ ...standing, farKnee: 90 }), 0);
-    expect(bent.farAnkle.x).toBeLessThan(base.farAnkle.x - 0.2); // 膝を曲げると足は後ろへ
+    const base = solve(standing);
+    expect(solve({ ...standing, spine: 30 }).head.x).toBeGreaterThan(base.head.x); // 前かがみ
+    expect(solve({ ...standing, shoulder: 90 }).wrist.x).toBeGreaterThan(base.wrist.x + 0.3); // 腕を前へ
+    expect(solve({ ...standing, farHip: 60 }).farKnee.x).toBeGreaterThan(base.farKnee.x + 0.2); // 膝上げ
+    expect(solve({ ...standing, farKnee: 90 }).farAnkle.x).toBeLessThan(base.farAnkle.x - 0.2); // 膝を曲げると足は後ろへ
+  });
+});
+
+describe('solveSide（座面の股関節を起点にする）', () => {
+  const SEAT: RigConfig = { root: { mode: 'seat', x: -0.2, y: 0.298, pelvis: 0 } };
+  const seated: Pose = { ankle: 0, knee: 87, hip: 87, spine: 0, neck: 0, shoulder: 0, elbow: 0 };
+
+  it('股関節は動かず、足は床に平らにつく', () => {
+    const sk = solve(seated, SEAT);
+    expect(sk.hip).toEqual({ x: -0.2, y: 0.298 });
+    expect(sk.heel.y).toBeCloseTo(0, 2);
+    expect(sk.toe.y).toBeCloseTo(0, 2);
+    expect(sk.footAngle).toBeCloseTo(90, 9);
+    expect(sk.head.x).toBeCloseTo(-0.2, 9); // 体はまっすぐ
+  });
+
+  it('膝を伸ばすと、手前の足だけが前に上がり、奥の足と体は動かない', () => {
+    const a = solve({ ...seated, farKnee: 87, farHip: 87, farAnkle: 0 }, SEAT);
+    const b = solve({ ...seated, knee: 10, farKnee: 87, farHip: 87, farAnkle: 0 }, SEAT);
+    expect(b.ankle.y).toBeGreaterThan(a.ankle.y + 0.15);
+    expect(b.ankle.x).toBeGreaterThan(a.ankle.x + 0.15);
+    expect(b.farAnkle).toEqual(a.farAnkle);
+    expect(b.head).toEqual(a.head);
+    expect(b.knee).toEqual(a.knee); // 太ももは座面に乗ったまま
+  });
+
+  it('かかと上げ：母趾球とつま先は床に付いたまま、かかとと膝が上がる', () => {
+    const flat = solve(seated, SEAT);
+    const rig: RigConfig = { ...SEAT, plants: { near: { pivot: 'ball', x: flat.ball.x }, far: { pivot: 'ball', x: flat.ball.x } } };
+    const down = solve({ ...seated, footPitch: 0 }, rig);
+    const up = solve({ ...seated, footPitch: 30 }, rig);
+    expect(down.ankle.x).toBeCloseTo(flat.ankle.x, 6);
+    expect(down.knee.y).toBeCloseTo(flat.knee.y, 2);
+    for (const sk of [down, up]) {
+      expect(sk.ball.x).toBeCloseTo(flat.ball.x, 9);
+      expect(sk.ball.y).toBeCloseTo(0, 9);
+      expect(sk.toe.y).toBeCloseTo(0, 9); // つま先は曲がって床に付く
+      expect(sk.farBall.x).toBeCloseTo(flat.ball.x, 9);
+    }
+    expect(up.heel.y).toBeGreaterThan(0.04);
+    expect(up.knee.y).toBeGreaterThan(down.knee.y + 0.02);
+    expect(up.effective.ankle).toBeLessThan(-10); // 足首は底屈する
+    expect(up.effective.knee).toBeGreaterThan(0);
+  });
+
+  it('つま先上げ：かかとは床に付いたまま、つま先が上がる', () => {
+    const flat = solve(seated, SEAT);
+    const rig: RigConfig = { ...SEAT, plants: { near: { pivot: 'heel', x: flat.heel.x } } };
+    const up = solve({ ...seated, footPitch: -18 }, rig);
+    expect(up.heel.x).toBeCloseTo(flat.heel.x, 9);
+    expect(up.heel.y).toBeCloseTo(0, 9);
+    expect(up.toe.y).toBeGreaterThan(0.03);
+    expect(up.effective.ankle).toBeGreaterThan(10); // 足首は背屈する
   });
 });
 
 describe('手の接触（腕の2関節を合わせる）', () => {
   it('届く位置なら、手のひらが目標にぴったり付く', () => {
-    const pose = fullPose({ ...sitting, ankle: 15, knee: 100, hip: 85 });
     const contact = { on: 'thigh' as const, along: 0.7, offset: 0.055 };
-    const sk = solveSide(pose, 0, { near: contact, far: contact }, 1);
+    const sk = solve({ ...sitting, ankle: 15, knee: 100, hip: 85 }, { ...FOOT, contacts: { near: contact, far: contact } }, 1);
     expect(sk.handTarget).toBeDefined();
     expect(Math.hypot(sk.hand.x - sk.handTarget!.x, sk.hand.y - sk.handTarget!.y)).toBeLessThan(1e-6);
     expect(Math.hypot(sk.farHand.x - sk.farHandTarget!.x, sk.farHand.y - sk.farHandTarget!.y)).toBeLessThan(1e-6);
@@ -71,8 +125,7 @@ describe('手の接触（腕の2関節を合わせる）', () => {
   });
 
   it('接触の強さ 0 なら、キーフレームの角度のまま', () => {
-    const pose = fullPose({ ...sitting, shoulder: 10, elbow: 20 });
-    const sk = solveSide(pose, 0, { near: { on: 'thigh', along: 0.7, offset: 0.055 } }, 0);
+    const sk = solve({ ...sitting, shoulder: 10, elbow: 20 }, { ...FOOT, contacts: { near: { on: 'thigh', along: 0.7, offset: 0.055 } } }, 0);
     expect(sk.arm.shoulder).toBe(10);
     expect(sk.arm.elbow).toBe(20);
   });
@@ -89,9 +142,9 @@ describe('重心と支えの範囲', () => {
   const chair: ChairProp = { type: 'chair', x: -0.4, seatHeight: 0.24, seatDepth: 0.3, backHeight: 0.5 };
 
   it('まっすぐ立つと、重心は足の上、高さは身長の 55〜60% になる', () => {
-    const sk = solveSide(fullPose(standing), 0);
+    const sk = solve(standing);
     const com = centerOfMass(sk);
-    const range = supportRange(sk, false, []);
+    const range = supportRange(sk, false, [])!;
     expect(com.y).toBeGreaterThan(0.55);
     expect(com.y).toBeLessThan(0.6);
     expect(com.x).toBeGreaterThan(range.min);
@@ -99,30 +152,34 @@ describe('重心と支えの範囲', () => {
   });
 
   it('支えの範囲は、床についた足のかかとからつま先まで', () => {
-    const sk = solveSide(fullPose(standing), 0);
-    const range = supportRange(sk, false, []);
+    const range = supportRange(solve(standing), false, [])!;
     expect(range.min).toBeCloseTo(-BODY.heelBack, 9);
     expect(range.max).toBeCloseTo(BODY.toeFront, 9);
   });
 
   it('座っている間は、座面も支えに数える', () => {
-    const sk = solveSide(fullPose(sitting), 0);
+    const sk = solve(sitting);
     const com = centerOfMass(sk);
-    expect(com.x).toBeLessThan(supportRange(sk, false, [chair]).min); // 足だけでは支えられない
-    const seated = supportRange(sk, true, [chair]);
+    expect(com.x).toBeLessThan(supportRange(sk, false, [chair])!.min); // 足だけでは支えられない
+    const seated = supportRange(sk, true, [chair])!;
     expect(com.x).toBeGreaterThan(seated.min);
     expect(com.x).toBeLessThan(seated.max);
   });
 
   it('上げた足は支えに数えない', () => {
-    const sk = solveSide(fullPose({ ...standing, farHip: 40, farKnee: 60 }), 0);
-    const range = supportRange(sk, false, []);
-    expect(range.max).toBeCloseTo(BODY.toeFront, 9);
+    const sk = solve({ ...standing, farHip: 40, farKnee: 60 });
+    expect(supportRange(sk, false, [])!.max).toBeCloseTo(BODY.toeFront, 9);
+    expect(footContact(sk.farHeel, sk.farBall, sk.farToe)).toBeNull();
+  });
+
+  it('かかとを上げた足は、母趾球からつま先までだけを支えに数える', () => {
+    const range = footContact({ x: 0, y: 0.05 }, { x: 0.12, y: 0 }, { x: 0.15, y: 0 });
+    expect(range).toEqual({ min: 0.12, max: 0.15 });
   });
 
   it('前かがみになると重心は前へ動く', () => {
-    const a = centerOfMass(solveSide(fullPose(sitting), 0));
-    const b = centerOfMass(solveSide(fullPose({ ...sitting, hip: 110, spine: 20 }), 0));
+    const a = centerOfMass(solve(sitting));
+    const b = centerOfMass(solve({ ...sitting, hip: 110, spine: 20 }));
     expect(b.x).toBeGreaterThan(a.x + 0.03);
   });
 });

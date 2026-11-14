@@ -1,0 +1,371 @@
+{
+  "id": "W3-front-L1",
+  "exercise": "W3",
+  "level": 1,
+  "view": "front",
+  "checked": false,
+  "cycleSeconds": 9.6,
+  "countsPerCycle": 2,
+  "root": {
+    "mode": "seat",
+    "x": 0,
+    "y": 0.298
+  },
+  "viewBox": {
+    "minX": -0.36,
+    "maxX": 0.36,
+    "minY": -0.075,
+    "maxY": 0.86
+  },
+  "props": [
+    {
+      "type": "chair",
+      "x": 0,
+      "width": 0.3,
+      "seatHeight": 0.242,
+      "backHeight": 0.52
+    }
+  ],
+  "highlight": [
+    "trunk",
+    "upperArm",
+    "forearm"
+  ],
+  "keyframes": [
+    {
+      "t": 0,
+      "pose": {
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "turn": 0,
+        "rElbowOut": -0.3089,
+        "rElbowUp": 0,
+        "rHandOut": -0.3089,
+        "rHandUp": 0,
+        "lElbowOut": -0.3089,
+        "lElbowUp": 0,
+        "lHandOut": -0.3089,
+        "lHandUp": 0
+      },
+      "onSeat": true,
+      "label": "正面を向く"
+    },
+    {
+      "t": 0.2,
+      "pose": {
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "turn": 0,
+        "rElbowOut": -0.3089,
+        "rElbowUp": 0,
+        "rHandOut": -0.3089,
+        "rHandUp": 0,
+        "lElbowOut": -0.3089,
+        "lElbowUp": 0,
+        "lHandOut": -0.3089,
+        "lHandUp": 0
+      },
+      "onSeat": true,
+      "label": "右へひねり始める"
+    },
+    {
+      "t": 1.2,
+      "pose": {
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "turn": 20,
+        "rElbowOut": 0.0242,
+        "rElbowUp": 0,
+        "rHandOut": 0.0242,
+        "rHandUp": 0,
+        "lElbowOut": -0.6048,
+        "lElbowUp": 0,
+        "lHandOut": -0.6048,
+        "lHandUp": 0
+      },
+      "onSeat": true,
+      "label": "右へ（途中）"
+    },
+    {
+      "t": 2.2,
+      "pose": {
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "turn": 40,
+        "rElbowOut": 0.3544,
+        "rElbowUp": 0,
+        "rHandOut": 0.3544,
+        "rHandUp": 0,
+        "lElbowOut": -0.8277,
+        "lElbowUp": 0,
+        "lHandOut": -0.8277,
+        "lHandUp": 0
+      },
+      "onSeat": true,
+      "label": "右へひねる"
+    },
+    {
+      "t": 2.5,
+      "pose": {
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "turn": 40,
+        "rElbowOut": 0.3544,
+        "rElbowUp": 0,
+        "rHandOut": 0.3544,
+        "rHandUp": 0,
+        "lElbowOut": -0.8277,
+        "lElbowUp": 0,
+        "lHandOut": -0.8277,
+        "lHandUp": 0
+      },
+      "onSeat": true,
+      "label": "戻し始める"
+    },
+    {
+      "t": 3.5,
+      "pose": {
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "turn": 20,
+        "rElbowOut": 0.0242,
+        "rElbowUp": 0,
+        "rHandOut": 0.0242,
+        "rHandUp": 0,
+        "lElbowOut": -0.6048,
+        "lElbowUp": 0,
+        "lHandOut": -0.6048,
+        "lHandUp": 0
+      },
+      "onSeat": true,
+      "label": "戻す（途中）"
+    },
+    {
+      "t": 4.5,
+      "pose": {
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "turn": 0,
+        "rElbowOut": -0.3089,
+        "rElbowUp": 0,
+        "rHandOut": -0.3089,
+        "rHandUp": 0,
+        "lElbowOut": -0.3089,
+        "lElbowUp": 0,
+        "lHandOut": -0.3089,
+        "lHandUp": 0
+      },
+      "onSeat": true,
+      "label": "正面に戻る"
+    },
+    {
+      "t": 5,
+      "pose": {
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "turn": 0,
+        "rElbowOut": -0.3089,
+        "rElbowUp": 0,
+        "rHandOut": -0.3089,
+        "rHandUp": 0,
+        "lElbowOut": -0.3089,
+        "lElbowUp": 0,
+        "lHandOut": -0.3089,
+        "lHandUp": 0
+      },
+      "onSeat": true,
+      "label": "左へひねり始める"
+    },
+    {
+      "t": 6,
+      "pose": {
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "turn": -20,
+        "rElbowOut": -0.6048,
+        "rElbowUp": 0,
+        "rHandOut": -0.6048,
+        "rHandUp": 0,
+        "lElbowOut": 0.0242,
+        "lElbowUp": 0,
+        "lHandOut": 0.0242,
+        "lHandUp": 0
+      },
+      "onSeat": true,
+      "label": "左へ（途中）"
+    },
+    {
+      "t": 7,
+      "pose": {
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "turn": -40,
+        "rElbowOut": -0.8277,
+        "rElbowUp": 0,
+        "rHandOut": -0.8277,
+        "rHandUp": 0,
+        "lElbowOut": 0.3544,
+        "lElbowUp": 0,
+        "lHandOut": 0.3544,
+        "lHandUp": 0
+      },
+      "onSeat": true,
+      "label": "左へひねる"
+    },
+    {
+      "t": 7.3,
+      "pose": {
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "turn": -40,
+        "rElbowOut": -0.8277,
+        "rElbowUp": 0,
+        "rHandOut": -0.8277,
+        "rHandUp": 0,
+        "lElbowOut": 0.3544,
+        "lElbowUp": 0,
+        "lHandOut": 0.3544,
+        "lHandUp": 0
+      },
+      "onSeat": true,
+      "label": "戻し始める"
+    },
+    {
+      "t": 8.3,
+      "pose": {
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "turn": -20,
+        "rElbowOut": -0.6048,
+        "rElbowUp": 0,
+        "rHandOut": -0.6048,
+        "rHandUp": 0,
+        "lElbowOut": 0.0242,
+        "lElbowUp": 0,
+        "lHandOut": 0.0242,
+        "lHandUp": 0
+      },
+      "onSeat": true,
+      "label": "戻す（途中）"
+    },
+    {
+      "t": 9.3,
+      "pose": {
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "turn": 0,
+        "rElbowOut": -0.3089,
+        "rElbowUp": 0,
+        "rHandOut": -0.3089,
+        "rHandUp": 0,
+        "lElbowOut": -0.3089,
+        "lElbowUp": 0,
+        "lHandOut": -0.3089,
+        "lHandUp": 0
+      },
+      "onSeat": true,
+      "label": "正面に戻る"
+    }
+  ],
+  "captions": [
+    {
+      "from": 0,
+      "to": 0.2,
+      "text": "両腕を前に伸ばし、手のひらを合わせます"
+    },
+    {
+      "from": 0.2,
+      "to": 2.5,
+      "text": "胸と腕を一緒に、右へひねります"
+    },
+    {
+      "from": 2.5,
+      "to": 4.8,
+      "text": "ゆっくり正面に戻します"
+    },
+    {
+      "from": 4.8,
+      "to": 7.3,
+      "text": "胸と腕を一緒に、左へひねります"
+    },
+    {
+      "from": 7.3,
+      "to": 9.6,
+      "text": "ゆっくり正面に戻します"
+    }
+  ],
+  "marks": [
+    {
+      "type": "arrow",
+      "from": 0.2,
+      "to": 2.2,
+      "anchor": "r.hand",
+      "dx": 0.045,
+      "dy": 0.075,
+      "angle": 90,
+      "length": 0.1
+    },
+    {
+      "type": "arrow",
+      "from": 5,
+      "to": 7,
+      "anchor": "l.hand",
+      "dx": -0.045,
+      "dy": 0.075,
+      "angle": -90,
+      "length": 0.1
+    }
+  ]
+}

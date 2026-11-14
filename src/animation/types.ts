@@ -1,15 +1,20 @@
 // アニメのデータ形式。キーフレームは JSON（src/data/animations/）で持ち、コードと分ける。
-// 長さの単位は「身長 = 1」。x は人物の前方向が正、y は床からの高さ。
-// 角度の単位は度。
+// 長さの単位は「身長 = 1」。y は床からの高さ。角度の単位は度。
+// 視点ごとに 2D で定義する（3D にはしない）。
+//   横向き（side）：x は人物の前方向が正。関節角度で姿勢を表す。
+//   正面（front）・後ろ（back）：x は画面の右方向が正。手足は「見かけの向きと長さ」で表す（下の FrontPose）。
 
-export type AnimationView = 'side'; // 正面・後ろはフェーズ3で足す
+export type AnimationView = 'side' | 'front' | 'back';
 
-// 手前側（near）の関節。奥側（far）は省略すると手前側と同じ角度になる
+// 手前側（near）の関節。必ず書く
 export type NearJoint = 'ankle' | 'knee' | 'hip' | 'spine' | 'neck' | 'shoulder' | 'elbow';
-export type FarJoint = 'farAnkle' | 'farKnee' | 'farHip' | 'farShoulder' | 'farElbow';
-export type JointName = NearJoint | FarJoint;
+// 奥側（far）の関節。省略すると手前側と同じ角度になる
+export type FarJoint = 'farAnkle' | 'farKnee' | 'farHip' | 'farShoulder' | 'farElbow' | 'farFootPitch';
+// 省略できる値。footPitch は足の傾き（正：かかとを上げる、負：つま先を上げる）。省略すると 0
+export type OptionalJoint = FarJoint | 'footPitch';
+export type JointName = NearJoint | OptionalJoint;
 
-export type Pose = Record<NearJoint, number> & Partial<Record<FarJoint, number>>;
+export type Pose = Record<NearJoint, number> & Partial<Record<OptionalJoint, number>>;
 export type FullPose = Record<JointName, number>;
 
 export interface Keyframe {
@@ -18,6 +23,20 @@ export interface Keyframe {
   onSeat?: boolean; // お尻が座面についているか（前後のキーフレームが両方 true の間だけ、座面を支えに数える）
   hands?: number; // 手の接触の強さ 0〜1。1 のとき手は接触先にぴったり付く
   label?: string; // プレビュー用の名前
+}
+
+// 体の位置を決める起点
+export type Root =
+  // 立つ・立ち上がる種目：床についた手前側の足首を起点にする（足は動かない）
+  | { mode?: 'foot'; x: number }
+  // 座って行う種目：座面に乗った股関節を起点にする。pelvis は骨盤の前傾（まっすぐ座ると 0）
+  | { mode: 'seat'; x: number; y: number; pelvis: number };
+
+// 足を床の決まった位置に付けたままにする指定（座って行う種目で使う）。
+// 足の傾き（footPitch）に合わせて、脚の関節は自動で決まる。
+export interface Plant {
+  pivot: 'ball' | 'heel'; // 支点。ball：母趾球（かかと上げ）、heel：かかと（つま先上げ）
+  x: number; // 支点の位置
 }
 
 // 手の接触先
@@ -35,9 +54,12 @@ export interface ChairProp {
 export type Prop = ChairProp;
 
 export type SegmentName = 'head' | 'trunk' | 'pelvis' | 'upperArm' | 'forearm' | 'thigh' | 'shank' | 'foot';
+// 目立たせる部位。far を付けると奥側だけ、near を付けると手前側だけ
+export type HighlightName = SegmentName | `near:${SegmentName}` | `far:${SegmentName}`;
 
 export type AnchorName =
   | 'ankle'
+  | 'heel'
   | 'toe'
   | 'knee'
   | 'hip'
@@ -46,20 +68,33 @@ export type AnchorName =
   | 'neckBase'
   | 'head'
   | 'elbow'
-  | 'hand';
+  | 'hand'
+  | 'farAnkle'
+  | 'farKnee';
 
-// 注意点の印（体の上に重ねる矢印）
+// 注意点の印（体の上に重ねる矢印や線）
 export interface ArrowMark {
   type: 'arrow';
   from: number; // 表示する区間（秒）
   to: number;
-  anchor: AnchorName; // 矢印の根元を付ける体の点
+  anchor: AnchorName; // 根元を付ける体の点
   dx: number; // 根元のずらし
   dy: number;
   angle: number; // 向き。真上が 0、前方向が 90
   length: number;
 }
-export type Mark = ArrowMark;
+// まっすぐな目安の線（例：体をまっすぐ保つ線）。anchor を中心に両側へ伸びる
+export interface LineMark {
+  type: 'line';
+  from: number;
+  to: number;
+  anchor: AnchorName;
+  dx: number;
+  dy: number;
+  angle: number;
+  length: number;
+}
+export type Mark = ArrowMark | LineMark;
 
 export interface Caption {
   from: number;
@@ -67,17 +102,138 @@ export interface Caption {
   text: string;
 }
 
-export interface AnimationData {
+// 視点によらず共通の項目
+interface AnimationBase {
   id: string;
   exercise: string; // 運動ID
   level: number;
-  view: AnimationView;
-  cycleSeconds: number; // 1往復の時間。終わりが回数のカウントになる
-  root: { x: number }; // 床についた足（手前側）の足首の位置。動かさない
+  cycleSeconds: number; // 1往復の時間
+  countsPerCycle?: number; // 1往復で数える回数。省略すると 1（左右交互の種目は 2）
+  checked?: boolean; // 確認済みの印。医師などが見本を確かめたら true にする
+  captions: Caption[]; // 字幕の区間
+  // 逆向きに再生するとき（内回し・前回しなど）の字幕。これがあるアニメだけ、逆向きに再生できる。
+  // 時刻は再生の時刻（逆向きに再生し始めてからの秒）
+  reverseCaptions?: Caption[];
+}
+
+// 横向きのアニメ
+export interface SideAnimation extends AnimationBase {
+  view: 'side';
+  root: Root;
+  plants?: { near?: Plant; far?: Plant }; // 足を床に付けたままにする指定
   props: Prop[]; // 支持物の種類と位置
-  highlight: SegmentName[]; // 動かしている部位（目立つ色で描く）
+  highlight: HighlightName[]; // 動かしている部位（目立つ色で描く）
   contacts?: { near?: ContactTarget; far?: ContactTarget }; // 手の接触
   keyframes: Keyframe[];
-  captions: Caption[]; // 字幕の区間
   marks: Mark[];
 }
+
+// ── 正面・後ろ向き ───────────────────────────────────────────
+// 体の左右は、人物から見た右（r）と左（l）で表す。
+// 後ろ向きでは人物の右が画面の右に来る。正面は鏡に映したように描く（frontRig.ts の MIRROR_FRONT）。
+//
+// 手足の各節は、付け根から先への「見かけの向き」を2つの数で表す（節の長さを 1 とした割合）。
+//   Out：体の外側への成分（正：外へ、負：内へ）
+//   Up ：上への成分（正：上へ、負：下へ）
+// 2つを合わせた長さが 1 より短い分は、手前か奥に向いて短く見えていることを表す。
+// 例：下ろした腕は Out 0, Up -1。こちらに向けて伸ばした腕は Out 0, Up 0（点に見える）。
+export type FrontLimbChannel =
+  | 'ElbowOut' // 肩→肘
+  | 'ElbowUp'
+  | 'HandOut' // 肘→手のひら
+  | 'HandUp'
+  | 'KneeOut' // 股関節→膝
+  | 'KneeUp'
+  | 'AnkleOut' // 膝→足首
+  | 'AnkleUp'
+  | 'ToeOut' // かかと→つま先
+  | 'ToeUp';
+export type FrontRightChannel = `r${FrontLimbChannel}`;
+export type FrontLeftChannel = `l${FrontLimbChannel}`; // 省略すると右と同じ値（左右対称）
+// lean：体幹を横に傾ける角度（正：画面の右へ）。turn：胸を回す角度（正：人物の右へ）。
+// scapula：肩甲骨の寄り具合（0：ふつう、1：寄せきった）
+export type FrontBodyChannel = 'lean' | 'turn' | 'scapula';
+export type FrontChannel = FrontBodyChannel | FrontRightChannel | FrontLeftChannel;
+
+export type FrontPose = Partial<Record<FrontChannel, number>>;
+export type FrontFullPose = Record<FrontChannel, number>;
+
+export interface FrontKeyframe {
+  t: number;
+  pose: FrontPose;
+  onSeat?: boolean;
+  label?: string;
+}
+
+// 正面・後ろ向きの起点。いまは座って行う種目だけ（立って行う種目は今後足す）。x, y は左右の股関節の中央
+export interface FrontRoot {
+  mode: 'seat';
+  x: number;
+  y: number;
+}
+
+export type BodySide = 'r' | 'l';
+
+// かかとを床の決まった位置に付けたままにする指定。足首の位置は、つま先の上げ具合から自動で決まる
+export interface FrontPlant {
+  x: number; // かかとの位置
+}
+
+export interface FrontChairProp {
+  type: 'chair';
+  x: number; // 座面の中央
+  width: number;
+  seatHeight: number;
+  backHeight: number;
+}
+// 両手で持つバンド（S8）。手から手へ描く
+export interface BandProp {
+  type: 'band';
+}
+export type FrontProp = FrontChairProp | BandProp;
+
+export type FrontHighlightName = SegmentName | 'scapula' | `r:${SegmentName}` | `l:${SegmentName}`;
+
+export type FrontLimbPoint = 'shoulder' | 'elbow' | 'hand' | 'hip' | 'knee' | 'ankle' | 'heel' | 'toe';
+export type FrontAnchorName = 'pelvis' | 'lumbar' | 'chest' | 'neckBase' | 'head' | `r.${FrontLimbPoint}` | `l.${FrontLimbPoint}`;
+
+interface FrontMarkBase {
+  from: number;
+  to: number;
+  anchor: FrontAnchorName;
+  dx: number;
+  dy: number;
+}
+export interface FrontArrowMark extends FrontMarkBase {
+  type: 'arrow';
+  angle: number; // 向き。真上が 0、画面の右が 90
+  length: number;
+}
+export interface FrontLineMark extends FrontMarkBase {
+  type: 'line';
+  angle: number;
+  length: number;
+}
+// 回す向きを示す、弧の形の矢印。逆向きに再生するときは、矢じりが反対の端に付く
+export interface FrontArcMark extends FrontMarkBase {
+  type: 'arc';
+  radius: number;
+  start: number; // 始まりの向き（真上が 0、画面の右が 90）
+  sweep: number; // 回る角度（正：時計回り）
+}
+export type FrontMark = FrontArrowMark | FrontLineMark | FrontArcMark;
+
+// 正面・後ろ向きのアニメ
+export interface FrontAnimation extends AnimationBase {
+  view: 'front' | 'back';
+  root: FrontRoot;
+  plants?: Partial<Record<BodySide, FrontPlant>>;
+  props: FrontProp[];
+  highlight: FrontHighlightName[];
+  // 表示する範囲（身長 = 1）。種目ごとに、全身と足元、支持物が入るように決める
+  viewBox: { minX: number; maxX: number; minY: number; maxY: number };
+  keyframes: FrontKeyframe[];
+  marks: FrontMark[];
+}
+
+export type AnimationData = SideAnimation | FrontAnimation;

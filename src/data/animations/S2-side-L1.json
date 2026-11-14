@@ -1,0 +1,170 @@
+{
+  "id": "S2-side-L1",
+  "exercise": "S2",
+  "level": 1,
+  "view": "side",
+  "checked": false,
+  "cycleSeconds": 5,
+  "root": {
+    "mode": "seat",
+    "x": -0.2,
+    "y": 0.298,
+    "pelvis": 0
+  },
+  "props": [
+    {
+      "type": "chair",
+      "x": -0.33,
+      "seatHeight": 0.242,
+      "seatDepth": 0.26,
+      "backHeight": 0.52
+    }
+  ],
+  "contacts": {
+    "near": {
+      "on": "world",
+      "x": -0.17,
+      "y": 0.257
+    },
+    "far": {
+      "on": "world",
+      "x": -0.17,
+      "y": 0.257
+    }
+  },
+  "plants": {
+    "near": {
+      "pivot": "ball",
+      "x": 0.1247
+    },
+    "far": {
+      "pivot": "ball",
+      "x": 0.1247
+    }
+  },
+  "highlight": [
+    "shank",
+    "foot"
+  ],
+  "keyframes": [
+    {
+      "t": 0,
+      "pose": {
+        "ankle": 0,
+        "knee": 87,
+        "hip": 87,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 0,
+        "elbow": 10,
+        "footPitch": 0
+      },
+      "onSeat": true,
+      "hands": 1,
+      "label": "足を床につける"
+    },
+    {
+      "t": 0.3,
+      "pose": {
+        "ankle": 0,
+        "knee": 87,
+        "hip": 87,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 0,
+        "elbow": 10,
+        "footPitch": 0
+      },
+      "onSeat": true,
+      "hands": 1,
+      "label": "動き始め"
+    },
+    {
+      "t": 2.3,
+      "pose": {
+        "ankle": 0,
+        "knee": 87,
+        "hip": 87,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 0,
+        "elbow": 10,
+        "footPitch": 32
+      },
+      "onSeat": true,
+      "hands": 1,
+      "label": "かかとを上げる"
+    },
+    {
+      "t": 2.8,
+      "pose": {
+        "ankle": 0,
+        "knee": 87,
+        "hip": 87,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 0,
+        "elbow": 10,
+        "footPitch": 32
+      },
+      "onSeat": true,
+      "hands": 1,
+      "label": "下ろし始め"
+    },
+    {
+      "t": 4.8,
+      "pose": {
+        "ankle": 0,
+        "knee": 87,
+        "hip": 87,
+        "spine": 0,
+        "neck": 0,
+        "shoulder": 0,
+        "elbow": 10,
+        "footPitch": 0
+      },
+      "onSeat": true,
+      "hands": 1,
+      "label": "下ろす"
+    }
+  ],
+  "captions": [
+    {
+      "from": 0,
+      "to": 0.3,
+      "text": "足の裏を床につけて座ります"
+    },
+    {
+      "from": 0.3,
+      "to": 2.8,
+      "text": "かかとをゆっくり上げます"
+    },
+    {
+      "from": 2.8,
+      "to": 5,
+      "text": "ゆっくり下ろします"
+    }
+  ],
+  "marks": [
+    {
+      "type": "arrow",
+      "from": 0.3,
+      "to": 2.3,
+      "anchor": "heel",
+      "dx": -0.05,
+      "dy": 0.01,
+      "angle": 0,
+      "length": 0.09
+    },
+    {
+      "type": "arrow",
+      "from": 2.9,
+      "to": 4.8,
+      "anchor": "heel",
+      "dx": -0.05,
+      "dy": 0.1,
+      "angle": 180,
+      "length": 0.09
+    }
+  ]
+}

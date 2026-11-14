@@ -15,6 +15,9 @@ export interface Exercise {
   highRisk: boolean; // true の種目はメニューで明示的に選んだときだけ表示
   unit: Unit;
   bilateral: boolean; // 左右を入れ替えて行うか（回数は片側ずつの数）
+  // 回す向きを替えて行う種目の、向きの名前（例：外回し・内回し）。回数は向きごとの数。
+  // 2つ目の向きは、同じアニメを逆向きに再生して見せる
+  directions?: [string, string];
   cues: string[]; // 注意点。1つ目を画面に大きく出す
   variants: ExerciseVariant[];
   // 種目として最低限必要な支え。メニューの支えがこれより少ないときはこちらを使う（支えは増やす方向にしか変えない）
@@ -26,8 +29,6 @@ export interface ExerciseVariant {
   howTo: string; // そのレベルでの行い方（短い文）
   posture: Posture; // 立って行うときは開始前に支持物の確認を出す（S-6）
   usesSupport: boolean; // 支持物につかまるか
-  // 片手で動作する種目など、つかまれる手の上限（例：片手でつかまり、もう片方の腕を動かす）
-  maxSupport?: SupportStage;
   view: View;
   animationId: string | null; // キーフレームの参照。未作成なら null
 }
@@ -47,7 +48,7 @@ export interface Menu {
 export interface MenuItem {
   ex: string;
   level: Level;
-  amount: number; // 回数・秒数・往復数（左右がある種目は片側の数）
+  amount: number; // 回数・秒数・往復数（左右がある種目は片側の数、回す向きがある種目は向きごとの数）
   sets: number;
 }
 

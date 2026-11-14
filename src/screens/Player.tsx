@@ -6,8 +6,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimationCanvas } from '../animation/AnimationCanvas';
 import { PlaceholderFigure } from '../animation/PlaceholderFigure';
 import { getAnimation } from '../animation/registry';
+import type { Caption } from '../animation/types';
 import { Button } from '../app/Button';
 import { buildSessionSteps, stepSeconds, type Side, type Step } from '../app/sessionPlan';
+import { speaker } from '../app/speech';
+import { SPEECH, shouldAnnounceName, speechForCount, speechForStep } from '../app/speechTexts';
 import { useWakeLock } from '../app/useWakeLock';
 import { getExercise } from '../data/exercises';
 import type { Menu, SessionKind, StopReason } from '../data/types';
@@ -57,6 +60,7 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
       completedRef.current = [...completedRef.current, current.exId];
     }
     if (index + 1 >= steps.length) {
+      speaker.say(SPEECH.finish);
       onFinish(completedRef.current);
       return;
     }
@@ -83,6 +87,36 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
     return () => cancelAnimationFrame(raf);
   }, [index, duration, paused, stopping]);
 
+  const remaining = duration === null ? 0 : Math.max(0, Math.ceil(duration - elapsedMs / 1000));
+
+  // ── 読み上げ（開始、回数、切り替え、休憩、終了）。字幕と表示だけでも分かるようにしてある ──
+  // 手順が変わったとき
+  const spokenStep = useRef(-1);
+  useEffect(() => {
+    const s = steps[index];
+    if (!s || spokenStep.current === index) return;
+    spokenStep.current = index;
+    speaker.say(speechForStep(s, getExercise(s.exId).name, shouldAnnounceName(steps, index)));
+  }, [index, steps]);
+
+  // 回数・往復を終えるたびに、数を読む（アニメの1往復の終わりと合う）
+  const completedCount =
+    step?.kind === 'exercise' && step.unit !== 'seconds' ? Math.min(step.amount, Math.floor(elapsedMs / 1000 / step.unitSeconds)) : 0;
+  useEffect(() => {
+    if (completedCount > 0) speaker.say(speechForCount(completedCount));
+  }, [index, completedCount]);
+
+  // 秒数で行う種目は、残り5秒を知らせる
+  const fiveLeft = step?.kind === 'exercise' && step.unit === 'seconds' && step.amount >= 10 && remaining === 5;
+  useEffect(() => {
+    if (fiveLeft) speaker.say(SPEECH.lastFiveSeconds);
+  }, [index, fiveLeft]);
+
+  // 一時停止と中止では、読み上げも止める
+  useEffect(() => {
+    if (paused || stopping) speaker.stop();
+  }, [paused, stopping]);
+
   useEffect(() => {
     if (duration !== null && elapsedMs >= duration * 1000) advance();
   }, [elapsedMs, duration, advance]);
@@ -92,7 +126,16 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
   const { ex, variant } = variantOf(step.exId, step.kind === 'rest' || step.kind === 'countdown' ? levelOf.get(step.exId) ?? 1 : step.level);
   const anim = getAnimation(variant.animationId);
   const itemNumber = (kind === 'standard' ? menu.standard : menu.short).findIndex((i) => i.ex === step.exId) + 1;
-  const remaining = duration === null ? 0 : Math.max(0, Math.ceil(duration - elapsedMs / 1000));
+  const mirror = (step.kind === 'countdown' || step.kind === 'exercise') && step.side === 'left';
+  // 2つ目の向き（内回し・前回しなど）は、同じアニメを逆向きに再生する
+  const direction = step.kind === 'countdown' || step.kind === 'exercise' ? step.direction : null;
+  const reverse = direction?.index === 1 && anim?.reverseCaptions !== undefined;
+  // 見ている向きが分かりにくい視点は、言葉で添える
+  const viewNote = anim?.view === 'back' ? '後ろから見た図' : null;
+  // 最初の1往復だけ、動きの説明（字幕）も読み上げる。短すぎる字幕は読まない
+  const speakCaption = (c: Caption) => {
+    if (anim && elapsedRef.current / 1000 < anim.cycleSeconds && c.to - c.from >= 1) speaker.say(c.text);
+  };
 
   const stopOverlay = stopping && (
     <div className="overlay" role="dialog" aria-modal="true" aria-labelledby="stop-title">
@@ -175,9 +218,10 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
       <main className="screen player">
         {header}
         <h1>{ex.name}</h1>
-        {step.side && <p className="side">{SIDE_LABEL[step.side]}</p>}
+        {(step.side || direction) && <p className="side">{[step.side && SIDE_LABEL[step.side], direction?.label].filter(Boolean).join('　')}</p>}
         {/* 始める前に、最初の姿勢を見せる */}
-        {anim && <AnimationCanvas key={anim.id} anim={anim} getTime={() => 0} label={`${ex.name}の最初の姿勢`} showCaption={false} />}
+        {anim && <AnimationCanvas key={`${anim.id}-${index}`} anim={anim} getTime={() => 0} label={`${ex.name}の最初の姿勢`} showCaption={false} mirror={mirror} reverse={reverse} />}
+        {viewNote && <p className="muted view-note">{viewNote}</p>}
         <p className="lead countdown-lead">
           まもなく始めます
           <span className="count countdown-count" aria-live="polite">
@@ -206,17 +250,18 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
     <main className="screen player">
       {header}
       <h1>{ex.name}</h1>
-      {(step.side || step.sets > 1) && (
+      {(step.side || direction || step.sets > 1) && (
         <p className="muted">
-          {step.side && <span className="side">{SIDE_LABEL[step.side]}　</span>}
+          {(step.side || direction) && <span className="side">{[step.side && SIDE_LABEL[step.side], direction?.label].filter(Boolean).join('　')}　</span>}
           {step.sets > 1 && `${step.set} / ${step.sets} セット`}
         </p>
       )}
       {anim ? (
-        <AnimationCanvas key={`${anim.id}-${index}`} anim={anim} getTime={() => elapsedRef.current / 1000} label={`${ex.name}の動きの見本`} />
+        <AnimationCanvas key={`${anim.id}-${index}`} anim={anim} getTime={() => elapsedRef.current / 1000} label={`${ex.name}の動きの見本`} mirror={mirror} reverse={reverse} onCaption={speakCaption} />
       ) : (
         <PlaceholderFigure posture={variant.posture} />
       )}
+      {viewNote && <p className="muted view-note">{viewNote}</p>}
       <p className="count" aria-live="polite">
         {countText}
       </p>

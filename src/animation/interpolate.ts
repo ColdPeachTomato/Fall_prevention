@@ -5,8 +5,8 @@
 //  ・同じ姿勢が続く所（止まる所）では速さが 0 になる（ゆっくり始まり、ゆっくり止まる）
 //  ・途中のキーフレームは止まらずに滑らかに通る
 
-import { FAR_DEFAULT } from './bodyModel';
-import type { AnimationData, FarJoint, FullPose, JointName, Pose } from './types';
+import { FAR_DEFAULT, FRONT_CHANNELS } from './bodyModel';
+import type { AnimationData, FarJoint, FrontAnimation, FrontChannel, FrontFullPose, FrontPose, FullPose, JointName, Pose, SideAnimation } from './types';
 
 const JOINT_NAMES: JointName[] = [
   'ankle',
@@ -16,17 +16,35 @@ const JOINT_NAMES: JointName[] = [
   'neck',
   'shoulder',
   'elbow',
+  'footPitch',
   'farAnkle',
   'farKnee',
   'farHip',
   'farShoulder',
   'farElbow',
+  'farFootPitch',
 ];
 
 export function fullPose(pose: Pose): FullPose {
-  const full = { ...pose } as FullPose;
+  const full = { ...pose, footPitch: pose.footPitch ?? 0 } as FullPose;
   for (const far of Object.keys(FAR_DEFAULT) as FarJoint[]) {
-    if (pose[far] === undefined) full[far] = pose[FAR_DEFAULT[far]];
+    if (pose[far] === undefined) full[far] = full[FAR_DEFAULT[far]];
+  }
+  return full;
+}
+
+// 正面・後ろ向きの姿勢で、省略した値を埋める（左側は右側と同じ値、ほかは決まった値）
+export function fullFrontPose(pose: FrontPose): FrontFullPose {
+  const full = {} as FrontFullPose;
+  for (const c of FRONT_CHANNELS) {
+    const own = pose[c.name];
+    if (own !== undefined) {
+      full[c.name] = own;
+    } else if (c.name.startsWith('l') && c.name !== 'lean') {
+      full[c.name] = pose[`r${c.name.slice(1)}` as FrontChannel] ?? c.fallback;
+    } else {
+      full[c.name] = c.fallback;
+    }
   }
   return full;
 }
@@ -110,29 +128,37 @@ export interface Sample {
   hands: number;
 }
 
+export interface FrontSample {
+  pose: FrontFullPose;
+  onSeat: boolean;
+}
+
 interface Compiled {
   times: number[];
-  joints: Record<JointName, CyclicCurve>;
+  channels: Record<string, CyclicCurve>;
   hands: CyclicCurve;
   onSeat: boolean[];
   period: number;
 }
 
+const FRONT_NAMES: FrontChannel[] = FRONT_CHANNELS.map((c) => c.name);
 const compiledCache = new WeakMap<AnimationData, Compiled>();
 
 function compile(anim: AnimationData): Compiled {
   const cached = compiledCache.get(anim);
   if (cached) return cached;
   const times = anim.keyframes.map((k) => k.t);
-  const poses = anim.keyframes.map((k) => fullPose(k.pose));
-  const joints = {} as Record<JointName, CyclicCurve>;
-  for (const name of JOINT_NAMES) {
-    joints[name] = buildCurve(times, poses.map((p) => p[name]), anim.cycleSeconds);
+  const names: string[] = anim.view === 'side' ? JOINT_NAMES : FRONT_NAMES;
+  const poses: Record<string, number>[] = anim.view === 'side' ? anim.keyframes.map((k) => fullPose(k.pose)) : anim.keyframes.map((k) => fullFrontPose(k.pose));
+  const channels: Record<string, CyclicCurve> = {};
+  for (const name of names) {
+    channels[name] = buildCurve(times, poses.map((p) => p[name]!), anim.cycleSeconds);
   }
+  const hands = anim.view === 'side' ? anim.keyframes.map((k) => k.hands ?? 0) : anim.keyframes.map(() => 0);
   const compiled: Compiled = {
     times,
-    joints,
-    hands: buildCurve(times, anim.keyframes.map((k) => k.hands ?? 0), anim.cycleSeconds),
+    channels,
+    hands: buildCurve(times, hands, anim.cycleSeconds),
     onSeat: anim.keyframes.map((k) => k.onSeat === true),
     period: anim.cycleSeconds,
   };
@@ -140,16 +166,27 @@ function compile(anim: AnimationData): Compiled {
   return compiled;
 }
 
-// 時刻 t（秒）の姿勢を求める
-export function sampleAnimation(anim: AnimationData, time: number): Sample {
-  const c = compile(anim);
-  const pose = {} as FullPose;
-  for (const name of JOINT_NAMES) pose[name] = evalCurve(c.joints[name], time);
+function sampleChannels(c: Compiled, time: number): { pose: Record<string, number>; onSeat: boolean } {
+  const pose: Record<string, number> = {};
+  for (const name of Object.keys(c.channels)) pose[name] = evalCurve(c.channels[name]!, time);
   const t = wrapTime(time, c.period);
   const i = segmentIndex(c.times, t);
   const next = (i + 1) % c.times.length;
   // キーフレームちょうどの時刻は、その姿勢の状態を使う。途中は前後が両方座面についている間だけ座面を数える
   const onSeat = t === c.times[i] ? c.onSeat[i]! : c.onSeat[i]! && c.onSeat[next]!;
+  return { pose, onSeat };
+}
+
+// 時刻 t（秒）の姿勢を求める（横向き）
+export function sampleAnimation(anim: SideAnimation, time: number): Sample {
+  const c = compile(anim);
+  const { pose, onSeat } = sampleChannels(c, time);
   const hands = Math.min(1, Math.max(0, evalCurve(c.hands, time)));
-  return { pose, onSeat, hands };
+  return { pose: pose as FullPose, onSeat, hands };
+}
+
+// 時刻 t（秒）の姿勢を求める（正面・後ろ向き）
+export function sampleFrontAnimation(anim: FrontAnimation, time: number): FrontSample {
+  const { pose, onSeat } = sampleChannels(compile(anim), time);
+  return { pose: pose as FrontFullPose, onSeat };
 }

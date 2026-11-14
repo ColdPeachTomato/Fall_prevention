@@ -13,6 +13,11 @@ export const REST_SECONDS = 30;
 export const COUNTDOWN_SECONDS = 5;
 
 export type Side = 'right' | 'left';
+// 回す向き（外回し・内回しなど）。2つ目の向きは、アニメを逆向きに再生する
+export interface Direction {
+  label: string;
+  index: 0 | 1;
+}
 
 export type Step =
   | {
@@ -21,7 +26,7 @@ export type Step =
       level: Level;
       support: SupportStage | null;
     }
-  | { kind: 'countdown'; exId: string; seconds: number; side: Side | null }
+  | { kind: 'countdown'; exId: string; seconds: number; side: Side | null; direction: Direction | null }
   | {
       kind: 'exercise';
       exId: string;
@@ -32,6 +37,7 @@ export type Step =
       set: number;
       sets: number;
       side: Side | null;
+      direction: Direction | null;
       seconds: number;
       unitSeconds: number; // 1回・1往復・1秒あたりの時間。カウントの表示に使う
       lastOfItem: boolean; // この種目の最後の手順か（終えたら「終えた運動」に入れる）
@@ -40,7 +46,11 @@ export type Step =
 
 // 1回（1往復、1秒）あたりの時間。回数で行う種目は、アニメの1往復の終わりを回数のカウントに合わせる
 export function unitSeconds(unit: Exclude<Unit, 'minutes'>, animationId: string | null): number {
-  if (unit === 'reps') return getAnimation(animationId)?.cycleSeconds ?? SECONDS_PER_REP;
+  if (unit === 'reps') {
+    // 左右交互の種目は、1往復の中で2回数える
+    const anim = getAnimation(animationId);
+    return anim ? anim.cycleSeconds / (anim.countsPerCycle ?? 1) : SECONDS_PER_REP;
+  }
   if (unit === 'laps') return SECONDS_PER_LAP;
   return 1;
 }
@@ -55,6 +65,8 @@ export function buildSessionSteps(menu: Menu, kind: SessionKind): Step[] {
     const unit = ex.unit;
     const support = effectiveSupport(menu.support, ex, variant);
     const sides: (Side | null)[] = ex.bilateral ? ['right', 'left'] : [null];
+    // 回す向きがある種目は、向きごとにメニューの回数を行う（例：外回し5回、内回し5回のあと、足を替える）
+    const directions: (Direction | null)[] = ex.directions ? [{ label: ex.directions[0], index: 0 }, { label: ex.directions[1], index: 1 }] : [null];
     const perUnit = unitSeconds(unit, variant.animationId);
 
     if (itemIndex > 0) steps.push({ kind: 'rest', exId: ex.id, seconds: REST_SECONDS, reason: 'next' });
@@ -64,20 +76,23 @@ export function buildSessionSteps(menu: Menu, kind: SessionKind): Step[] {
     for (let set = 1; set <= item.sets; set++) {
       if (set > 1) steps.push({ kind: 'rest', exId: ex.id, seconds: REST_SECONDS, reason: 'set' });
       sides.forEach((side, sideIndex) => {
-        steps.push({ kind: 'countdown', exId: ex.id, seconds: COUNTDOWN_SECONDS, side });
-        steps.push({
-          kind: 'exercise',
-          exId: ex.id,
-          level: item.level,
-          support,
-          unit,
-          amount: item.amount,
-          set,
-          sets: item.sets,
-          side,
-          seconds: item.amount * perUnit,
-          unitSeconds: perUnit,
-          lastOfItem: set === item.sets && sideIndex === sides.length - 1,
+        directions.forEach((direction, directionIndex) => {
+          steps.push({ kind: 'countdown', exId: ex.id, seconds: COUNTDOWN_SECONDS, side, direction });
+          steps.push({
+            kind: 'exercise',
+            exId: ex.id,
+            level: item.level,
+            support,
+            unit,
+            amount: item.amount,
+            set,
+            sets: item.sets,
+            side,
+            direction,
+            seconds: item.amount * perUnit,
+            unitSeconds: perUnit,
+            lastOfItem: set === item.sets && sideIndex === sides.length - 1 && directionIndex === directions.length - 1,
+          });
         });
       });
     }

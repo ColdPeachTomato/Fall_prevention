@@ -4,6 +4,7 @@
   "level": 1,
   "view": "side",
   "cycleSeconds": 7.2,
+  "checked": false,
   "root": {
     "x": 0
   },

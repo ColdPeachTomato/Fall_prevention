@@ -109,6 +109,11 @@ function ExerciseRow({ ex, item, onChange }: { ex: Exercise; item: DraftItem; on
         <input type="checkbox" checked={item.selected} onChange={(e) => onChange({ ...item, selected: e.target.checked })} />
         {ex.id} {ex.name}
         {ex.bilateral && <span className="muted">（片側ずつ）</span>}
+        {ex.directions && (
+          <span className="muted">
+            （{ex.directions[0]}・{ex.directions[1]}を、それぞれこの回数）
+          </span>
+        )}
       </label>
       {item.selected && (
         <div className="editor-fields">

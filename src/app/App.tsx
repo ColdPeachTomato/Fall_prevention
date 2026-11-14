@@ -13,6 +13,8 @@ import { PreCheck } from '../screens/PreCheck';
 import { WalkConfirm } from '../screens/WalkConfirm';
 import { addRecord, loadMenu, loadRecords, loadSettings, requestPersistence, saveMenu } from '../storage/db';
 import { today } from './dates';
+import { speaker } from './speech';
+import { SPEECH } from './speechTexts';
 
 type Screen =
   | { name: 'home' }
@@ -104,7 +106,11 @@ export function App() {
                   : ['体を休めることも大切です。', 'また次の日に運動しましょう。'],
             });
           }}
-          onBegin={() => setScreen({ name: 'player', kind: screen.kind })}
+          onBegin={() => {
+            // 音声は「始める」を押した後に開始する（押した操作の中で最初の読み上げを行う）
+            speaker.say(SPEECH.begin);
+            setScreen({ name: 'player', kind: screen.kind });
+          }}
         />
       );
 

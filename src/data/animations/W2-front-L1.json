@@ -1,0 +1,208 @@
+{
+  "id": "W2-front-L1",
+  "exercise": "W2",
+  "level": 1,
+  "view": "front",
+  "checked": false,
+  "cycleSeconds": 4,
+  "root": {
+    "mode": "seat",
+    "x": 0,
+    "y": 0.298
+  },
+  "viewBox": {
+    "minX": -0.4,
+    "maxX": 0.4,
+    "minY": -0.075,
+    "maxY": 0.86
+  },
+  "props": [
+    {
+      "type": "chair",
+      "x": 0,
+      "width": 0.3,
+      "seatHeight": 0.242,
+      "backHeight": 0.52
+    }
+  ],
+  "highlight": [
+    "upperArm",
+    "forearm"
+  ],
+  "keyframes": [
+    {
+      "t": 0,
+      "pose": {
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "rElbowOut": 0.1707,
+        "rElbowUp": -0.9752,
+        "rHandOut": -0.1735,
+        "rHandUp": 0.9747
+      },
+      "onSeat": true,
+      "label": "肘を下げる"
+    },
+    {
+      "t": 0.5,
+      "pose": {
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "rElbowOut": 0.0472,
+        "rElbowUp": -0.6992,
+        "rHandOut": -0.0703,
+        "rHandUp": 0.7911
+      },
+      "onSeat": true,
+      "label": "下から前へ"
+    },
+    {
+      "t": 1,
+      "pose": {
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "rElbowOut": 0.1942,
+        "rElbowUp": 0,
+        "rHandOut": -0.2098,
+        "rHandUp": 0.1276
+      },
+      "onSeat": true,
+      "label": "前へ"
+    },
+    {
+      "t": 1.5,
+      "pose": {
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "rElbowOut": 0.2803,
+        "rElbowUp": 0.6714,
+        "rHandOut": -0.2915,
+        "rHandUp": -0.5096
+      },
+      "onSeat": true,
+      "label": "前から上へ"
+    },
+    {
+      "t": 2,
+      "pose": {
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "rElbowOut": 0.4602,
+        "rElbowUp": 0.8765,
+        "rHandOut": -0.4622,
+        "rHandUp": -0.7043
+      },
+      "onSeat": true,
+      "label": "上へ"
+    },
+    {
+      "t": 2.5,
+      "pose": {
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "rElbowOut": 0.6763,
+        "rElbowUp": 0.6335,
+        "rHandOut": -0.6673,
+        "rHandUp": -0.4737
+      },
+      "onSeat": true,
+      "label": "上から後ろへ"
+    },
+    {
+      "t": 3,
+      "pose": {
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "rElbowOut": 0.8312,
+        "rElbowUp": 0,
+        "rHandOut": -0.8143,
+        "rHandUp": 0.1276
+      },
+      "onSeat": true,
+      "label": "後ろへ"
+    },
+    {
+      "t": 3.5,
+      "pose": {
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.1,
+        "rToeUp": 0,
+        "rElbowOut": 0.5269,
+        "rElbowUp": -0.7344,
+        "rHandOut": -0.5255,
+        "rHandUp": 0.8245
+      },
+      "onSeat": true,
+      "label": "後ろから下へ"
+    }
+  ],
+  "captions": [
+    {
+      "from": 0,
+      "to": 4,
+      "text": "肘を、前から上、後ろへ回します"
+    }
+  ],
+  "reverseCaptions": [
+    {
+      "from": 0,
+      "to": 4,
+      "text": "肘を、後ろから上、前へ回します"
+    }
+  ],
+  "marks": [
+    {
+      "type": "arc",
+      "from": 0,
+      "to": 4,
+      "anchor": "r.shoulder",
+      "dx": 0,
+      "dy": 0,
+      "radius": 0.225,
+      "start": 5,
+      "sweep": 150
+    },
+    {
+      "type": "arc",
+      "from": 0,
+      "to": 4,
+      "anchor": "l.shoulder",
+      "dx": 0,
+      "dy": 0,
+      "radius": 0.225,
+      "start": -5,
+      "sweep": -150
+    }
+  ]
+}

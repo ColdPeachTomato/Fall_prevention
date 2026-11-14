@@ -2,7 +2,7 @@
 // 画風（体型、色、線の太さ）はこのファイルの STYLE と SHAPE を変えると調整できる。
 
 import { dir, type Frame, type Skeleton, type Vec } from './sideRig';
-import type { AnchorName, AnimationData, ArrowMark, ChairProp, SegmentName } from './types';
+import type { AnchorName, ArrowMark, ChairProp, SegmentName, SideAnimation } from './types';
 
 // 色。動かしている部位は目立つ色、椅子は落ち着いた色にする
 export const STYLE = {
@@ -21,6 +21,8 @@ export const STYLE = {
   highlightFar: '#f3b190',
   chair: '#b9ad97',
   chairEdge: '#8c7f68',
+  band: '#2f7d5b', // バンド（S8）
+  scapula: '#f7d9c4', // 肩甲骨（後ろ向きで目立たせる）
   arrow: '#b4380f',
   arrowEdge: '#ffffff',
   balanceOk: '#15803d',
@@ -29,7 +31,7 @@ export const STYLE = {
 } as const;
 
 // 体の太さ（半径。身長 = 1）
-const SHAPE = {
+export const SHAPE = {
   thigh: [0.056, 0.043],
   shank: [0.04, 0.028],
   pelvis: [0.068, 0.066],
@@ -54,12 +56,15 @@ export interface DrawOptions {
   dpr: number;
   showBalance?: boolean; // 重心と支えの範囲を重ねる（プレビュー用）
   showJoints?: boolean; // 関節の点を重ねる（プレビュー用）
+  mirror?: boolean; // 左右反転（左側で行うとき）
+  reverse?: boolean; // 逆向きに再生している（回す向きの矢印を反対にする）
 }
 
-type Ctx = CanvasRenderingContext2D;
+export type Ctx = CanvasRenderingContext2D;
+export type ViewBox = { minX: number; maxX: number; minY: number; maxY: number };
 
 // 太さの変わる丸い棒（手足）
-function capsule(ctx: Ctx, a: Vec, b: Vec, ra: number, rb: number, fill: string, px: number): void {
+export function capsule(ctx: Ctx, a: Vec, b: Vec, ra: number, rb: number, fill: string, px: number): void {
   const dx = b.x - a.x;
   const dy = b.y - a.y;
   const len = Math.hypot(dx, dy);
@@ -84,7 +89,7 @@ function capsule(ctx: Ctx, a: Vec, b: Vec, ra: number, rb: number, fill: string,
   ctx.stroke();
 }
 
-function circle(ctx: Ctx, c: Vec, r: number, fill: string, px: number): void {
+export function circle(ctx: Ctx, c: Vec, r: number, fill: string, px: number): void {
   ctx.beginPath();
   ctx.arc(c.x, c.y, r, 0, Math.PI * 2);
   ctx.fillStyle = fill;
@@ -94,15 +99,27 @@ function circle(ctx: Ctx, c: Vec, r: number, fill: string, px: number): void {
   ctx.stroke();
 }
 
-function foot(ctx: Ctx, ankle: Vec, footAngle: number, fill: string, px: number): void {
+// 足（靴）。つま先の部分は別に描き、かかとを上げてもつま先は床に付いたままにできる
+function foot(ctx: Ctx, ankle: Vec, footAngle: number, toeBend: number, fill: string, px: number): void {
   const u = dir(footAngle);
   const v = { x: -u.y, y: u.x };
   const p = (du: number, dv: number): [number, number] => [ankle.x + u.x * du + v.x * dv, ankle.y + u.y * du + v.y * dv];
+  const toeBase = p(0.08, -0.0255);
+  const toeDir = dir(footAngle - toeBend);
+  capsule(
+    ctx,
+    { x: toeBase[0], y: toeBase[1] },
+    { x: toeBase[0] + toeDir.x * 0.027, y: toeBase[1] + toeDir.y * 0.027 },
+    0.0135,
+    0.0125,
+    fill,
+    px,
+  );
   ctx.beginPath();
   ctx.moveTo(...p(-0.036, -0.039));
-  ctx.lineTo(...p(0.095, -0.039));
-  ctx.quadraticCurveTo(...p(0.118, -0.039), ...p(0.112, -0.02));
-  ctx.quadraticCurveTo(...p(0.105, -0.004), ...p(0.055, 0.004));
+  ctx.lineTo(...p(0.082, -0.039));
+  ctx.lineTo(...p(0.088, -0.014));
+  ctx.quadraticCurveTo(...p(0.075, 0), ...p(0.055, 0.004));
   ctx.lineTo(...p(0.03, 0.022));
   ctx.lineTo(...p(-0.03, 0.022));
   ctx.quadraticCurveTo(...p(-0.05, 0), ...p(-0.046, -0.025));
@@ -136,11 +153,19 @@ function anchorPoint(sk: Skeleton, name: AnchorName): Vec {
   return sk[name];
 }
 
-function arrow(ctx: Ctx, sk: Skeleton, m: ArrowMark, t: number, px: number): void {
-  if (t < m.from || t > m.to) return;
-  const alpha = Math.max(0, Math.min(1, Math.min(t - m.from, m.to - t) / 0.25));
+// 印の濃さ。表示する区間の始めと終わりで、ふわっと出て消える。
+// 1往復のあいだ出し続ける印（always）は、往復の変わり目でも消さない
+export function markAlpha(t: number, from: number, to: number, always = false): number {
+  if (always) return 1;
+  if (t < from || t > to) return 0;
+  return Math.max(0, Math.min(1, Math.min(t - from, to - t) / 0.25));
+}
+
+type StraightMark = Pick<ArrowMark, 'from' | 'to' | 'dx' | 'dy' | 'angle' | 'length'>;
+
+export function arrow(ctx: Ctx, a: Vec, m: StraightMark, t: number, px: number, always = false): void {
+  const alpha = markAlpha(t, m.from, m.to, always);
   if (alpha <= 0) return;
-  const a = anchorPoint(sk, m.anchor);
   const base = { x: a.x + m.dx, y: a.y + m.dy };
   const d = dir(m.angle);
   const n = { x: -d.y, y: d.x };
@@ -169,7 +194,31 @@ function arrow(ctx: Ctx, sk: Skeleton, m: ArrowMark, t: number, px: number): voi
   ctx.restore();
 }
 
-function balanceOverlay(ctx: Ctx, f: Frame, px: number): void {
+// 目安の線（体をまっすぐ保つ線など）
+export function guideLine(ctx: Ctx, a: Vec, m: StraightMark, t: number, px: number, always = false): void {
+  const alpha = markAlpha(t, m.from, m.to, always);
+  if (alpha <= 0) return;
+  const c = { x: a.x + m.dx, y: a.y + m.dy };
+  const d = dir(m.angle);
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.setLineDash([10 * px, 7 * px]);
+  ctx.lineCap = 'round';
+  for (const [width, color] of [
+    [6 * px, STYLE.arrowEdge],
+    [3 * px, STYLE.arrow],
+  ] as const) {
+    ctx.beginPath();
+    ctx.moveTo(c.x - (d.x * m.length) / 2, c.y - (d.y * m.length) / 2);
+    ctx.lineTo(c.x + (d.x * m.length) / 2, c.y + (d.y * m.length) / 2);
+    ctx.lineWidth = width;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+export function balanceOverlay(ctx: Ctx, f: Pick<Frame, 'com' | 'support' | 'stable'>, px: number): void {
   const color = f.stable ? STYLE.balanceOk : STYLE.balanceNg;
   // 支えている範囲（床の下に帯で示す）
   ctx.fillStyle = color;
@@ -230,23 +279,32 @@ function jointsOverlay(ctx: Ctx, sk: Skeleton, px: number): void {
   }
 }
 
-export function drawFrame(ctx: Ctx, anim: AnimationData, f: Frame, o: DrawOptions): void {
-  const scale = Math.min(o.width / (VIEW.maxX - VIEW.minX), o.height / (VIEW.maxY - VIEW.minY));
-  const ox = (o.width - scale * (VIEW.maxX - VIEW.minX)) / 2 - VIEW.minX * scale;
-  const oy = o.height - (o.height - scale * (VIEW.maxY - VIEW.minY)) / 2 + VIEW.minY * scale;
-  const px = 1 / scale; // 画面の 1 ピクセルに当たる長さ
+// 背景を塗り、「身長 = 1、y が上向き」の座標で描けるようにする。画面の 1 ピクセルに当たる長さを返す
+export function beginScene(ctx: Ctx, view: ViewBox, o: DrawOptions): number {
+  const scale = Math.min(o.width / (view.maxX - view.minX), o.height / (view.maxY - view.minY));
+  const ox = (o.width - scale * (view.maxX - view.minX)) / 2 - view.minX * scale;
+  const oy = o.height - (o.height - scale * (view.maxY - view.minY)) / 2 + view.minY * scale;
 
   ctx.setTransform(o.dpr, 0, 0, o.dpr, 0, 0);
   ctx.fillStyle = STYLE.background;
   ctx.fillRect(0, 0, o.width, o.height);
-  // ここから先は「身長 = 1、y が上向き」の座標で描く
-  ctx.setTransform(scale * o.dpr, 0, 0, -scale * o.dpr, ox * o.dpr, oy * o.dpr);
+  if (o.mirror) {
+    // 左右反転：左側で行うときは、同じキーフレームを鏡に映した形で描く
+    ctx.setTransform(-scale * o.dpr, 0, 0, -scale * o.dpr, (ox + (view.minX + view.maxX) * scale) * o.dpr, oy * o.dpr);
+  } else {
+    ctx.setTransform(scale * o.dpr, 0, 0, -scale * o.dpr, ox * o.dpr, oy * o.dpr);
+  }
   ctx.lineJoin = 'round';
+  return 1 / scale;
+}
+
+export function drawFrame(ctx: Ctx, anim: SideAnimation, f: Frame, o: DrawOptions): void {
+  const px = beginScene(ctx, VIEW, o);
 
   const sk = f.sk;
-  const hl = new Set<SegmentName>(anim.highlight);
+  const hl = new Set<string>(anim.highlight);
   const color = (seg: SegmentName, base: string, far: boolean): string => {
-    if (hl.has(seg)) return far ? STYLE.highlightFar : STYLE.highlight;
+    if (hl.has(seg) || hl.has(`${far ? 'far' : 'near'}:${seg}`)) return far ? STYLE.highlightFar : STYLE.highlight;
     return base;
   };
 
@@ -263,7 +321,7 @@ export function drawFrame(ctx: Ctx, anim: AnimationData, f: Frame, o: DrawOption
   capsule(ctx, sk.shoulder, sk.farElbow, SHAPE.upperArm[0], SHAPE.upperArm[1], color('upperArm', STYLE.topFar, true), px);
   capsule(ctx, sk.farElbow, sk.farWrist, SHAPE.forearm[0], SHAPE.forearm[1], color('forearm', STYLE.topFar, true), px);
   circle(ctx, sk.farHand, SHAPE.hand, STYLE.skinFar, px);
-  foot(ctx, sk.farAnkle, sk.farFootAngle, color('foot', STYLE.shoeFar, true), px);
+  foot(ctx, sk.farAnkle, sk.farFootAngle, sk.farToeBend, color('foot', STYLE.shoeFar, true), px);
   capsule(ctx, sk.farKnee, sk.farAnkle, SHAPE.shank[0], SHAPE.shank[1], color('shank', STYLE.bottomFar, true), px);
   capsule(ctx, sk.hip, sk.farKnee, SHAPE.thigh[0], SHAPE.thigh[1], color('thigh', STYLE.bottomFar, true), px);
 
@@ -292,7 +350,7 @@ export function drawFrame(ctx: Ctx, anim: AnimationData, f: Frame, o: DrawOption
   ctx.stroke();
 
   // 手前側の脚と腕
-  foot(ctx, sk.ankle, sk.footAngle, color('foot', STYLE.shoe, false), px);
+  foot(ctx, sk.ankle, sk.footAngle, sk.toeBend, color('foot', STYLE.shoe, false), px);
   capsule(ctx, sk.knee, sk.ankle, SHAPE.shank[0], SHAPE.shank[1], color('shank', STYLE.bottom, false), px);
   capsule(ctx, sk.hip, sk.knee, SHAPE.thigh[0], SHAPE.thigh[1], color('thigh', STYLE.bottom, false), px);
   capsule(ctx, sk.shoulder, sk.elbow, SHAPE.upperArm[0], SHAPE.upperArm[1], color('upperArm', STYLE.top, false), px);
@@ -301,7 +359,9 @@ export function drawFrame(ctx: Ctx, anim: AnimationData, f: Frame, o: DrawOption
 
   // 注意点の印
   for (const m of anim.marks) {
-    if (m.type === 'arrow') arrow(ctx, sk, m, f.t, px);
+    const always = m.from <= 0 && m.to >= anim.cycleSeconds;
+    if (m.type === 'arrow') arrow(ctx, anchorPoint(sk, m.anchor), m, f.t, px, always);
+    else guideLine(ctx, anchorPoint(sk, m.anchor), m, f.t, px, always);
   }
 
   if (o.showJoints) jointsOverlay(ctx, sk, px);

@@ -1,0 +1,217 @@
+{
+  "id": "W1-front-L1",
+  "exercise": "W1",
+  "level": 1,
+  "view": "front",
+  "checked": false,
+  "cycleSeconds": 3,
+  "root": {
+    "mode": "seat",
+    "x": 0,
+    "y": 0.298
+  },
+  "viewBox": {
+    "minX": -0.36,
+    "maxX": 0.36,
+    "minY": -0.075,
+    "maxY": 0.86
+  },
+  "plants": {
+    "r": {
+      "x": 0.1
+    }
+  },
+  "props": [
+    {
+      "type": "chair",
+      "x": 0,
+      "width": 0.3,
+      "seatHeight": 0.242,
+      "backHeight": 0.52
+    }
+  ],
+  "highlight": [
+    "r:foot"
+  ],
+  "keyframes": [
+    {
+      "t": 0,
+      "pose": {
+        "rElbowOut": 0.2485,
+        "rElbowUp": -0.8773,
+        "rHandOut": 0.004,
+        "rHandUp": -0.8399,
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0,
+        "rToeUp": 0.02,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "onSeat": true,
+      "label": "つま先を下げる"
+    },
+    {
+      "t": 0.375,
+      "pose": {
+        "rElbowOut": 0.2485,
+        "rElbowUp": -0.8773,
+        "rHandOut": 0.004,
+        "rHandUp": -0.8399,
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": -0.2121,
+        "rToeUp": 0.0727,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "onSeat": true,
+      "label": "内へ"
+    },
+    {
+      "t": 0.75,
+      "pose": {
+        "rElbowOut": 0.2485,
+        "rElbowUp": -0.8773,
+        "rHandOut": 0.004,
+        "rHandUp": -0.8399,
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": -0.3,
+        "rToeUp": 0.2,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "onSeat": true,
+      "label": "内から上へ"
+    },
+    {
+      "t": 1.125,
+      "pose": {
+        "rElbowOut": 0.2485,
+        "rElbowUp": -0.8773,
+        "rHandOut": 0.004,
+        "rHandUp": -0.8399,
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": -0.2121,
+        "rToeUp": 0.3273,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "onSeat": true,
+      "label": "上へ"
+    },
+    {
+      "t": 1.5,
+      "pose": {
+        "rElbowOut": 0.2485,
+        "rElbowUp": -0.8773,
+        "rHandOut": 0.004,
+        "rHandUp": -0.8399,
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0,
+        "rToeUp": 0.38,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "onSeat": true,
+      "label": "上から外へ"
+    },
+    {
+      "t": 1.875,
+      "pose": {
+        "rElbowOut": 0.2485,
+        "rElbowUp": -0.8773,
+        "rHandOut": 0.004,
+        "rHandUp": -0.8399,
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.2121,
+        "rToeUp": 0.3273,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "onSeat": true,
+      "label": "外へ"
+    },
+    {
+      "t": 2.25,
+      "pose": {
+        "rElbowOut": 0.2485,
+        "rElbowUp": -0.8773,
+        "rHandOut": 0.004,
+        "rHandUp": -0.8399,
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.3,
+        "rToeUp": 0.2,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "onSeat": true,
+      "label": "外から下へ"
+    },
+    {
+      "t": 2.625,
+      "pose": {
+        "rElbowOut": 0.2485,
+        "rElbowUp": -0.8773,
+        "rHandOut": 0.004,
+        "rHandUp": -0.8399,
+        "rKneeOut": 0.08,
+        "rKneeUp": -0.052,
+        "rAnkleOut": 0,
+        "rAnkleUp": -1,
+        "rToeOut": 0.2121,
+        "rToeUp": 0.0727,
+        "lToeOut": 0.1,
+        "lToeUp": 0
+      },
+      "onSeat": true,
+      "label": "下へ"
+    }
+  ],
+  "captions": [
+    {
+      "from": 0,
+      "to": 3,
+      "text": "かかとを床につけたまま、つま先で外へ円を描きます"
+    }
+  ],
+  "reverseCaptions": [
+    {
+      "from": 0,
+      "to": 3,
+      "text": "かかとを床につけたまま、つま先で内へ円を描きます"
+    }
+  ],
+  "marks": [
+    {
+      "type": "arc",
+      "from": 0,
+      "to": 3,
+      "anchor": "r.heel",
+      "dx": 0,
+      "dy": 0.045,
+      "radius": 0.085,
+      "start": -75,
+      "sweep": 150
+    }
+  ]
+}

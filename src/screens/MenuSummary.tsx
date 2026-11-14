@@ -16,7 +16,8 @@ function ItemList({ items }: { items: MenuItem[] }) {
           <li key={i.ex}>
             {i.ex} {ex.name}：レベル{i.level}、{i.amount}
             {UNIT_LABEL[ex.unit]}
-            {ex.bilateral ? '（片側ずつ）' : ''} × {i.sets}セット
+            {ex.bilateral ? '（片側ずつ）' : ''}
+            {ex.directions ? `（${ex.directions[0]}・${ex.directions[1]}を各${i.amount}${UNIT_LABEL[ex.unit]}）` : ''} × {i.sets}セット
           </li>
         );
       })}
