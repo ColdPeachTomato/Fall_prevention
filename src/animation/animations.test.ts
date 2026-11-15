@@ -7,7 +7,8 @@ import { ALL_JOINTS } from './bodyModel';
 import { VIEW } from './draw';
 import { ANIMATIONS, getAnimation } from './registry';
 import { computeFrame, footContact, type Frame, type Vec } from './sideRig';
-import { sideFigureAlpha } from './draw';
+import { sideFigureAlpha, STYLE } from './draw';
+import { FAR_FADE, mixColor } from './drawFront';
 import { solveFront } from './frontRig';
 import { TURN_POSE } from './scene';
 import type { ChairProp, SideAnimation, SupportStage } from './types';
@@ -187,7 +188,9 @@ describe('アニメの登録', () => {
       'D4-side-L3',
       'D5-side-L3',
       // D2-side-L3 は、向き・膝・腕の振りを作り直した（2026-11-15）。確認待ち
-      // W3-front-L1（髪の裾のつなぎ方）と B4-front-L3（腕を開いて揺らす）は、2026-11-15 に直したので外した。確認待ち
+      // 2026-11-15 に直したあと、もう一度確かめてもらった（W3：髪の裾のつなぎ方、B4：腕を開いて揺らす）
+      'W3-front-L1',
+      'B4-front-L3',
       'S9-side-L3',
       'D1-front-L3',
     ];
@@ -862,6 +865,12 @@ describe('レベル3の種目（横向き。仕様との照合）', () => {
     const anim = sideAnim('D2-side-L3');
     const backOnly = framesOf(anim).filter((f) => f.t > 6 && f.t < 8 && sideFigureAlpha(f.pose.facing) === 0);
     expect(backOnly.length * STEP).toBeGreaterThan(0.5);
+    // 後ろ姿の腕は、見ている側から奥のカウンターへ伸びている。肩は元の色、手へ行くにつれて少しだけ薄くする
+    // （横から見たときの奥側の腕の色に近づけるが、同じ薄さまではしない）
+    expect(mixColor(STYLE.top, STYLE.topFar, 0)).toBe('rgb(63, 111, 143)');
+    expect(mixColor(STYLE.top, STYLE.topFar, 1)).toBe('rgb(142, 170, 189)');
+    expect(FAR_FADE).toBeGreaterThan(0.3);
+    expect(FAR_FADE).toBeLessThan(1);
     // 後ろ姿は、足をそろえて立ち、両手でカウンター（上の面の高さ 0.54）を握っている。
     // 手の中心はカウンターの上の面より少し上で、手の下のほうだけがカウンターに隠れる（半分より多く見える）
     const counter = anim.props.find((p) => p.type === 'counter')!;
