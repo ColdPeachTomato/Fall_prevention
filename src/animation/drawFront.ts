@@ -391,7 +391,18 @@ function jointsOverlay(ctx: Ctx, sk: FrontSkeleton, px: number): void {
 }
 
 // 人物の各部を描く関数をまとめて返す（脚、バンド、腕、体）。重なりの順番は、呼ぶ側が視点に合わせて決める
-function figureParts(ctx: Ctx, sk: FrontSkeleton, pose: FrontFullPose, view: 'front' | 'back', highlight: readonly string[], standing: boolean, hasBand: boolean, px: number) {
+// scapulaFill：後ろ向きで背中に描く肩甲骨の色（肩甲骨を寄せる種目では、目立つ色で動きを見せる）
+function figureParts(
+  ctx: Ctx,
+  sk: FrontSkeleton,
+  pose: FrontFullPose,
+  view: 'front' | 'back',
+  highlight: readonly string[],
+  standing: boolean,
+  hasBand: boolean,
+  px: number,
+  scapulaFill: string = STYLE.scapula,
+) {
   const back = view === 'back';
   const hl = new Set<string>(highlight);
   const color = (seg: SegmentName, base: string, side?: BodySide): string => (hl.has(seg) || (side !== undefined && hl.has(`${side}:${seg}`)) ? STYLE.highlight : base);
@@ -455,17 +466,27 @@ function figureParts(ctx: Ctx, sk: FrontSkeleton, pose: FrontFullPose, view: 'fr
   const body = () => {
     pelvis(ctx, sk, color('pelvis', STYLE.bottom), px);
     trunk(ctx, sk, color('trunk', STYLE.top), px);
-    if (back) scapulae(ctx, sk, hl.has('scapula') ? STYLE.highlight : STYLE.scapula, px);
+    if (back) scapulae(ctx, sk, hl.has('scapula') ? STYLE.highlight : scapulaFill, px);
     head(ctx, sk, color('head', STYLE.skin), px);
   };
   return { legs, band, arms, body };
 }
 
-// 後ろ向きに立つ人物だけを描く（床や支持物は描かない）。横から見る種目で、向きを変える途中の後ろ姿に使う
-export function drawBackFigure(ctx: Ctx, sk: FrontSkeleton, pose: FrontFullPose, highlight: readonly string[], px: number): void {
-  const { legs, arms, body } = figureParts(ctx, sk, pose, 'back', highlight, true, false, px);
+// 後ろ向きに立つ人物だけを描く（床や支持物は描かない）。横から見る種目で、向きを変える途中の後ろ姿に使う。
+// ・肩甲骨は上半身と同じ色にする。明るい色だと胸のように見えて、こちらを向いていると錯覚するため
+// ・barTop：体の向こう側にある、つかまる所（カウンター）の上の面の高さ。握った手のうち、これより下は
+//   カウンターに隠れて見えないので描かない（2026-11-15 利用者の指摘）
+export function drawBackFigure(ctx: Ctx, sk: FrontSkeleton, pose: FrontFullPose, highlight: readonly string[], px: number, barTop?: number): void {
+  const { legs, arms, body } = figureParts(ctx, sk, pose, 'back', highlight, true, false, px, STYLE.top);
   legs();
+  ctx.save();
+  if (barTop !== undefined) {
+    ctx.beginPath();
+    ctx.rect(sk.pelvis.x - 2, barTop, 4, 4);
+    ctx.clip();
+  }
   arms();
+  ctx.restore();
   body();
 }
 

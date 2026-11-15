@@ -15,7 +15,8 @@ export function frameOf(anim: AnimationData, t: number, stage: SupportStage | nu
   return anim.view === 'side' ? computeFrame(anim, t, stage) : computeFrontFrame(anim, t, stage);
 }
 
-// 向きを変える途中の後ろ姿：足をそろえてまっすぐ立ち、両手を体の前（向こう側）のつかまる所に置く
+// 向きを変える途中の後ろ姿：足をそろえてまっすぐ立ち、両手を体の前（向こう側）のつかまる所に置く。
+// 手の中心は、カウンターの上の面（0.54）より少し上。手の下のほうは、カウンターに隠れる
 export const TURN_POSE = fullFrontPose({
   rKneeOut: -0.05,
   rKneeUp: -0.98,
@@ -26,7 +27,7 @@ export const TURN_POSE = fullFrontPose({
   rElbowOut: 0.12,
   rElbowUp: -0.9,
   rHandOut: 0.05,
-  rHandUp: -0.55,
+  rHandUp: -0.46,
 });
 // まっすぐ立ったときの、股関節の高さ
 const STAND_HIP = BODY.ankleHeight + (BODY.thigh + BODY.shank) * 0.98;
@@ -35,7 +36,9 @@ const STAND_HIP = BODY.ankleHeight + (BODY.thigh + BODY.shank) * 0.98;
 function drawTurnFigure(ctx: Ctx, anim: SideAnimation, hip: Vec, px: number): void {
   const sk = solveFront(TURN_POSE, { view: 'back', root: { mode: 'stand', x: hip.x, y: Math.min(hip.y, STAND_HIP) } });
   // 目立たせる部位は、手前・奥の区別を外して、左右とも同じにする
-  drawBackFigure(ctx, sk, TURN_POSE, anim.highlight.map((h) => h.replace(/^(near|far):/, '')), px);
+  // 握った手のうち、カウンターの上の面より下は、カウンターに隠れる
+  const counter = anim.props.find((p) => p.type === 'counter');
+  drawBackFigure(ctx, sk, TURN_POSE, anim.highlight.map((h) => h.replace(/^(near|far):/, '')), px, counter?.height);
 }
 
 // 時刻 t の1コマを描く

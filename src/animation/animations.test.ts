@@ -862,11 +862,14 @@ describe('レベル3の種目（横向き。仕様との照合）', () => {
     const anim = sideAnim('D2-side-L3');
     const backOnly = framesOf(anim).filter((f) => f.t > 6 && f.t < 8 && sideFigureAlpha(f.pose.facing) === 0);
     expect(backOnly.length * STEP).toBeGreaterThan(0.5);
-    // 後ろ姿は、足をそろえて立ち、両手をカウンターの高さ（0.54）に置いている
-    const sk = solveFront(TURN_POSE, { view: 'back', root: { mode: 'stand', x: 0, y: 0.52 } });
+    // 後ろ姿は、足をそろえて立ち、両手でカウンター（上の面の高さ 0.54）を握っている。
+    // 手の中心はカウンターの上の面より少し上で、手の下のほうだけがカウンターに隠れる（半分より多く見える）
+    const counter = anim.props.find((p) => p.type === 'counter')!;
+    expect(counter.height).toBe(0.54);
+    const sk = solveFront(TURN_POSE, { view: 'back', root: { mode: 'stand', x: 0, y: 0.5202 } });
     for (const side of ['r', 'l'] as const) {
-      expect(sk[side].hand.y).toBeGreaterThan(0.5);
-      expect(sk[side].hand.y).toBeLessThan(0.58);
+      expect(sk[side].hand.y).toBeGreaterThan(counter.height + 0.003);
+      expect(sk[side].hand.y - 0.025).toBeLessThan(counter.height - 0.01); // 手の下の端は、カウンターの上の面より下
       expect(Math.abs(sk[side].heel.y)).toBeLessThan(0.01);
     }
   });
