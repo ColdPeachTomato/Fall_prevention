@@ -73,30 +73,58 @@ export function handBite(limb: Pick<FrontLimb, 'hand' | 'elbow' | 'sign'>, hidde
   return { x: limb.hand.x + (dx / n) * reach, y: limb.hand.y + (dy / n) * reach, r: ARM_EDGE };
 }
 
-// 手。腕より手前に描いたうえで、腕が重なる分だけ、手の肘の側を腕の色で覆う（袖口が手に少しかぶさるように見える）。
-// 覆う所は手の円の中だけなので、下に腕が描かれていなくても、欠けた所に穴が開かない。sleeve：腕の、手首の側の色
+// 手。腕が重なる分（手の肘の側）は、手を描かない：見えている側だけを、輪郭つきで描く。
+// 隠れた側には手の輪郭を残さない。輪郭が残ると、腕が透けて手が手前にあるように見えるため（2026-11-15 利用者の指摘）。
+// 隠れた側は、前腕をそのまま手の向こうへ伸ばした形（前腕の太さの帯）で埋め、境目に腕のふちの線を入れる。sleeve：腕の、手首の側の色
 function hand(ctx: Ctx, limb: FrontLimb, hidden: number, sleeve: string, px: number, skin: string = STYLE.skin): void {
-  circle(ctx, limb.hand, SHAPE.hand, skin, px);
   const bite = handBite(limb, hidden);
-  if (!bite) return;
+  if (!bite) {
+    circle(ctx, limb.hand, SHAPE.hand, skin, px);
+    return;
+  }
+  const r = SHAPE.hand;
+  const handPath = () => {
+    ctx.beginPath();
+    ctx.arc(limb.hand.x, limb.hand.y, r, 0, Math.PI * 2);
+  };
+  const bitePath = () => {
+    ctx.beginPath();
+    ctx.arc(bite.x, bite.y, bite.r, 0, Math.PI * 2);
+  };
+  // 見えている側：手の円のうち、腕が重ならない所だけ
   ctx.save();
   ctx.beginPath();
-  ctx.arc(limb.hand.x, limb.hand.y, SHAPE.hand, 0, Math.PI * 2);
+  ctx.rect(limb.hand.x - 2 * r, limb.hand.y - 2 * r, 4 * r, 4 * r);
+  ctx.arc(bite.x, bite.y, bite.r, 0, Math.PI * 2);
+  ctx.clip('evenodd');
+  circle(ctx, limb.hand, r, skin, px);
+  ctx.restore();
+  // 隠れた側：前腕の続き（手首の太さの帯）。手の円と、腕が重なる所の中だけに描く
+  const toElbow = { x: bite.x - limb.hand.x, y: bite.y - limb.hand.y };
+  const n = Math.hypot(toElbow.x, toElbow.y);
+  const u = { x: toElbow.x / n, y: toElbow.y / n };
+  ctx.save();
+  handPath();
+  ctx.clip();
+  bitePath();
   ctx.clip();
   ctx.beginPath();
-  ctx.arc(bite.x, bite.y, bite.r, 0, Math.PI * 2);
-  ctx.fillStyle = sleeve;
-  ctx.fill();
+  ctx.moveTo(limb.hand.x + u.x * (r + 0.01), limb.hand.y + u.y * (r + 0.01));
+  ctx.lineTo(limb.hand.x - u.x * r, limb.hand.y - u.y * r);
+  ctx.lineCap = 'butt';
+  ctx.lineWidth = SHAPE.forearm[1] * 2;
+  ctx.strokeStyle = sleeve;
+  ctx.stroke();
+  ctx.restore();
+  // 境目：腕のふちの線（手の円の中だけ）
+  ctx.save();
+  handPath();
+  ctx.clip();
+  bitePath();
   ctx.lineWidth = SHAPE.outlinePx * px;
   ctx.strokeStyle = STYLE.outline;
   ctx.stroke();
   ctx.restore();
-  // 手のふちの線を、覆った所も含めて引き直す
-  ctx.beginPath();
-  ctx.arc(limb.hand.x, limb.hand.y, SHAPE.hand, 0, Math.PI * 2);
-  ctx.lineWidth = SHAPE.outlinePx * px;
-  ctx.strokeStyle = STYLE.outline;
-  ctx.stroke();
 }
 
 // 立って体重を片足に乗せると、支える脚は内へ傾き、脚の付け根が骨盤の外へ飛び出して見える。
