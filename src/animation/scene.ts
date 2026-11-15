@@ -28,6 +28,9 @@ export const TURN_POSE = fullFrontPose({
   rElbowUp: -0.9,
   rHandOut: 0.05,
   rHandUp: -0.46,
+  // 腕は、見ている側から奥のカウンターへ伸びている（手がいちばん奥、肘はその半分）。奥ほど少し薄く描かれる
+  rElbowDepth: -0.5,
+  rHandDepth: -1,
 });
 // まっすぐ立ったときの、股関節の高さ
 const STAND_HIP = BODY.ankleHeight + (BODY.thigh + BODY.shank) * 0.98;

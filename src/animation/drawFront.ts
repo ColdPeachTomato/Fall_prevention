@@ -45,8 +45,20 @@ export function mixColor(a: string, b: string, w: number): string {
 // 腕に隠れる手の割合（手の直径に対して）は、種目ごとにキーフレームの HandCover で決める。
 // その上限。どの種目でも、手が消えることはない
 export const HAND_HIDDEN_LIMIT = 0.8;
-// 奥へ伸びる腕の、手の所での薄さ（0：元の色、1：横から見たときの奥側の腕と同じ薄さ）。「少しだけ薄く」
+// 後ろ向きで、奥へ伸びる腕のいちばん奥（depth = -1）での薄さ（0：元の色、1：横から見たときの奥側の腕と同じ薄さ）。「少しだけ薄く」
 export const FAR_FADE = 0.6;
+// 横から見たときの、奥側の色
+const FAR_COLOR: Record<string, string> = { [STYLE.top]: STYLE.topFar, [STYLE.highlight]: STYLE.highlightFar, [STYLE.skin]: STYLE.skinFar };
+
+// 前後の位置（depth。手前が正）に合わせた色。
+// 手前にある所は、少し濃くする。奥にある所は、正面では元の色のまま、後ろ向きでは少し薄くする
+// （後ろ向きでは、腕が体の向こうへ伸びるので、薄くして奥行きを見せる。2026-11-15 利用者の指示）
+export function depthTone(base: string, depth: number, view: 'front' | 'back'): string {
+  if (depth > 0) return shadeByDepth(base, depth);
+  const far = FAR_COLOR[base];
+  if (depth === 0 || view !== 'back' || far === undefined) return base;
+  return mixColor(base, far, FAR_FADE * Math.min(1, -depth));
+}
 // 手に重なる腕のふちの丸み（半径）
 const ARM_EDGE = 0.036;
 
@@ -402,8 +414,8 @@ function jointsOverlay(ctx: Ctx, sk: FrontSkeleton, px: number): void {
 
 // 人物の各部を描く関数をまとめて返す（脚、バンド、腕、体）。重なりの順番は、呼ぶ側が視点に合わせて決める
 // scapulaFill：後ろ向きで背中に描く肩甲骨の色（肩甲骨を寄せる種目では、目立つ色で動きを見せる）。
-// armsReachAway：腕が、見ている側から奥へ伸びている（後ろ姿で、体の向こうのつかまる所を握っている）。
-//   肩から手へ行くにつれて、少しずつ薄い色にする。横から見たときの、奥側の腕の色（薄い青）に近づける
+// 後ろ向きでは、腕が体の前（見ている側から奥）へ伸びる。奥にある所（ElbowDepth・HandDepth が負）ほど、少しずつ薄い色にする。
+//   横から見たときの、奥側の腕の色（薄い青、薄いオレンジ）に近づける。正面では、奥にある所は元の色のまま
 function figureParts(
   ctx: Ctx,
   sk: FrontSkeleton,
@@ -414,7 +426,6 @@ function figureParts(
   hasBand: boolean,
   px: number,
   scapulaFill: string = STYLE.scapula,
-  armsReachAway = false,
 ) {
   const back = view === 'back';
   const hl = new Set<string>(highlight);
@@ -456,12 +467,14 @@ function figureParts(
     const order: BodySide[] = sk.turn > 0 ? ['r', 'l'] : ['l', 'r'];
     // 肘と手の前後（ElbowDepth・HandDepth）で、腕の濃さを変える：手前にある所ほど少し濃くする（肩は元の色。奥は元の色のまま）。
     // 腕が手に重なる割合は HandCover で決める
+    const tone = (base: string, depth: number) => depthTone(base, depth, view);
     const shaded = (from: Vec, to: Vec, base: string, depthFrom: number, depthTo: number): string | CanvasGradient => {
-      if (depthFrom <= 0 && depthTo <= 0) return base;
-      if (Math.hypot(to.x - from.x, to.y - from.y) < 0.004) return shadeByDepth(base, depthTo);
+      const [c0, c1] = [tone(base, depthFrom), tone(base, depthTo)];
+      if (c0 === c1) return c0;
+      if (Math.hypot(to.x - from.x, to.y - from.y) < 0.004) return c1;
       const g = ctx.createLinearGradient(from.x, from.y, to.x, to.y);
-      g.addColorStop(0, shadeByDepth(base, depthFrom));
-      g.addColorStop(1, shadeByDepth(base, depthTo));
+      g.addColorStop(0, c0);
+      g.addColorStop(1, c1);
       return g;
     };
     for (const side of order) {
@@ -470,23 +483,10 @@ function figureParts(
       const handDepth = pose[`${side}HandDepth`];
       const upper = color('upperArm', STYLE.top, side);
       const fore = color('forearm', STYLE.top, side);
-      if (armsReachAway && upper === STYLE.top && fore === STYLE.top) {
-        // 奥へ伸びる腕：肩は元の色、肘、手首と奥へ行くほど薄くする
-        const fade = (from: Vec, to: Vec, w0: number, w1: number): CanvasGradient => {
-          const g = ctx.createLinearGradient(from.x, from.y, to.x, to.y);
-          g.addColorStop(0, mixColor(STYLE.top, STYLE.topFar, w0));
-          g.addColorStop(1, mixColor(STYLE.top, STYLE.topFar, w1));
-          return g;
-        };
-        capsule(ctx, limb.shoulder, limb.elbow, SHAPE.upperArm[0], SHAPE.upperArm[1], fade(limb.shoulder, limb.elbow, 0, FAR_FADE / 2), px);
-        capsule(ctx, limb.elbow, limb.wrist, SHAPE.forearm[0], SHAPE.forearm[1], fade(limb.elbow, limb.wrist, FAR_FADE / 2, FAR_FADE), px);
-        hand(ctx, limb, pose[`${side}HandCover`], mixColor(STYLE.top, STYLE.topFar, FAR_FADE), px, mixColor(STYLE.skin, STYLE.skinFar, FAR_FADE));
-        continue;
-      }
       capsule(ctx, limb.shoulder, limb.elbow, SHAPE.upperArm[0], SHAPE.upperArm[1], shaded(limb.shoulder, limb.elbow, upper, 0, elbowDepth), px);
       capsule(ctx, limb.elbow, limb.wrist, SHAPE.forearm[0], SHAPE.forearm[1], shaded(limb.elbow, limb.wrist, fore, elbowDepth, handDepth), px);
       // 手は消さない。腕が重なる分だけ、肘の側が欠けて見える
-      hand(ctx, limb, pose[`${side}HandCover`], shadeByDepth(fore, handDepth), px);
+      hand(ctx, limb, pose[`${side}HandCover`], tone(fore, handDepth), px, tone(STYLE.skin, Math.min(0, handDepth)));
     }
   };
   const body = () => {
@@ -503,7 +503,7 @@ function figureParts(
 // ・barTop：体の向こう側にある、つかまる所（カウンター）の上の面の高さ。握った手のうち、これより下は
 //   カウンターに隠れて見えないので描かない（2026-11-15 利用者の指摘）
 export function drawBackFigure(ctx: Ctx, sk: FrontSkeleton, pose: FrontFullPose, highlight: readonly string[], px: number, barTop?: number): void {
-  const { legs, arms, body } = figureParts(ctx, sk, pose, 'back', highlight, true, false, px, STYLE.top, true);
+  const { legs, arms, body } = figureParts(ctx, sk, pose, 'back', highlight, true, false, px, STYLE.top);
   legs();
   ctx.save();
   if (barTop !== undefined) {

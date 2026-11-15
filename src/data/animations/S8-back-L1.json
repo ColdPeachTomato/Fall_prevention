@@ -3,7 +3,7 @@
   "exercise": "S8",
   "level": 1,
   "view": "back",
-  "checked": true,
+  "checked": false,
   "cycleSeconds": 8,
   "root": {
     "mode": "seat",
@@ -46,8 +46,10 @@
         "scapula": 0,
         "rElbowOut": 0,
         "rElbowUp": -0.2079,
+        "rElbowDepth": -0.4891,
         "rHandOut": 0,
         "rHandUp": -0.2079,
+        "rHandDepth": -0.9781,
         "rHandCover": 0.8
       },
       "onSeat": true,
@@ -65,8 +67,10 @@
         "scapula": 0,
         "rElbowOut": 0,
         "rElbowUp": -0.2079,
+        "rElbowDepth": -0.4891,
         "rHandOut": 0,
         "rHandUp": -0.2079,
+        "rHandDepth": -0.9781,
         "rHandCover": 0.8
       },
       "onSeat": true,
@@ -84,8 +88,10 @@
         "scapula": 1,
         "rElbowOut": 0.8013,
         "rElbowUp": -0.2079,
+        "rElbowDepth": -0.2805,
         "rHandOut": 0.8013,
         "rHandUp": -0.2079,
+        "rHandDepth": -0.561,
         "rHandCover": 0
       },
       "onSeat": true,
@@ -103,8 +109,10 @@
         "scapula": 1,
         "rElbowOut": 0.8013,
         "rElbowUp": -0.2079,
+        "rElbowDepth": -0.2805,
         "rHandOut": 0.8013,
         "rHandUp": -0.2079,
+        "rHandDepth": -0.561,
         "rHandCover": 0
       },
       "onSeat": true,
@@ -122,8 +130,10 @@
         "scapula": 0,
         "rElbowOut": 0,
         "rElbowUp": -0.2079,
+        "rElbowDepth": -0.4891,
         "rHandOut": 0,
         "rHandUp": -0.2079,
+        "rHandDepth": -0.9781,
         "rHandCover": 0.8
       },
       "onSeat": true,

@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { getExercise } from '../data/exercises';
 import { BODY, FRONT_CHANNELS, FRONT_VECTORS } from './bodyModel';
-import { faceShift, HAND_HIDDEN_LIMIT, handBite, NEAR_SHADE, shadeByDepth, thighInset } from './drawFront';
+import { depthTone, FAR_FADE, faceShift, HAND_HIDDEN_LIMIT, handBite, mixColor, NEAR_SHADE, shadeByDepth, thighInset } from './drawFront';
 import { computeFrontFrame, frontFootContact, type FrontFrame } from './frontRig';
 import { ANIMATIONS, getAnimation } from './registry';
 import type { Vec } from './sideRig';
@@ -531,9 +531,9 @@ describe('前後の見せ方（正面・後ろ向きで共通）', () => {
     expect(sum(shadeByDepth(BASE, 1))).toBeGreaterThanOrEqual(sum(shadeByDepth(BASE, 0)) * 0.79);
   });
 
-  it('腕の前後を持つのは、腕が前後に動く種目だけ（W2：肘を回す、W3：腕をこちらへ伸ばす）', () => {
+  it('腕の前後を持つのは、腕が前後に動く種目だけ（W2：肘を回す、W3：腕をこちらへ伸ばす、S8：後ろから見て、腕を向こうへ伸ばす）', () => {
     for (const other of FRONT) {
-      if (['W2', 'W3'].includes(other.exercise)) continue;
+      if (['W2', 'W3', 'S8'].includes(other.exercise)) continue;
       for (const k of other.keyframes) {
         for (const key of ['rElbowDepth', 'lElbowDepth', 'rHandDepth', 'lHandDepth'] as const) expect(k.pose[key] ?? 0, other.id).toBe(0);
       }
@@ -551,6 +551,40 @@ describe('前後の見せ方（正面・後ろ向きで共通）', () => {
         expect(elbow).toBeCloseTo(hand / 2, 2);
         expect(f.pose[`${side}HandCover`]).toBe(0);
       }
+    }
+  });
+
+  it('奥にある所の色：正面では元の色のまま、後ろ向きでは少しだけ薄くする（腕が体の向こうへ伸びる奥行きを見せる）', () => {
+    const ORANGE = '#e8743b';
+    const BLUE = '#3f6f8f';
+    // 正面：奥は元の色のまま。手前は少し濃い
+    expect(depthTone(ORANGE, -1, 'front')).toBe(ORANGE);
+    expect(depthTone(ORANGE, 0, 'front')).toBe(ORANGE);
+    expect(depthTone(ORANGE, 1, 'front')).toBe(shadeByDepth(ORANGE, 1));
+    // 後ろ向き：奥へ行くほど、横から見たときの奥側の色（薄いオレンジ、薄い青）に近づく。同じ薄さまではしない
+    expect(depthTone(ORANGE, 0, 'back')).toBe(ORANGE);
+    expect(depthTone(ORANGE, -1, 'back')).toBe(mixColor(ORANGE, '#f3b190', FAR_FADE));
+    expect(depthTone(BLUE, -0.5, 'back')).toBe(mixColor(BLUE, '#8eaabd', FAR_FADE / 2));
+    expect(FAR_FADE).toBeLessThan(1);
+    const sum = (rgb: string) => rgb.match(/\d+/g)!.map(Number).reduce((a, b) => a + b, 0);
+    expect(sum(depthTone(ORANGE, -1, 'back'))).toBeGreaterThan(sum(depthTone(ORANGE, -0.5, 'back'))); // 奥ほど薄い
+    // 奥側の色が決まっていない色（靴など）は、変えない
+    expect(depthTone('#5b4636', -1, 'back')).toBe('#5b4636');
+  });
+
+  it('S8：腕は体の向こうへ伸びている。手がいちばん奥で、引き広げると奥行きが小さくなる（腕の濃淡で奥行きが分かる）', () => {
+    for (const id of ['S8-back-L1', 'S8-back-L2']) {
+      const anim = frontAnim(id);
+      const slack = computeFrontFrame(anim, 0).pose; // バンドを肩幅に持つ（腕は前へ）
+      const spread = computeFrontFrame(anim, 4).pose; // 引き広げて止めている（腕は横へ開く）
+      for (const pose of [slack, spread]) {
+        expect(pose.rHandDepth, id).toBeLessThan(0);
+        expect(pose.rElbowDepth, id).toBeCloseTo(pose.rHandDepth / 2, 3); // 肘は、手の半分の奥行き
+        expect(pose.lHandDepth, id).toBeCloseTo(pose.rHandDepth, 9);
+      }
+      expect(slack.rHandDepth, id).toBeLessThan(-0.9);
+      expect(spread.rHandDepth, id).toBeGreaterThan(-0.65);
+      expect(spread.rHandDepth, id).toBeLessThan(-0.4); // 引き広げても、腕は少し前にある（濃淡が残る）
     }
   });
 

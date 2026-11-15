@@ -17,8 +17,7 @@ export const CONFIRMED = [
   'S7-side-L2',
   // 2026-11-15 確認（S8 は拳の欠け方を直した後に、もう一度確かめてもらった）
   'S6-front-L2',
-  'S8-back-L1',
-  'S8-back-L2',
+  // S8-back-L1・L2 は、腕の濃淡（奥ほど薄く）を足したので外した（2026-11-15）。確認待ち
   'W1-front-L1',
   'W1-front-L2',
   'W2-front-L1',

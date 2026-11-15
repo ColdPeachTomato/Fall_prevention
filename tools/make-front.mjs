@@ -225,7 +225,10 @@ function bandPose(alpha, scapula) {
   // 後ろから見ると、拳は腕の向こう側にある。腕を広げているときは拳がすべて見え（0割）、
   // 拳が内側に寄るほど腕に隠れていき、バンドを緩めきったときは直径の8割が隠れる（2026-11-14 利用者の指示。拳は消えない）
   const cover = round(0.8 * (1 - Math.sin(alpha * RAD) / Math.sin(SPREAD * RAD)));
-  return { ...LEGS, scapula, rElbowOut: out, rElbowUp: up, rHandOut: out, rHandUp: up, rHandCover: cover };
+  // 腕は体の前（見ている側から奥）へ伸びている：手がいちばん奥、肘はその半分。奥ほど少し薄い色で描かれる。
+  // 引き広げると腕が横へ開くので、奥行きは小さくなる（2026-11-15 利用者の指示）
+  const forward = Math.cos(alpha * RAD) * Math.cos(DOWN * RAD);
+  return { ...LEGS, scapula, rElbowOut: out, rElbowUp: up, rElbowDepth: round(-forward / 2), rHandOut: out, rHandUp: up, rHandDepth: round(-forward), rHandCover: cover };
 }
 const s8 = {
   ...common('S8-back-L1', 'S8', 'back', box(0.47), { cycleSeconds: 8 }),

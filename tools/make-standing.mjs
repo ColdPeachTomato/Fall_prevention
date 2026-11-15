@@ -386,7 +386,9 @@ const stanceLeft = { shift: WEIGHT_SHIFT, ...leg('l', legOut(-FOOT, WEIGHT_SHIFT
     const up = round(-Math.sin(DOWN * RAD));
     // 拳は腕の向こう側。腕を広げているときは 0割、緩めきったときは直径の8割が腕に隠れる（座って行うレベル1と同じ）
     const cover = round(0.8 * (1 - Math.sin(alpha * RAD) / Math.sin(SPREAD * RAD)));
-    return { ...legs, scapula, rElbowOut: out, rElbowUp: up, rHandOut: out, rHandUp: up, rHandCover: cover };
+    // 腕は体の前（見ている側から奥）へ伸びている：手がいちばん奥、肘はその半分。奥ほど少し薄い色で描かれる
+    const forward = Math.cos(alpha * RAD) * Math.cos(DOWN * RAD);
+    return { ...legs, scapula, rElbowOut: out, rElbowUp: up, rElbowDepth: round(-forward / 2), rHandOut: out, rHandUp: up, rHandDepth: round(-forward), rHandCover: cover };
   };
   save.push({
     ...frontCommon('S8-back-L2', 'S8', 'back', fullBox(-0.58, 0.47), { cycleSeconds: 8 }),
