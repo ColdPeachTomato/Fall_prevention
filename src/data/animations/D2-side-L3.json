@@ -3,7 +3,7 @@
   "exercise": "D2",
   "level": 3,
   "view": "side",
-  "checked": false,
+  "checked": true,
   "cycleSeconds": 16,
   "root": {
     "mode": "hip",
