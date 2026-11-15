@@ -63,6 +63,16 @@ export interface DrawOptions {
   mirror?: boolean; // 左右反転（左側で行うとき）
   reverse?: boolean; // 逆向きに再生している（回す向きの矢印を反対にする）
   support?: SupportStage | null; // 支えの段階（つかまる種目で、腕の形を決める）
+  // 横から見る種目で、向きを変える途中に見せる後ろ姿を描く関数（scene.ts が渡す）。hip：股関節の位置
+  turnFigure?: (ctx: Ctx, hip: Vec, px: number) => void;
+}
+
+// 向きを変える途中（facing が -1 と 1 の間）の、横向きの人物の濃さ。
+// 向きを変え始めと終わりは横向きのまま（1）。途中で薄くして後ろ姿に入れ替え（0）、反対向きの横向きに戻す。
+// 人は、つかまる所（体の向こう側）のほうを向いて向きを変えるので、見えるのは後ろ姿になる
+export function sideFigureAlpha(facing: number): number {
+  const x = Math.max(0, Math.min(1, (Math.abs(facing) - 0.55) / 0.3));
+  return x * x * (3 - 2 * x);
 }
 
 export type Ctx = CanvasRenderingContext2D;
@@ -205,7 +215,7 @@ export function arrow(ctx: Ctx, a: Vec, m: StraightMark, t: number, px: number, 
   const w = 0.011; // 軸の半分の太さ
   const hw = 0.032; // 矢じりの半分の幅
   ctx.save();
-  ctx.globalAlpha = alpha;
+  ctx.globalAlpha *= alpha; // 人物ごと薄くしているとき（向きを変える途中）は、印も一緒に薄くなる
   ctx.beginPath();
   ctx.moveTo(base.x + n.x * w, base.y + n.y * w);
   ctx.lineTo(neck.x + n.x * w, neck.y + n.y * w);
@@ -231,7 +241,7 @@ export function guideLine(ctx: Ctx, a: Vec, m: StraightMark, t: number, px: numb
   const c = { x: a.x + m.dx, y: a.y + m.dy };
   const d = dir(m.angle);
   ctx.save();
-  ctx.globalAlpha = alpha;
+  ctx.globalAlpha *= alpha;
   ctx.setLineDash([10 * px, 7 * px]);
   ctx.lineCap = 'round';
   for (const [width, color] of [
@@ -350,10 +360,20 @@ export function drawFrame(ctx: Ctx, anim: SideAnimation, f: Frame, o: DrawOption
   }
 
   // 人物の向き（facing）：左向きのときは、股関節の真上の線を軸に、人物だけを左右に裏返して描く。
-  // 向きを変える途中は、横に縮めて描く。床の目印と支持物は裏返さない
+  // 床の目印と支持物は裏返さない。向きを変える途中は、横向きの人物を薄くして、後ろ姿に入れ替える
+  // （後ろ姿を描く関数がないときは、横に縮めて裏返す）
+  const sideAlpha = o.turnFigure ? sideFigureAlpha(f.pose.facing) : 1;
+  if (sideAlpha < 1 && o.turnFigure) {
+    ctx.save();
+    ctx.globalAlpha *= 1 - sideAlpha;
+    o.turnFigure(ctx, sk.hip, px);
+    ctx.restore();
+  }
   ctx.save();
+  ctx.globalAlpha *= sideAlpha;
   if (f.pose.facing !== 1) {
-    const width = Math.abs(f.pose.facing) < 0.03 ? (f.pose.facing < 0 ? -0.03 : 0.03) : f.pose.facing;
+    const squash = Math.abs(f.pose.facing) < 0.03 ? (f.pose.facing < 0 ? -0.03 : 0.03) : f.pose.facing;
+    const width = o.turnFigure ? (f.pose.facing < 0 ? -1 : 1) : squash;
     ctx.translate(sk.hip.x, 0);
     ctx.scale(width, 1);
     ctx.translate(-sk.hip.x, 0);

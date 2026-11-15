@@ -423,15 +423,34 @@ const supportPoints = { hand: 'l', side: { x: SIDE_CHAIR_X + 0.14, y: 0.54 }, fr
 const stanceLeft = { shift: WEIGHT_SHIFT, ...leg('l', legOut(-FOOT, WEIGHT_SHIFT, -1)), lToeOut: 0.1, lToeUp: 0, lKneeDepth: 0 };
 const box = { minX: -0.62, maxX: 0.36, minY: -0.075, maxY: 1.06 };
 
-// B4 片足で立つ：片足を床から少し浮かせて、そのまま保つ。上体は傾けない
+// B4 片足で立つ：片足を床から少し浮かせて、そのまま保つ。上体は傾けない。
+// つかまっていない腕は、体から少し離して「ハ」の字に開き、バランスを取るように小さく揺らす（2026-11-15 利用者の指示）
 {
-  const pose = { ...stanceLeft, rKneeOut: 0.03, rKneeUp: -0.9, rAnkleOut: 0, rAnkleUp: -0.8, rToeOut: 0.1, rToeUp: -0.1 };
+  const legsB4 = { ...stanceLeft, rKneeOut: 0.03, rKneeUp: -0.9, rAnkleOut: 0, rAnkleUp: -0.8, rToeOut: 0.1, rToeUp: -0.1 };
+  const OPEN = 0.24; // 腕の開き（約14度）
+  const SWAY = 0.05; // 揺れの大きさ（約3度。手先で、身長160cmのとき約3cm）
+  // 肩→肘、肘→手の向き。手先のほうを、少しだけ大きく開く
+  const arm = (side, open) => {
+    const hand = open + 0.05;
+    return {
+      [`${side}ElbowOut`]: round(open),
+      [`${side}ElbowUp`]: round(-Math.sqrt(1 - open * open) * 0.995),
+      [`${side}HandOut`]: round(hand),
+      [`${side}HandUp`]: round(-Math.sqrt(1 - hand * hand) * 0.995),
+    };
+  };
+  // 左右の腕は、互い違いに揺れる（片方が開くと、もう片方は閉じる）。2秒で1往復
+  const b4Keys = [];
+  for (let i = 0; i < 8; i++) {
+    const s = Math.sin((2 * Math.PI * i) / 4);
+    b4Keys.push(fkf(i * 0.5, { ...legsB4, ...arm('r', OPEN + SWAY * s), ...arm('l', OPEN - SWAY * s) }, i === 0 ? '片足を浮かせて立つ' : 'そのまま保つ（腕でバランスを取る）'));
+  }
   save.push({
     ...frontCommon('B4-front-L3', 'B4', box, { cycleSeconds: 4 }),
     support: supportPoints,
     props: supportProps,
     highlight: ['r:shank', 'r:foot'],
-    keyframes: [fkf(0, pose, '片足を浮かせて立つ'), fkf(2, pose, 'そのまま保つ')],
+    keyframes: b4Keys,
     captions: [{ from: 0, to: 4, text: '片足を少し浮かせて立ちます。上体は傾けません' }],
     marks: [{ type: 'line', from: 0, to: 4, anchor: 'lumbar', dx: 0, dy: 0, angle: 90, length: 0.36 }],
   });

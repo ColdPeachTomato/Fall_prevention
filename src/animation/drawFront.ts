@@ -6,7 +6,7 @@
 import { arrow, balanceOverlay, beginScene, capsule, circle, guideLine, markAlpha, SHAPE, STYLE, type Ctx, type DrawOptions } from './draw';
 import { frontAnchor, sideSign, type FrontFrame, type FrontLimb, type FrontSkeleton } from './frontRig';
 import { dir, type Vec } from './sideRig';
-import type { BodySide, CounterProp, FrontAnimation, FrontArcMark, FrontChairProp, SegmentName } from './types';
+import type { BodySide, CounterProp, FrontAnimation, FrontArcMark, FrontChairProp, FrontFullPose, SegmentName } from './types';
 
 // 正面から見た体の幅（半分の値。身長 = 1）
 const FRONT_SHAPE = {
@@ -219,9 +219,11 @@ function head(ctx: Ctx, sk: FrontSkeleton, fill: string, px: number): void {
     // 後ろ髪の裾：頭と首の後ろにあるので先に描き、耳の下から少しだけのぞかせる
     for (const s of [-1, 1]) {
       ctx.beginPath();
-      // 頭が回ると、向いた側の裾は頭の後ろに隠れ、反対の側の裾が多くのぞく
-      ctx.moveTo(...hp(s * 0.03 + nape, -0.02));
-      ctx.lineTo(...hp(s * 0.053 + nape, -0.02));
+      // 頭が回ると、向いた側の裾は頭の後ろに隠れ、反対の側の裾が多くのぞく。
+      // 裾の上の端は、動かさずに頭の横の髪（生え際より上）まで伸ばす。裾だけが頭髪から離れて浮いて見えないようにするため
+      // （2026-11-15 利用者の指摘。頭が回っていないときは、伸ばした分は頭の後ろに隠れて、見え方は変わらない）
+      ctx.moveTo(...hp(s * 0.03, 0.024));
+      ctx.lineTo(...hp(s * 0.052, 0.024));
       ctx.lineTo(...hp(s * 0.05 + nape, -0.058));
       ctx.lineTo(...hp(s * 0.044 + nape, -0.047));
       ctx.lineTo(...hp(s * 0.038 + nape, -0.062));
@@ -388,56 +390,25 @@ function jointsOverlay(ctx: Ctx, sk: FrontSkeleton, px: number): void {
   }
 }
 
-export function drawFrontFrame(ctx: Ctx, anim: FrontAnimation, f: FrontFrame, o: DrawOptions): void {
-  const px = beginScene(ctx, anim.viewBox, o);
-  const sk = f.sk;
-  const back = anim.view === 'back';
-  const hl = new Set<string>(anim.highlight);
+// 人物の各部を描く関数をまとめて返す（脚、バンド、腕、体）。重なりの順番は、呼ぶ側が視点に合わせて決める
+function figureParts(ctx: Ctx, sk: FrontSkeleton, pose: FrontFullPose, view: 'front' | 'back', highlight: readonly string[], standing: boolean, hasBand: boolean, px: number) {
+  const back = view === 'back';
+  const hl = new Set<string>(highlight);
   const color = (seg: SegmentName, base: string, side?: BodySide): string => (hl.has(seg) || (side !== undefined && hl.has(`${side}:${seg}`)) ? STYLE.highlight : base);
-
-  // 床：ふつうは1本の線。足を前や後ろへ出す種目では、面として描く
-  if (anim.floorSpots) {
-    floorArea(ctx, anim, anim.floorSpots, px);
-  } else {
-    ctx.fillStyle = STYLE.floor;
-    ctx.fillRect(anim.viewBox.minX, -0.008, anim.viewBox.maxX - anim.viewBox.minX, 0.008);
-  }
-
-  // 支持物は、支えの段階に合うものだけを描く（つかまらない種目は none として扱う）
-  const stage = o.support ?? 'none';
-  const shown = anim.props.filter((p) => p.type === 'band' || p.showFor === undefined || p.showFor.includes(stage));
-  const chairs = shown.filter((p): p is FrontChairProp => p.type === 'chair' && !p.inFront);
-  const counters = shown.filter((p): p is CounterProp => p.type === 'counter' && !p.inFront);
-  const standing = anim.root.mode === 'stand';
-  // 体の手前にある支持物：体が見えるよう薄く描く
-  const propsInFront = () => {
-    ctx.save();
-    ctx.globalAlpha = 0.45;
-    for (const p of shown) {
-      if (p.type === 'chair' && p.inFront) {
-        chairSeat(ctx, p, px);
-        chairBack(ctx, p, px);
-      } else if (p.type === 'counter' && p.inFront) {
-        counter(ctx, p, px);
-      }
-    }
-    ctx.restore();
-  };
-  const hasBand = anim.props.some((p) => p.type === 'band');
 
   const legs = () => {
     for (const side of ['r', 'l'] as const) {
       const limb = sk[side];
       // 脚の前後（KneeDepth）：足先を前に出すと手前（少し濃く・大きく・下）、後ろに出すと奥（元の色・小さく・上）
-      const depth = f.pose[`${side}KneeDepth`];
+      const depth = pose[`${side}KneeDepth`];
       const tint = (base: string, d: number) => (d <= 0 ? base : shadeByDepth(base, d));
       const ankle = { x: limb.ankle.x, y: limb.ankle.y - DEPTH_DROP * depth };
       const knee = { x: limb.knee.x, y: limb.knee.y - DEPTH_DROP * depth * 0.5 };
       // 立位で内へ傾いた脚は、付け根を少し内側に寄せて描く
-      const inset = standing ? thighInset(f.pose[`${side}KneeOut`]) : 0;
+      const inset = standing ? thighInset(pose[`${side}KneeOut`]) : 0;
       const hip = { x: limb.hip.x - limb.sign * inset, y: limb.hip.y };
       capsule(ctx, knee, ankle, SHAPE.shank[0], SHAPE.shank[1] * (1 + 0.18 * depth), tint(color('shank', STYLE.bottom, side), depth * 0.8), px);
-      foot(ctx, limb, color('foot', STYLE.shoe, side), px, depth, anim.view);
+      foot(ctx, limb, color('foot', STYLE.shoe, side), px, depth, view);
       capsule(ctx, hip, knee, SHAPE.thigh[0], SHAPE.thigh[1], tint(color('thigh', STYLE.bottom, side), depth * 0.4), px);
     }
   };
@@ -471,14 +442,14 @@ export function drawFrontFrame(ctx: Ctx, anim: FrontAnimation, f: FrontFrame, o:
     };
     for (const side of order) {
       const limb = sk[side];
-      const elbowDepth = f.pose[`${side}ElbowDepth`];
-      const handDepth = f.pose[`${side}HandDepth`];
+      const elbowDepth = pose[`${side}ElbowDepth`];
+      const handDepth = pose[`${side}HandDepth`];
       const upper = color('upperArm', STYLE.top, side);
       const fore = color('forearm', STYLE.top, side);
       capsule(ctx, limb.shoulder, limb.elbow, SHAPE.upperArm[0], SHAPE.upperArm[1], shaded(limb.shoulder, limb.elbow, upper, 0, elbowDepth), px);
       capsule(ctx, limb.elbow, limb.wrist, SHAPE.forearm[0], SHAPE.forearm[1], shaded(limb.elbow, limb.wrist, fore, elbowDepth, handDepth), px);
       // 手は消さない。腕が重なる分だけ、肘の側が欠けて見える
-      hand(ctx, limb, f.pose[`${side}HandCover`], shadeByDepth(fore, handDepth), px);
+      hand(ctx, limb, pose[`${side}HandCover`], shadeByDepth(fore, handDepth), px);
     }
   };
   const body = () => {
@@ -487,7 +458,52 @@ export function drawFrontFrame(ctx: Ctx, anim: FrontAnimation, f: FrontFrame, o:
     if (back) scapulae(ctx, sk, hl.has('scapula') ? STYLE.highlight : STYLE.scapula, px);
     head(ctx, sk, color('head', STYLE.skin), px);
   };
+  return { legs, band, arms, body };
+}
 
+// 後ろ向きに立つ人物だけを描く（床や支持物は描かない）。横から見る種目で、向きを変える途中の後ろ姿に使う
+export function drawBackFigure(ctx: Ctx, sk: FrontSkeleton, pose: FrontFullPose, highlight: readonly string[], px: number): void {
+  const { legs, arms, body } = figureParts(ctx, sk, pose, 'back', highlight, true, false, px);
+  legs();
+  arms();
+  body();
+}
+
+export function drawFrontFrame(ctx: Ctx, anim: FrontAnimation, f: FrontFrame, o: DrawOptions): void {
+  const px = beginScene(ctx, anim.viewBox, o);
+  const sk = f.sk;
+  const back = anim.view === 'back';
+
+  // 床：ふつうは1本の線。足を前や後ろへ出す種目では、面として描く
+  if (anim.floorSpots) {
+    floorArea(ctx, anim, anim.floorSpots, px);
+  } else {
+    ctx.fillStyle = STYLE.floor;
+    ctx.fillRect(anim.viewBox.minX, -0.008, anim.viewBox.maxX - anim.viewBox.minX, 0.008);
+  }
+
+  // 支持物は、支えの段階に合うものだけを描く（つかまらない種目は none として扱う）
+  const stage = o.support ?? 'none';
+  const shown = anim.props.filter((p) => p.type === 'band' || p.showFor === undefined || p.showFor.includes(stage));
+  const chairs = shown.filter((p): p is FrontChairProp => p.type === 'chair' && !p.inFront);
+  const counters = shown.filter((p): p is CounterProp => p.type === 'counter' && !p.inFront);
+  const standing = anim.root.mode === 'stand';
+  // 体の手前にある支持物：体が見えるよう薄く描く
+  const propsInFront = () => {
+    ctx.save();
+    ctx.globalAlpha = 0.45;
+    for (const p of shown) {
+      if (p.type === 'chair' && p.inFront) {
+        chairSeat(ctx, p, px);
+        chairBack(ctx, p, px);
+      } else if (p.type === 'counter' && p.inFront) {
+        counter(ctx, p, px);
+      }
+    }
+    ctx.restore();
+  };
+  const hasBand = anim.props.some((p) => p.type === 'band');
+  const { legs, band, arms, body } = figureParts(ctx, sk, f.pose, anim.view, anim.highlight, standing, hasBand, px);
   for (const c of counters) counter(ctx, c, px);
   if (back && !standing) {
     // 後ろ向き・座位：脚と、前に出した腕は体の向こう側

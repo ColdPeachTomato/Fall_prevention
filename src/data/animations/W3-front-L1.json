@@ -3,7 +3,7 @@
   "exercise": "W3",
   "level": 1,
   "view": "front",
-  "checked": true,
+  "checked": false,
   "cycleSeconds": 9.6,
   "countsPerCycle": 2,
   "root": {

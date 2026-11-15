@@ -7,6 +7,9 @@ import { ALL_JOINTS } from './bodyModel';
 import { VIEW } from './draw';
 import { ANIMATIONS, getAnimation } from './registry';
 import { computeFrame, footContact, type Frame, type Vec } from './sideRig';
+import { sideFigureAlpha } from './draw';
+import { solveFront } from './frontRig';
+import { TURN_POSE } from './scene';
 import type { ChairProp, SideAnimation, SupportStage } from './types';
 import { validateAnimation } from './validate';
 
@@ -176,16 +179,15 @@ describe('アニメの登録', () => {
       'W1-front-L1',
       'W1-front-L2',
       'W2-front-L1',
-      'W3-front-L1',
       'W4-side-L2',
       'B1-front-L2',
       'B2-side-L2',
       'B3-side-L3',
-      'B4-front-L3',
       'D3-front-L2',
       'D4-side-L3',
       'D5-side-L3',
       // D2-side-L3 は、向き・膝・腕の振りを作り直した（2026-11-15）。確認待ち
+      // W3-front-L1（髪の裾のつなぎ方）と B4-front-L3（腕を開いて揺らす）は、2026-11-15 に直したので外した。確認待ち
       'S9-side-L3',
       'D1-front-L3',
     ];
@@ -846,6 +848,27 @@ describe('レベル3の種目（横向き。仕様との照合）', () => {
     const hands = out.map((f) => computeFrame(anim, f.t, 'one').sk.hand.x);
     expect(range(hands)).toBeGreaterThan(0.08);
     expect(stagesFor(anim)).toEqual(['one']); // 常につかまる。カウンターの横なので片手
+  });
+
+  it('向きを変える途中は、横向きの人物を薄くして後ろ姿に入れ替える（線のように細くはしない）', () => {
+    expect(sideFigureAlpha(1)).toBe(1);
+    expect(sideFigureAlpha(-1)).toBe(1);
+    expect(sideFigureAlpha(0.9)).toBe(1); // 向きを変え始めは、横向きのまま
+    expect(sideFigureAlpha(0.5)).toBe(0); // 途中は後ろ姿だけ
+    expect(sideFigureAlpha(0)).toBe(0);
+    expect(sideFigureAlpha(-0.5)).toBe(0);
+    for (let v = 0; v < 1; v += 0.01) expect(sideFigureAlpha(v + 0.01)).toBeGreaterThanOrEqual(sideFigureAlpha(v));
+    // D2：向きを変える 2 秒のうち、後ろ姿だけが見える時間が 0.5 秒以上ある（一瞬で入れ替わらない）
+    const anim = sideAnim('D2-side-L3');
+    const backOnly = framesOf(anim).filter((f) => f.t > 6 && f.t < 8 && sideFigureAlpha(f.pose.facing) === 0);
+    expect(backOnly.length * STEP).toBeGreaterThan(0.5);
+    // 後ろ姿は、足をそろえて立ち、両手をカウンターの高さ（0.54）に置いている
+    const sk = solveFront(TURN_POSE, { view: 'back', root: { mode: 'stand', x: 0, y: 0.52 } });
+    for (const side of ['r', 'l'] as const) {
+      expect(sk[side].hand.y).toBeGreaterThan(0.5);
+      expect(sk[side].hand.y).toBeLessThan(0.58);
+      expect(Math.abs(sk[side].heel.y)).toBeLessThan(0.01);
+    }
   });
 
   it('D5 後ろ歩き：往きは後ろへ4歩、戻りは前を向いたまま前へ4歩で、元の所に戻る', () => {

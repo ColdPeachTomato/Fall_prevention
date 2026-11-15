@@ -239,8 +239,17 @@ describe.each(FRONT.map((a) => [a.id, a] as const))('%s', (_id, anim) => {
     }
     const phases = movingPhases(frames);
     if (isStatic(anim)) {
-      // 姿勢を保つ種目は動かない（残りの秒数は画面に出す）
-      expect(phases).toHaveLength(0);
+      // 姿勢を保つ種目は、体幹と脚を動かさない（残りの秒数は画面に出す）。
+      // 腕だけは、バランスを取るように小さく揺れてよい（B4。速さは 0.08 身長/秒まで。反動のない、ゆっくりした揺れ）
+      const first = frames[0]!;
+      for (const f of frames) {
+        for (const point of ['head', 'chest', 'pelvis'] as const) expect(dist(f.sk[point], first.sk[point]), `${point} ${at(f)}`).toBeLessThan(1e-9);
+        for (const side of ['r', 'l'] as const) {
+          for (const point of ['shoulder', 'hip', 'knee', 'ankle', 'heel', 'toe'] as const) expect(dist(f.sk[side][point], first.sk[side][point]), `${side}.${point} ${at(f)}`).toBeLessThan(1e-9);
+        }
+      }
+      for (let i = 1; i < frames.length; i++) expect(speedBetween(frames[i - 1]!, frames[i]!), at(frames[i]!)).toBeLessThan(0.08);
+      if (anim.id !== 'B4-front-L3') expect(phases).toHaveLength(0);
       return;
     }
     expect(phases.length).toBeGreaterThanOrEqual(2);
@@ -262,6 +271,7 @@ describe.each(FRONT.map((a) => [a.id, a] as const))('%s', (_id, anim) => {
       expect(counts).toBe(1);
       return;
     }
+    if (isStatic(anim)) return; // 秒数で保つ種目は、回数を数えない
     for (let k = 1; k <= counts; k++) {
       const t = (anim.cycleSeconds * k) / counts;
       const speed = speedBetween(computeFrontFrame(anim, t - STEP), computeFrontFrame(anim, t));
@@ -872,6 +882,29 @@ describe('レベル3の種目（正面。仕様との照合）', () => {
       expect(f.pose.lean).toBe(0);
       expect(inFoot(f, 'l'), at(f)).toBe(true); // 重心は支える足の上
     }
+  });
+
+  it('B4 片足で立つ：つかまっていない腕は「ハ」の字に開き、互い違いに小さく揺れる。つかまる手は動かない', () => {
+    const anim = frontAnim('B4-front-L3');
+    const free = framesOf(anim, 'none');
+    const spread = (f: FrontFrame, side: BodySide) => (f.sk[side].hand.x - f.sk[side].shoulder.x) * f.sk[side].sign; // 手が、肩よりどれだけ外にあるか
+    const range = (v: number[]) => Math.max(...v) - Math.min(...v);
+    for (const side of ['r', 'l'] as const) {
+      const out = free.map((f) => spread(f, side));
+      expect(Math.min(...out), side).toBeGreaterThan(0.06); // いつも体から離れている（「ハ」の字）
+      expect(Math.max(...out), side).toBeLessThan(0.14); // 開きすぎない
+      expect(range(out), side).toBeGreaterThan(0.025); // 揺れている
+      expect(range(out), side).toBeLessThan(0.05); // 小さな揺れ（身長160cmで手先 8cm 未満）
+    }
+    // 互い違い：右が開くとき、左は閉じる
+    for (const f of free) expect(spread(f, 'r') + spread(f, 'l'), at(f)).toBeCloseTo(spread(free[0]!, 'r') + spread(free[0]!, 'l'), 2);
+    // 片手でつかまるとき：つかまる手（左）は動かず、空いている手（右）だけが揺れる
+    const one = framesOf(anim, 'one');
+    for (const f of one) expect(dist(f.sk.l.hand, one[0]!.sk.l.hand), at(f)).toBeLessThan(1e-9);
+    expect(range(one.map((f) => spread(f, 'r')))).toBeGreaterThan(0.025);
+    // 両手でつかまるとき：どちらの手も動かない
+    const both = framesOf(anim, 'both');
+    for (const f of both) for (const side of ['r', 'l'] as const) expect(dist(f.sk[side].hand, both[0]!.sk[side].hand), at(f)).toBeLessThan(1e-9);
   });
 
   it('D1 足先タッチ：前・横・後ろの順に床に触れ、そのたびに足を戻す。3か所で1回', () => {

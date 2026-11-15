@@ -22,16 +22,15 @@ export const CONFIRMED = [
   'W1-front-L1',
   'W1-front-L2',
   'W2-front-L1',
-  'W3-front-L1',
   'W4-side-L2',
   'B1-front-L2',
   'B2-side-L2',
   'B3-side-L3',
-  'B4-front-L3',
   'D3-front-L2',
   'D4-side-L3',
   'D5-side-L3',
   // D2-side-L3 は、向き・膝・腕の振りを作り直した（2026-11-15）。確認待ち
+  // W3-front-L1（髪の裾のつなぎ方）と B4-front-L3（腕を開いて揺らす）は、2026-11-15 に直したので外した。確認待ち
   'S9-side-L3',
   'D1-front-L3',
 ];
