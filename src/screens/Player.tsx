@@ -175,6 +175,17 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
       {itemNumber} / {itemCount} 種目め
     </p>
   );
+  // 運動中とカウントダウンの画面のいちばん上の行：左に進み具合（とセット）、右に左右・回す向き。
+  // 1行にまとめて、見本の絵に使える高さを増やす
+  const sideLabel = step.kind === 'countdown' || step.kind === 'exercise' ? [step.side && SIDE_LABEL[step.side], direction?.label].filter(Boolean).join('　') : '';
+  const runHeader = (sets: string | null) => (
+    <div className="player-top">
+      <span className="progress muted">
+        {itemNumber} / {itemCount} 種目め{sets ? `・${sets}` : ''}
+      </span>
+      {sideLabel && <span className="side">{sideLabel}</span>}
+    </div>
+  );
 
   if (step.kind === 'supportCheck') {
     return (
@@ -223,16 +234,18 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
 
   if (step.kind === 'countdown') {
     return (
-      <main className="screen player">
-        {header}
+      <main className="screen player player-run">
+        {runHeader(null)}
         <h1>{ex.name}</h1>
         {/* 何のための運動かを伝える一文。運動中の画面にも同じ場所に出す */}
         <p className="purpose">
           <strong>{PURPOSE_LABEL}</strong> {ex.purpose}
         </p>
-        {(step.side || direction) && <p className="side">{[step.side && SIDE_LABEL[step.side], direction?.label].filter(Boolean).join('　')}</p>}
-        {/* 始める前に、最初の姿勢を見せる */}
-        {anim && <AnimationCanvas key={`${anim.id}-${index}`} anim={anim} getTime={() => 0} label={`${ex.name}の最初の姿勢`} showCaption={false} mirror={mirror} reverse={reverse} support={support} />}
+        {/* 始める前に、最初の姿勢を見せる。見本の絵は、画面の残りの高さに合わせて伸び縮みする */}
+        <div className="player-stage">
+          {anim && <AnimationCanvas key={`${anim.id}-${index}`} anim={anim} getTime={() => 0} label={`${ex.name}の最初の姿勢`} showCaption={false} mirror={mirror} reverse={reverse} support={support} />}
+          {paused && <p className="paused paused-badge">一時停止中</p>}
+        </div>
         {viewNote && <p className="muted view-note">{viewNote}</p>}
         <p className="lead countdown-lead">
           まもなく始めます
@@ -240,8 +253,7 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
             {remaining}
           </span>
         </p>
-        {paused && <p className="paused">一時停止中</p>}
-        <p>{variant.howTo}</p>
+        <p className="how-to">{variant.howTo}</p>
         {support && <p className="muted">つかまり方：{SUPPORT_LABEL[support]}</p>}
         {controls}
         {stopOverlay}
@@ -260,28 +272,25 @@ export function Player({ menu, kind, onFinish, onStop }: Props) {
   }
 
   return (
-    <main className="screen player">
-      {header}
+    <main className="screen player player-run">
+      {runHeader(step.sets > 1 ? `${step.set} / ${step.sets} セット` : null)}
       <h1>{ex.name}</h1>
       <p className="purpose">
         <strong>{PURPOSE_LABEL}</strong> {ex.purpose}
       </p>
-      {(step.side || direction || step.sets > 1) && (
-        <p className="muted">
-          {(step.side || direction) && <span className="side">{[step.side && SIDE_LABEL[step.side], direction?.label].filter(Boolean).join('　')}　</span>}
-          {step.sets > 1 && `${step.set} / ${step.sets} セット`}
-        </p>
-      )}
-      {anim ? (
-        <AnimationCanvas key={`${anim.id}-${index}`} anim={anim} getTime={() => elapsedRef.current / 1000} label={`${ex.name}の動きの見本`} mirror={mirror} reverse={reverse} support={support} onCaption={speakCaption} />
-      ) : (
-        <PlaceholderFigure posture={variant.posture} />
-      )}
+      {/* 見本の絵は、画面の残りの高さに合わせて伸び縮みする（文字の行の高さは変えない） */}
+      <div className="player-stage">
+        {anim ? (
+          <AnimationCanvas key={`${anim.id}-${index}`} anim={anim} getTime={() => elapsedRef.current / 1000} label={`${ex.name}の動きの見本`} mirror={mirror} reverse={reverse} support={support} onCaption={speakCaption} />
+        ) : (
+          <PlaceholderFigure posture={variant.posture} />
+        )}
+        {paused && <p className="paused paused-badge">一時停止中</p>}
+      </div>
       {viewNote && <p className="muted view-note">{viewNote}</p>}
       <p className="count" aria-live="polite">
         {countText}
       </p>
-      {paused && <p className="paused">一時停止中</p>}
       <p className="cue">{ex.cues[0]}</p>
       {!anim && <p>{variant.howTo}</p>}
       {step.support && <p className="muted">つかまり方：{SUPPORT_LABEL[step.support]}</p>}
