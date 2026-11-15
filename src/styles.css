@@ -711,3 +711,180 @@ p {
     max-width: 720px;
   }
 }
+
+/* ── フェーズ4：メニューの受け渡しと振り返り ── */
+
+.doctor textarea.code-input {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  font: inherit;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 16px;
+  padding: 8px;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  word-break: break-all;
+}
+
+.scan-video {
+  display: block;
+  width: 100%;
+  max-height: 60vh;
+  border-radius: 12px;
+  background: #000000;
+  margin: 8px 0;
+}
+
+/* 印刷シート。画面でも同じものを見せる */
+.print-sheet {
+  margin-top: 24px;
+  padding: 16px;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  color: #000000;
+}
+
+.sheet-title {
+  margin: 0;
+  font-size: 28px;
+}
+
+.sheet-dates {
+  margin: 4px 0 12px;
+}
+
+.sheet-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.qr-image {
+  width: min(100%, 340px);
+  height: auto;
+  flex: none;
+}
+
+.sheet-how {
+  flex: 1 1 220px;
+}
+
+.sheet-how h3 {
+  margin-top: 0;
+}
+
+.sheet-how ol {
+  padding-left: 24px;
+  margin: 4px 0;
+}
+
+.sheet-noqr {
+  flex: 1 1 220px;
+  font-weight: 700;
+}
+
+.sheet-code {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  word-break: break-all;
+  user-select: all;
+  -webkit-user-select: all;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  body {
+    background: #ffffff;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .screen.share {
+    max-width: none;
+    padding: 0;
+  }
+
+  .print-sheet {
+    margin: 0;
+    padding: 0;
+    border: none;
+    font-size: 11pt;
+  }
+
+  .print-sheet .qr-image {
+    width: 85mm;
+  }
+
+  .sheet-code {
+    font-size: 8pt;
+  }
+}
+
+/* 振り返り */
+.review-totals,
+.review-list {
+  padding-left: 24px;
+  margin: 4px 0;
+}
+
+.review-totals li,
+.review-list li {
+  margin: 6px 0;
+}
+
+.review-weeks {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.review-week {
+  border-top: 2px solid var(--line);
+  padding: 8px 0;
+}
+
+.review-week-head,
+.review-week-detail {
+  margin: 2px 0;
+}
+
+.review-days {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  padding: 0;
+  margin: 6px 0;
+}
+
+.review-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  padding: 2px 0;
+}
+
+.review-day.has-mark {
+  border-color: var(--primary);
+  background: var(--selected-bg);
+  font-weight: 700;
+}
+
+.footer-link .text-link {
+  display: block;
+  margin: 0 auto;
+}

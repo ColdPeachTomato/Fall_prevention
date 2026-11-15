@@ -1,4 +1,5 @@
-// 医師用設定。現在のメニューを見て、作成・変更する。
+// 医師用設定。現在のメニューを見て、作成・変更する。メニューを渡す（QR・印刷シート）、読み込む（QR・コード）もここから。
+// 新しいメニューに置き換える前に、いまのメニューとの違いを一覧で見せ、医師が確かめてから保存する。
 
 import { useState } from 'react';
 import { today } from '../app/dates';
@@ -15,12 +16,16 @@ import {
 } from '../data/limits';
 import type { Exercise, Level, Menu, MenuItem, SessionKind, SupportStage } from '../data/types';
 import { SUPPORT_LABEL } from '../menu/support';
+import { diffMenus } from '../menu/diff';
 import { validateMenu } from '../menu/validate';
+import { MenuImport } from './MenuImport';
+import { MenuShare } from './MenuShare';
 import { MenuSummary } from './MenuSummary';
 
 interface Props {
   menu: Menu | null;
   onSave: (menu: Menu) => Promise<void>;
+  onReview: () => void; // 振り返りの画面へ
   onExit: () => void;
 }
 
@@ -157,8 +162,10 @@ function ExerciseRow({ ex, item, onChange }: { ex: Exercise; item: DraftItem; on
   );
 }
 
-export function Doctor({ menu, onSave, onExit }: Props) {
-  const [mode, setMode] = useState<'view' | 'edit' | 'confirm'>('view');
+export function Doctor({ menu, onSave, onReview, onExit }: Props) {
+  const [mode, setMode] = useState<'view' | 'edit' | 'confirm' | 'share' | 'import'>('view');
+  // 確認の画面に来る前の画面（「直す」「やめる」で戻る先）
+  const [pendingFrom, setPendingFrom] = useState<'edit' | 'import'>('edit');
   const [draft, setDraft] = useState<Draft>(() => initialDraft(menu));
   const [errors, setErrors] = useState<string[]>([]);
   const [pending, setPending] = useState<Menu | null>(null);
@@ -184,6 +191,24 @@ export function Doctor({ menu, onSave, onExit }: Props) {
           >
             {menu ? 'メニューを変える' : 'メニューを作る'}
           </button>
+          {menu && (
+            <button type="button" className="btn btn-secondary" onClick={() => setMode('share')}>
+              メニューを渡す（QR・印刷シート）
+            </button>
+          )}
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => {
+              setErrors([]);
+              setMode('import');
+            }}
+          >
+            メニューを読み込む（QR・コード）
+          </button>
+          <button type="button" className="btn btn-secondary" onClick={onReview}>
+            これまでの記録を見る
+          </button>
           <button type="button" className="btn btn-secondary" onClick={onExit}>
             本人用の画面に戻る
           </button>
@@ -192,10 +217,45 @@ export function Doctor({ menu, onSave, onExit }: Props) {
     );
   }
 
+  if (mode === 'share' && menu) return <MenuShare menu={menu} onBack={() => setMode('view')} />;
+
+  if (mode === 'import') {
+    return (
+      <MenuImport
+        onDecoded={(m) => {
+          setPending(m);
+          setPendingFrom('import');
+          setMode('confirm');
+          window.scrollTo({ top: 0 });
+        }}
+        onBack={() => setMode('view')}
+      />
+    );
+  }
+
   if (mode === 'confirm' && pending) {
     return (
       <main className="screen doctor">
         <h1>このメニューで保存しますか</h1>
+        <section className="notice">
+          <h2>いまのメニューとの違い</h2>
+          <ul>
+            {diffMenus(menu, pending).map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        </section>
+        {errors.length > 0 && (
+          <section className="notice notice-warn" role="alert">
+            <h2>保存できませんでした</h2>
+            <ul>
+              {errors.map((e) => (
+                <li key={e}>{e}</li>
+              ))}
+            </ul>
+          </section>
+        )}
+        <h2>新しいメニュー</h2>
         <MenuSummary menu={pending} />
         <div className="actions">
           <button
@@ -206,10 +266,11 @@ export function Doctor({ menu, onSave, onExit }: Props) {
               setSaving(true);
               try {
                 await onSave(pending);
+                setErrors([]);
                 setMode('view');
               } catch (e) {
                 setErrors([e instanceof Error ? e.message : '保存できませんでした']);
-                setMode('edit');
+                if (pendingFrom === 'edit') setMode('edit');
               } finally {
                 setSaving(false);
               }
@@ -217,8 +278,8 @@ export function Doctor({ menu, onSave, onExit }: Props) {
           >
             保存する
           </button>
-          <button type="button" className="btn btn-secondary" onClick={() => setMode('edit')}>
-            直す
+          <button type="button" className="btn btn-secondary" onClick={() => setMode(pendingFrom === 'edit' ? 'edit' : 'view')}>
+            {pendingFrom === 'edit' ? '直す' : '保存せずに戻る（いまのメニューのまま）'}
           </button>
         </div>
       </main>
@@ -339,6 +400,7 @@ export function Doctor({ menu, onSave, onExit }: Props) {
             }
             setErrors([]);
             setPending(r.menu);
+            setPendingFrom('edit');
             setMode('confirm');
             window.scrollTo({ top: 0 });
           }}

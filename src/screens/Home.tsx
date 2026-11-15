@@ -11,6 +11,7 @@ interface Props {
   records: SessionRecord[];
   onStart: (kind: 'standard' | 'short') => void;
   onWalk: () => void;
+  onReview: () => void;
   onDoctor: () => void;
 }
 
@@ -25,7 +26,7 @@ function dayMarks(records: SessionRecord[], date: string): DayMark[] {
   return marks;
 }
 
-export function Home({ menu, settings, records, onStart, onWalk, onDoctor }: Props) {
+export function Home({ menu, settings, records, onStart, onWalk, onReview, onDoctor }: Props) {
   const todayStr = today();
   const week = weekDates(todayStr);
   const exerciseDays = week.filter((d) => dayMarks(records, d).includes('運動')).length;
@@ -86,6 +87,9 @@ export function Home({ menu, settings, records, onStart, onWalk, onDoctor }: Pro
       </section>
 
       <div className="footer-link">
+        <button type="button" className="text-link" onClick={onReview}>
+          これまでの記録を見る
+        </button>
         <button type="button" className="text-link" onClick={onDoctor}>
           医師用の設定
         </button>

@@ -10,6 +10,7 @@ import { Message } from '../screens/Message';
 import { PinEntry } from '../screens/PinEntry';
 import { Player } from '../screens/Player';
 import { PreCheck } from '../screens/PreCheck';
+import { Review } from '../screens/Review';
 import { WalkConfirm } from '../screens/WalkConfirm';
 import { addRecord, loadMenu, loadRecords, loadSettings, requestPersistence, saveMenu } from '../storage/db';
 import { today } from './dates';
@@ -24,7 +25,8 @@ type Screen =
   | { name: 'message'; title: string; lines: string[] }
   | { name: 'walk' }
   | { name: 'pin' }
-  | { name: 'doctor' };
+  | { name: 'doctor' }
+  | { name: 'review'; from: 'home' | 'doctor' };
 
 interface Data {
   menu: Menu | null;
@@ -86,6 +88,7 @@ export function App() {
             if (menu) setScreen({ name: 'precheck', kind });
           }}
           onWalk={() => setScreen({ name: 'walk' })}
+          onReview={() => setScreen({ name: 'review', from: 'home' })}
           onDoctor={() => setScreen({ name: 'pin' })}
         />
       );
@@ -180,8 +183,12 @@ export function App() {
             await saveMenu(m, new Date().toISOString());
             await reload();
           }}
+          onReview={() => setScreen({ name: 'review', from: 'doctor' })}
           onExit={home}
         />
       );
+
+    case 'review':
+      return <Review menu={menu} records={data.records} onBack={() => setScreen(screen.from === 'doctor' ? { name: 'doctor' } : { name: 'home' })} />;
   }
 }
