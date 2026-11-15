@@ -10,6 +10,7 @@ import { frameOf } from '../animation/scene';
 import type { AnimationData, SupportStage } from '../animation/types';
 import { getExercise, PURPOSE_LABEL } from '../data/exercises';
 import { validateAnimation } from '../animation/validate';
+import { VoiceList } from './VoiceList';
 
 const FRAME_STEP = 0.1; // コマ送りの幅（秒）
 const SCAN_STEP = 0.05; // 警告を探す間隔（秒）
@@ -417,6 +418,8 @@ export default function Preview() {
           </button>
         </div>
       </section>
+
+      <VoiceList />
 
       <section className="editor-section">
         <h2>JSON の書き出し</h2>
