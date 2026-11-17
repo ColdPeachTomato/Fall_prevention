@@ -32,3 +32,25 @@ describe('目的の一文', () => {
     for (const ex of EXERCISES.filter((e) => e.category === 'balance')) expect(ex.purpose, ex.id).toMatch(/バランスを保ちましょう$/);
   });
 });
+
+describe('本人が読む文（運動名、注意点、行い方、目的）', () => {
+  // 要件メモ「見やすさと操作」：やさしい日本語にし、専門用語は言い換える（支持物→つかまる所、セミタンデム→足を半歩ずらして立つ）
+  const jargon = ['支持物', '立位', '座位', '閉脚', 'タンデム', '体幹', '骨盤', '重心', '背屈', '底屈', '可動域', '股関節', '支持脚', '視線'];
+
+  it('専門用語を使わない', () => {
+    for (const ex of EXERCISES) {
+      const texts = [ex.name, ex.purpose, ...ex.cues, ...ex.variants.map((v) => v.howTo)];
+      for (const text of texts) {
+        for (const word of jargon) expect(text.includes(word), `${ex.id}：「${text}」に「${word}」`).toBe(false);
+      }
+    }
+  });
+
+  it('どの種目にも、画面に大きく出す注意点が1つ以上ある。行い方の文は「。」で終わる', () => {
+    for (const ex of EXERCISES) {
+      expect(ex.cues.length, ex.id).toBeGreaterThanOrEqual(1);
+      expect(ex.cues[0]!.length, ex.id).toBeGreaterThan(0);
+      for (const v of ex.variants) expect(v.howTo.endsWith('。'), `${ex.id} レベル${v.level}`).toBe(true);
+    }
+  });
+});

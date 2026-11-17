@@ -78,4 +78,5 @@ export interface SessionRecord {
 // 端末の設定
 export interface Settings {
   menuSetAt?: string; // メニューを保存した日時（ISO）
+  welcomeSeen?: boolean; // 「はじめに」（ホーム画面への追加の案内）を見たか
 }

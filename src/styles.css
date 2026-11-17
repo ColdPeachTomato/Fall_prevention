@@ -888,3 +888,13 @@ p {
   display: block;
   margin: 0 auto;
 }
+
+/* 手順の番号つきの一覧（ホーム画面への追加の案内） */
+.steps {
+  margin: 8px 0;
+  padding-left: 1.6em;
+}
+
+.steps li {
+  margin: 8px 0;
+}

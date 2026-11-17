@@ -9,6 +9,8 @@ interface Props {
   menu: Menu | null;
   settings: Settings;
   records: SessionRecord[];
+  standalone: boolean; // ホーム画面から開いているか
+  onInstallGuide: () => void;
   onStart: (kind: 'standard' | 'short') => void;
   onWalk: () => void;
   onReview: () => void;
@@ -26,7 +28,7 @@ function dayMarks(records: SessionRecord[], date: string): DayMark[] {
   return marks;
 }
 
-export function Home({ menu, settings, records, onStart, onWalk, onReview, onDoctor }: Props) {
+export function Home({ menu, settings, records, standalone, onInstallGuide, onStart, onWalk, onReview, onDoctor }: Props) {
   const todayStr = today();
   const week = weekDates(todayStr);
   const exerciseDays = week.filter((d) => dayMarks(records, d).includes('運動')).length;
@@ -42,6 +44,7 @@ export function Home({ menu, settings, records, onStart, onWalk, onReview, onDoc
         <section className="notice" role="status">
           <h2>メニューがまだありません</h2>
           <p>運動のメニューは医師が決めます。次の受診のときに、医師に設定してもらってください。</p>
+          <p>メニューのシート（QR）をお持ちのときは、シートに書いてある手順で読み込んでください。</p>
         </section>
       )}
 
@@ -85,6 +88,17 @@ export function Home({ menu, settings, records, onStart, onWalk, onReview, onDoc
           })}
         </ol>
       </section>
+
+      {!standalone && (
+        // ホーム画面から開いていないときは、ホーム画面への追加を案内する（保存データが消えることがあるため）
+        <section className="notice" role="status">
+          <h2>ホーム画面に追加して使ってください</h2>
+          <p>このまま使うと、しばらく使わなかったときに、メニューや記録が消えることがあります。</p>
+          <button type="button" className="text-link" onClick={onInstallGuide}>
+            追加の手順を見る
+          </button>
+        </section>
+      )}
 
       <div className="footer-link">
         <button type="button" className="text-link" onClick={onReview}>

@@ -62,6 +62,15 @@ export async function loadSettings(): Promise<Settings> {
   return ((await (await db()).get('kv', 'settings')) as Settings | undefined) ?? {};
 }
 
+// 設定の一部を書き換える（ほかの項目は残す）
+export async function saveSettings(patch: Partial<Settings>): Promise<void> {
+  const database = await db();
+  const tx = database.transaction('kv', 'readwrite');
+  const settings = ((await tx.store.get('settings')) as Settings | undefined) ?? {};
+  await tx.store.put({ ...settings, ...patch } satisfies Settings, 'settings');
+  await tx.done;
+}
+
 export async function addRecord(record: SessionRecord): Promise<void> {
   await (await db()).put('records', record);
 }

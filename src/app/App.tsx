@@ -12,13 +12,16 @@ import { Player } from '../screens/Player';
 import { PreCheck } from '../screens/PreCheck';
 import { Review } from '../screens/Review';
 import { WalkConfirm } from '../screens/WalkConfirm';
-import { addRecord, loadMenu, loadRecords, loadSettings, requestPersistence, saveMenu } from '../storage/db';
+import { Welcome } from '../screens/Welcome';
+import { addRecord, loadMenu, loadRecords, loadSettings, requestPersistence, saveMenu, saveSettings } from '../storage/db';
 import { today } from './dates';
+import { currentPlatform, isStandalone } from './install';
 import { speaker } from './speech';
 import { SPEECH } from './speechTexts';
 
 type Screen =
   | { name: 'home' }
+  | { name: 'welcome'; first: boolean }
   | { name: 'precheck'; kind: SessionKind }
   | { name: 'player'; kind: SessionKind }
   | { name: 'end'; kind: SessionKind; completed: string[]; stopped?: { ex: string; reason: StopReason } }
@@ -43,14 +46,23 @@ export function App() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [screen, setScreenState] = useState<Screen>({ name: 'home' });
 
+  // ホーム画面から開いているか（開いている間は変わらない）
+  const [standalone] = useState(isStandalone);
+
   const reload = useCallback(async () => {
     const [menu, settings, records] = await Promise.all([loadMenu(), loadSettings(), loadRecords()]);
     setData({ menu, settings, records });
+    return settings;
   }, []);
 
   useEffect(() => {
     void requestPersistence();
-    reload().catch((e: unknown) => setLoadError(e instanceof Error ? e.message : String(e)));
+    reload()
+      .then((settings) => {
+        // ブラウザで開いているときは、初回に一度だけ「はじめに」（ホーム画面への追加の案内）を出す
+        if (!isStandalone() && !settings.welcomeSeen) setScreenState({ name: 'welcome', first: true });
+      })
+      .catch((e: unknown) => setLoadError(e instanceof Error ? e.message : String(e)));
   }, [reload]);
 
   const setScreen = (s: Screen) => {
@@ -87,9 +99,26 @@ export function App() {
             // S-1 メニューが未設定のときは始められない
             if (menu) setScreen({ name: 'precheck', kind });
           }}
+          standalone={standalone}
+          onInstallGuide={() => setScreen({ name: 'welcome', first: false })}
           onWalk={() => setScreen({ name: 'walk' })}
           onReview={() => setScreen({ name: 'review', from: 'home' })}
           onDoctor={() => setScreen({ name: 'pin' })}
+        />
+      );
+
+    case 'welcome':
+      return (
+        <Welcome
+          platform={currentPlatform()}
+          first={screen.first}
+          onDone={async () => {
+            if (screen.first) {
+              await saveSettings({ welcomeSeen: true });
+              await reload();
+            }
+            home();
+          }}
         />
       );
 

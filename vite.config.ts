@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import { APP_NAME } from './src/app/install';
 
 // GitHub Pages ではリポジトリ名の下に置かれるため、配置時に BASE_PATH で指定する（例 /repo-name/）
 const base = process.env.BASE_PATH ?? '/';
@@ -15,7 +16,7 @@ export default defineConfig({
       includeAssets: ['icons/apple-touch-icon.png'],
       manifest: {
         name: '転倒予防の運動',
-        short_name: '転倒予防',
+        short_name: APP_NAME, // 案内の文に出す名前と同じにする
         description: '自宅で行う転倒予防の運動',
         lang: 'ja',
         start_url: '.',
